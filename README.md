@@ -1,2 +1,2 @@
-<p align="center"><img src="mangetamainlogo.png"></p>
+<p align="center"><img src="mangetamainlogo.jpeg"></p>
 # Projet_Mangetamain
