@@ -84,6 +84,7 @@ These lines specify the Python version and the dependencies used for the virtual
 
 ```commandline
 poetry config virtualenvs.in-project true
+poetry env use python3.12
 poetry install
 ```
 
