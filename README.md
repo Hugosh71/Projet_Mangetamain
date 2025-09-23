@@ -118,78 +118,12 @@ Then you may use `pip freeze` to check whether `streamlit` is installed. If `str
 
 ## Run locally
 
-### Option A: Poetry (recommended)
-
 ```commandline
 make requirements
 make run
 ```
 
 The app will be available at `http://localhost:8501`.
-
-### Option B: Direct Streamlit (without Poetry)
-
-```commandline
-pip install streamlit
-streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
-```
-
-## Docker
-
-Build and run locally:
-
-```commandline
-make docker-build
-make docker-run
-```
-
-The app will be available at `http://localhost:8501`.
-
-### Push to a container registry
-
-1. Authenticate to your registry (Docker Hub, GHCR, or AWS ECR).
-2. Tag and push:
-
-```commandline
-make docker-tag REGISTRY=<registry-url>
-make docker-push REGISTRY=<registry-url>
-```
-
-Where `<registry-url>` could be like `123456789012.dkr.ecr.eu-west-3.amazonaws.com` for AWS ECR.
-
-## Deploy on AWS (example: ECR + ECS Fargate)
-
-Below is a concise example. Adjust names, regions, and IAM permissions as needed.
-
-1. Create an ECR repo (once):
-
-```commandline
-aws ecr create-repository --repository-name mangetamain --region <region>
-```
-
-2. Authenticate Docker to ECR:
-
-```commandline
-aws ecr get-login-password --region <region> | \
-  docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com
-```
-
-3. Build, tag, and push:
-
-```commandline
-make docker-build
-make docker-tag REGISTRY=<account-id>.dkr.ecr.<region>.amazonaws.com
-make docker-push REGISTRY=<account-id>.dkr.ecr.<region>.amazonaws.com
-```
-
-4. Create an ECS Fargate service (via Console or IaC) with:
-
-- **Task Definition** running image `<account-id>.dkr.ecr.<region>.amazonaws.com/mangetamain:latest`
-- **Container Port** 8501 and a Security Group allowing inbound 80/443 (and 8501 if not behind ALB)
-- **CPU/Memory** small (e.g., 0.25 vCPU, 512–1024 MiB)
-- **Load Balancer** optional; an ALB targeting port 8501 is recommended for HTTPS
-
-Once running, access the public load balancer DNS or the public IP if using a public subnet without ALB.
 
 ## Collaborative Development
 
