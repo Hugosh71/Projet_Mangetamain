@@ -5,6 +5,9 @@
 PROJECT_NAME = mangetamain
 PYTHON_VERSION = 3.12
 PYTHON_INTERPRETER = python
+IMAGE_NAME = mangetamain
+IMAGE_TAG = latest
+REGISTRY ?= 
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -44,6 +47,34 @@ format:
 .PHONY: test
 test:
 	python -m pytest tests
+
+
+## Run Streamlit locally (uses Poetry env if available)
+.PHONY: run
+run:
+	poetry run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
+
+## Build Docker image
+.PHONY: docker-build
+docker-build:
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+## Run Docker container locally (http://localhost:8501)
+.PHONY: docker-run
+docker-run:
+	docker run --rm -it -p 8501:8501 $(IMAGE_NAME):$(IMAGE_TAG)
+
+## Tag image for a registry (set REGISTRY=aws_account_id.dkr.ecr.region.amazonaws.com)
+.PHONY: docker-tag
+docker-tag:
+	@test -n "$(REGISTRY)" || (echo "REGISTRY is required" && exit 1)
+	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
+
+## Push image to registry (requires docker login)
+.PHONY: docker-push
+docker-push:
+	@test -n "$(REGISTRY)" || (echo "REGISTRY is required" && exit 1)
+	docker push $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 
 ## Set up Python interpreter environment
