@@ -175,3 +175,38 @@ If there are conflicts, Git will ask you to resolve them manually. After resolvi
 git add <file-with-conflict>
 git commit -m "..."
 ```
+
+## Quality & CI Workflow
+
+- Launch the Streamlit app locally with Docker Compose:
+
+  ```commandline
+  docker compose up app
+  ```
+
+- Run the test suite inside the dedicated container:
+
+  ```commandline
+  docker compose run --rm tests
+  ```
+
+- Execute linting & formatting checks via Docker Compose:
+
+  ```commandline
+  docker compose run --rm lint
+  ```
+
+### Pre-commit hooks
+
+Install the hooks once dependencies are installed:
+
+```commandline
+poetry install --with dev
+poetry run pre-commit install
+```
+
+Trigger all hooks manually before committing:
+
+```commandline
+poetry run pre-commit run --all-files
+```
