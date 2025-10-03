@@ -60,7 +60,7 @@ exclude = [".venv", "build", "dist", "__pycache__"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "C4"]
-ignore = ["E203", "W503"]
+ignore = ["E203"]
 
 [tool.ruff.format]
 preview = false
