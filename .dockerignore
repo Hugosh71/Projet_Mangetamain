@@ -1,22 +1,23 @@
 .git
-.gitignore
+.github
 .venv
 __pycache__
-*.pyc
-*.pyo
-*.pyd
-.mypy_cache
-.ruff_cache
-.pytest_cache
-dist
-build
-node_modules
-data/
-tests/
-notebooks/
-docs/images/
-*.ipynb
-*.log
-Dockerfile
-.dockerignore
+*.py[cod]
+build/
+dist/
+.pytest_cache/
+coverage.xml
+.ruff_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# Node artifacts
+node_modules/
+
+# notebooks outputs
+*.ipynb_checkpoints
+
+# poetry lock
+poetry.lock
 
