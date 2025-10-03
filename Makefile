@@ -7,7 +7,7 @@ PYTHON_VERSION = 3.12
 PYTHON_INTERPRETER = python
 IMAGE_NAME = mangetamain
 IMAGE_TAG = latest
-REGISTRY ?= 
+REGISTRY ?=
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -18,7 +18,7 @@ REGISTRY ?=
 .PHONY: requirements
 requirements:
 	poetry install
-	
+
 
 
 
@@ -32,8 +32,7 @@ clean:
 ## Lint using ruff (use `make format` to do formatting)
 .PHONY: lint
 lint:
-	ruff format --check
-	ruff check
+	docker compose run --rm lint
 
 ## Format source code with ruff
 .PHONY: format
@@ -46,7 +45,11 @@ format:
 ## Run tests
 .PHONY: test
 test:
-	python -m pytest tests
+	docker compose run --rm tests
+
+.PHONY: pre-commit
+pre-commit:
+	poetry run pre-commit run --all-files
 
 
 ## Run Streamlit locally (uses Poetry env if available)
