@@ -13,11 +13,11 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml poetry.lock* README.md ./
+COPY pyproject.toml README.md ./
 
 RUN pip install --upgrade pip && pip install poetry
 
-RUN poetry config virtualenvs.create false && poetry install --with dev
+RUN poetry config virtualenvs.create false && poetry install --with dev --no-root
 
 COPY src/ ./src/
 COPY docs/ ./docs/
@@ -29,5 +29,3 @@ ENV STREAMLIT_SERVER_PORT=8501 \
     STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 
 CMD ["streamlit", "run", "src/app/main.py", "--server.port=8501", "--server.address=0.0.0.0"]
-
-
