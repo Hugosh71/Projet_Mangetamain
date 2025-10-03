@@ -8,19 +8,27 @@ PYTHON_INTERPRETER = python
 IMAGE_NAME = mangetamain
 IMAGE_TAG = latest
 REGISTRY ?=
+DOCKER_COMPOSE = docker compose
+POETRY = poetry
 
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
 
-
 ## Install Python dependencies
 .PHONY: requirements
 requirements:
-	poetry install
+	$(POETRY) install
 
+## Install development dependencies
+.PHONY: requirements-dev
+requirements-dev:
+	$(POETRY) install --with dev
 
-
+## Install all optional extras
+.PHONY: requirements-all
+requirements-all:
+	$(POETRY) install --all-extras
 
 ## Delete all compiled Python files
 .PHONY: clean
@@ -28,11 +36,15 @@ clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-
 ## Lint using ruff (use `make format` to do formatting)
 .PHONY: lint
 lint:
-	docker compose run --rm lint
+	$(DOCKER_COMPOSE) run --rm lint
+
+## Lint locally without Docker
+.PHONY: lint-local
+lint-local:
+	$(POETRY) run ruff check src tests
 
 ## Format source code with ruff
 .PHONY: format
@@ -40,22 +52,55 @@ format:
 	ruff check --fix
 	ruff format
 
-
+## Format locally with Poetry env
+.PHONY: format-local
+format-local:
+	$(POETRY) run ruff check --fix src tests
+	$(POETRY) run ruff format src tests
 
 ## Run tests
 .PHONY: test
 test:
-	docker compose run --rm tests
+	$(DOCKER_COMPOSE) run --rm tests
+
+## Run tests locally
+.PHONY: test-local
+test-local:
+	$(POETRY) run pytest
+
+## Run tests with coverage locally
+.PHONY: test-cov
+test-cov:
+	$(POETRY) run pytest --cov=src --cov-report=term-missing --cov-report=xml
+
+## Run a specific test file: make test-file FILE=tests/unit/test_core.py
+.PHONY: test-file
+test-file:
+	$(POETRY) run pytest $(FILE)
 
 .PHONY: pre-commit
 pre-commit:
-	poetry run pre-commit run --all-files
+	$(POETRY) run pre-commit run --all-files
 
+## Install pre-commit hooks
+.PHONY: pre-commit-install
+pre-commit-install:
+	$(POETRY) run pre-commit install
 
 ## Run Streamlit locally (uses Poetry env if available)
 .PHONY: run
 run:
-	poetry run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
+	$(POETRY) run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
+
+## Run Streamlit via Docker Compose
+.PHONY: run-docker
+run-docker:
+	$(DOCKER_COMPOSE) up app
+
+## Run Streamlit in dev mode (auto-reload)
+.PHONY: run-dev
+run-dev:
+	$(POETRY) run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0 --server.runOnSave=true
 
 ## Build Docker image
 .PHONY: docker-build
@@ -79,7 +124,6 @@ docker-push:
 	@test -n "$(REGISTRY)" || (echo "REGISTRY is required" && exit 1)
 	docker push $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
-
 ## Set up Python interpreter environment
 .PHONY: create_environment
 create_environment:
@@ -88,19 +132,14 @@ create_environment:
 	@echo '$$(poetry env activate)'
 	@echo ">>> Or run commands with:\npoetry run <command>"
 
-
-
-
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
-
 
 ## Make dataset
 .PHONY: data
 data: requirements
 	$(PYTHON_INTERPRETER) mangetamain/dataset.py
-
 
 #################################################################################
 # Self Documenting Commands                                                     #
