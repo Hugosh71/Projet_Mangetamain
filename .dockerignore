@@ -1,3 +1,4 @@
+# General ignores
 .git
 .github
 .venv
@@ -15,9 +16,21 @@ coverage.xml
 # Node artifacts
 node_modules/
 
-# notebooks outputs
+# Notebooks
+*.ipynb
 *.ipynb_checkpoints
+
+# Project data
+data/
+notebooks/
+
+# Docker
+Dockerfile
+Dockerfile.test
+.dockerignore
+
+# Logs
+*.log
 
 # poetry lock
 poetry.lock
-
