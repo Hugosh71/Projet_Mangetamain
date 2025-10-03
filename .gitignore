@@ -189,3 +189,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Cursor
+.cursor/
+
+# Temp
+.temp/
