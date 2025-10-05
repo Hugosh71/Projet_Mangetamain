@@ -2,25 +2,45 @@
 # GLOBALS                                                                       #
 #################################################################################
 
-PROJECT_NAME = mangetamain
-PYTHON_VERSION = 3.12
-PYTHON_INTERPRETER = python
-IMAGE_NAME = mangetamain
-IMAGE_TAG = latest
-REGISTRY ?=
-DOCKER_COMPOSE = docker compose
-POETRY = poetry
+SHELL := bash
+.ONESHELL:
+
+PROJECT_NAME     := mangetamain
+PYTHON_VERSION   := 3.12
+PYTHON_INTERPRETER := python
+POETRY           := poetry
+
+SRC_DIR          := src
+TEST_DIR         := tests
+APP_ENTRY        := $(SRC_DIR)/app/main.py
+
+IMAGE_NAME       := $(PROJECT_NAME)
+IMAGE_TAG        := latest
+REGISTRY        ?=
+
+DOCKER_COMPOSE   := docker compose
+RUFF            := $(POETRY) run ruff
+PYTEST          := $(POETRY) run pytest
+STREAMLIT       := $(POETRY) run streamlit
 
 #################################################################################
-# COMMANDS                                                                      #
+# ENV & DEPENDENCIES                                                            #
 #################################################################################
+
+## Create local poetry environment
+.PHONY: create-env
+create-env:
+	$(POETRY) env use $(PYTHON_VERSION)
+	@echo ">>> Poetry environment created."
+	@echo "Activate with: poetry shell"
+	@echo "Or run commands with: poetry run <command>"
 
 ## Install Python dependencies
 .PHONY: requirements
 requirements:
 	$(POETRY) install
 
-## Install development dependencies
+## Install dev dependencies
 .PHONY: requirements-dev
 requirements-dev:
 	$(POETRY) install --with dev
@@ -30,54 +50,28 @@ requirements-dev:
 requirements-all:
 	$(POETRY) install --all-extras
 
-## Delete all compiled Python files
+#################################################################################
+# CODE QUALITY                                                                  #
+#################################################################################
+
+## Clean Python cache files
 .PHONY: clean
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
 
-## Lint using ruff (use `make format` to do formatting)
+## Lint source and tests
 .PHONY: lint
 lint:
-	$(DOCKER_COMPOSE) run --rm lint
+	$(RUFF) check $(SRC_DIR) $(TEST_DIR)
 
-## Lint locally without Docker
-.PHONY: lint-local
-lint-local:
-	$(POETRY) run ruff check src tests
-
-## Format source code with ruff
+## Format code (fix lint + format)
 .PHONY: format
 format:
-	ruff check --fix
-	ruff format
+	$(RUFF) check --fix $(SRC_DIR) $(TEST_DIR)
+	$(RUFF) format $(SRC_DIR) $(TEST_DIR)
 
-## Format locally with Poetry env
-.PHONY: format-local
-format-local:
-	$(POETRY) run ruff check --fix src tests
-	$(POETRY) run ruff format src tests
-
-## Run tests
-.PHONY: test
-test:
-	$(DOCKER_COMPOSE) run --rm tests
-
-## Run tests locally
-.PHONY: test-local
-test-local:
-	$(POETRY) run pytest
-
-## Run tests with coverage locally
-.PHONY: test-cov
-test-cov:
-	$(POETRY) run pytest --cov=src --cov-report=term-missing --cov-report=xml
-
-## Run a specific test file: make test-file FILE=tests/unit/test_core.py
-.PHONY: test-file
-test-file:
-	$(POETRY) run pytest $(FILE)
-
+## Run pre-commit hooks
 .PHONY: pre-commit
 pre-commit:
 	$(POETRY) run pre-commit run --all-files
@@ -87,74 +81,106 @@ pre-commit:
 pre-commit-install:
 	$(POETRY) run pre-commit install
 
-## Run Streamlit locally (uses Poetry env if available)
+#################################################################################
+# TESTING                                                                       #
+#################################################################################
+
+## Run tests
+.PHONY: test
+test:
+	$(PYTEST)
+
+## Run tests with coverage
+.PHONY: test-cov
+test-cov:
+	$(PYTEST) --cov=$(SRC_DIR) --cov-report=term-missing --cov-report=xml
+
+## Run specific test file (e.g. make test-file FILE=tests/unit/test_core.py)
+.PHONY: test-file
+test-file:
+	$(PYTEST) $(FILE)
+
+#################################################################################
+# RUN APPLICATION                                                               #
+#################################################################################
+
+## Run Streamlit locally
 .PHONY: run
 run:
-	$(POETRY) run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
-
-## Run Streamlit via Docker Compose
-.PHONY: run-docker
-run-docker:
-	$(DOCKER_COMPOSE) up app
+	PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY)
 
 ## Run Streamlit in dev mode (auto-reload)
 .PHONY: run-dev
 run-dev:
-	$(POETRY) run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0 --server.runOnSave=true
+	PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY) --server.runOnSave=true
+
+#################################################################################
+# DOCKER                                                                       #
+#################################################################################
 
 ## Build Docker image
 .PHONY: docker-build
 docker-build:
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	docker --platform linux/amd64 build -t $(IMAGE_NAME):$(IMAGE_TAG) .
 
-## Run Docker container locally (http://localhost:8501)
-.PHONY: docker-run
-docker-run:
-	docker run --rm -it -p 8501:8501 $(IMAGE_NAME):$(IMAGE_TAG)
-
-## Tag image for a registry (set REGISTRY=aws_account_id.dkr.ecr.region.amazonaws.com)
+## Tag Docker image (REGISTRY must be set)
 .PHONY: docker-tag
 docker-tag:
 	@test -n "$(REGISTRY)" || (echo "REGISTRY is required" && exit 1)
 	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
-## Push image to registry (requires docker login)
+## Push image to registry
 .PHONY: docker-push
 docker-push:
 	@test -n "$(REGISTRY)" || (echo "REGISTRY is required" && exit 1)
 	docker push $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
 
-## Set up Python interpreter environment
-.PHONY: create_environment
-create_environment:
-	poetry env use $(PYTHON_VERSION)
-	@echo ">>> Poetry environment created. Activate with: "
-	@echo '$$(poetry env activate)'
-	@echo ">>> Or run commands with:\npoetry run <command>"
+## Run app with Docker Compose
+.PHONY: docker-run
+docker-run:
+	$(DOCKER_COMPOSE) up app
+
+## Run lint inside Docker
+.PHONY: docker-lint
+docker-lint:
+	$(DOCKER_COMPOSE) run --rm lint
+
+## Run tests inside Docker
+.PHONY: docker-test
+docker-test:
+	$(DOCKER_COMPOSE) run --rm tests
 
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
 
-## Make dataset
+## Example: generate dataset
 .PHONY: data
 data: requirements
-	$(PYTHON_INTERPRETER) mangetamain/dataset.py
+	$(PYTHON_INTERPRETER) $(PROJECT_NAME)/dataset.py
 
 #################################################################################
-# Self Documenting Commands                                                     #
+# META                                                                          #
 #################################################################################
 
 .DEFAULT_GOAL := help
 
 define PRINT_HELP_PYSCRIPT
-import re, sys; \
-lines = '\n'.join([line for line in sys.stdin]); \
-matches = re.findall(r'\n## (.*)\n[\s\S]+?\n([a-zA-Z_-]+):', lines); \
-print('Available rules:\n'); \
-print('\n'.join(['{:25}{}'.format(*reversed(match)) for match in matches]))
+import re, sys
+lines = sys.stdin.read()
+matches = re.findall(r'^## (.+)\n\.PHONY: ([\w-]+)', lines, flags=re.M)
+print("Available commands:\n")
+for desc, target in matches:
+    print(f"{target:25} {desc}")
 endef
 export PRINT_HELP_PYSCRIPT
 
+## Show this help
+.PHONY: help
 help:
-	@$(PYTHON_INTERPRETER) -c "${PRINT_HELP_PYSCRIPT}" < $(MAKEFILE_LIST)
+	@$(PYTHON_INTERPRETER) -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+
+## Run lint, tests, and build image (common pipeline)
+.PHONY: build
+build: lint test docker-build
+	@echo ">>> Build successful."
