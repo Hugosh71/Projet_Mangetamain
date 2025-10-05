@@ -20,6 +20,7 @@ REGISTRY        ?=
 
 DOCKER_COMPOSE   := docker compose
 RUFF            := $(POETRY) run ruff
+FLAKE8          := $(POETRY) run flake8
 PYTEST          := $(POETRY) run pytest
 STREAMLIT       := $(POETRY) run streamlit
 
