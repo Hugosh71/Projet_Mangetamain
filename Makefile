@@ -16,7 +16,7 @@ APP_ENTRY        := $(SRC_DIR)/app/main.py
 
 IMAGE_NAME       := $(PROJECT_NAME)
 IMAGE_TAG        := latest
-REGISTRY        ?=
+REGISTRY         ?=
 
 DOCKER_COMPOSE   := docker compose
 RUFF            := $(POETRY) run ruff
@@ -116,6 +116,15 @@ run-dev:
 	PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY) --server.runOnSave=true
 
 #################################################################################
+# Jupyter Notebook                                                              #
+#################################################################################
+
+## Run Jupyter Notebook
+.PHONY: run-notebook
+run-notebook:
+	PYTHONPATH=$$(pwd) $(POETRY) run jupyter lab
+
+#################################################################################
 # DOCKER                                                                       #
 #################################################################################
 
@@ -150,15 +159,6 @@ docker-lint:
 .PHONY: docker-test
 docker-test:
 	$(DOCKER_COMPOSE) run --rm tests
-
-#################################################################################
-# PROJECT RULES                                                                 #
-#################################################################################
-
-## Example: generate dataset
-.PHONY: data
-data: requirements
-	$(PYTHON_INTERPRETER) $(PROJECT_NAME)/dataset.py
 
 #################################################################################
 # META                                                                          #
