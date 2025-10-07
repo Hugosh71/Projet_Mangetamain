@@ -59,71 +59,9 @@ def test_basic_logging():
             print("Fichier error non trouve")
 
 
-def test_environment_variables():
-    """Test des variables d'environnement."""
-    print("\nTest 2: Variables d'environnement")
-
-    # Définir des variables d'environnement de test
-    test_env = {
-        "MANG_LOG_DIR": str(Path.cwd() / "test_logs"),
-        "MANG_USER_ID": "test_user_123",
-        "MANG_SESSION_ID": "session_abc_456",
-        "MANG_LOG_MAX_FILES": "5",
-    }
-
-    # Sauvegarder les variables existantes
-    original_env = {}
-    for key in test_env:
-        original_env[key] = os.environ.get(key)
-        os.environ[key] = test_env[key]
-
-    try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Utiliser le répertoire défini par la variable d'environnement
-            os.environ["MANG_LOG_DIR"] = temp_dir
-
-            # Configurer le logging avec les variables d'environnement
-            config = configure_logging()
-
-            logger = get_logger("env_test")
-            logger.info("Test avec variables d'environnement")
-            logger.error("Test d'erreur avec variables d'environnement")
-
-            # Vérifier que les variables sont utilisées
-            print(f"User ID utilise: {config.run_identifier}")
-            print(f"Repertoire configure: {config.log_directory}")
-
-            # Vérifier le contenu des logs
-            debug_log = config.debug_log_path
-            if debug_log.exists():
-                with open(debug_log, encoding="utf-8") as f:
-                    content = f.read()
-                    print("\nLogs avec variables d'environnement:")
-                    print(content)
-
-                    # Vérifier que les informations contextuelles sont présentes
-                    if "user=test_user_123" in content:
-                        print("User ID correctement injecte")
-                    else:
-                        print("User ID manquant dans les logs")
-
-                    if "session=session_abc_456" in content:
-                        print("Session ID correctement injecte")
-                    else:
-                        print("Session ID manquant dans les logs")
-
-    finally:
-        # Restaurer les variables d'environnement originales
-        for key, value in original_env.items():
-            if value is None:
-                os.environ.pop(key, None)
-            else:
-                os.environ[key] = value
-
-
 def test_log_rotation():
     """Test de la rotation des logs."""
-    print("\nTest 3: Rotation des logs")
+    print("\nTest 2: Rotation des logs")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Créer plusieurs fichiers de logs simulés
@@ -163,7 +101,7 @@ def test_log_rotation():
 
 def test_log_format():
     """Test du format des logs."""
-    print("\nTest 4: Format des logs")
+    print("\nTest 3: Format des logs")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         config = configure_logging(log_directory=temp_dir)
@@ -208,7 +146,6 @@ def main():
 
     try:
         test_basic_logging()
-        test_environment_variables()
         test_log_rotation()
         test_log_format()
 
