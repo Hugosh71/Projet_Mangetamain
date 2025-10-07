@@ -19,20 +19,19 @@ from datetime import UTC, datetime
 from logging import handlers
 from pathlib import Path
 
+from .settings import DEFAULT_MAX_LOG_FILES, LoggingSettings
+
 __all__ = [
     "configure_logging",
     "get_logger",
+    "reset_logging",
     "LoggingConfig",
 ]
 
 
 BASE_LOGGER_NAME = "mangetamain"
-LOG_DIR_NAME = "logs"
 LOG_DEBUG_FILENAME_TEMPLATE = "debug-{timestamp}.log"
 LOG_ERROR_FILENAME_TEMPLATE = "error-{timestamp}.log"
-LOG_USER_ID = "MANG_USER_ID"
-LOG_SESSION_ID = "MANG_SESSION_ID"
-LOG_MAX_LOG_FILES = 10
 
 
 @dataclass(frozen=True)
@@ -98,6 +97,7 @@ def configure_logging(
     max_log_files: int | None = None,
     user_id: str | None = None,
     session_id: str | None = None,
+    reset_existing: bool = False,
 ) -> LoggingConfig:
     """Configure the application-wide logging stack.
 
@@ -108,24 +108,23 @@ def configure_logging(
     """
 
     logger = logging.getLogger(BASE_LOGGER_NAME)
+    if reset_existing and getattr(logger, "__mangetamain_configured__", False):
+        reset_logging()
+
     if getattr(logger, "__mangetamain_configured__", False):
         # Return the existing configuration captured on the first setup.
         return logger.__mangetamain_logging_config__  # type: ignore[attr-defined]
 
-    # Utiliser les variables d'environnement si les paramètres ne sont pas fournis
+    derived = LoggingSettings.from_env()
+
     if log_directory is None:
-        log_directory = os.path.join(os.path.dirname(__file__), LOG_DIR_NAME)
+        log_directory = derived.directory
     if user_id is None:
-        user_id = LOG_USER_ID
+        user_id = derived.user_id
     if session_id is None:
-        session_id = LOG_SESSION_ID
+        session_id = derived.session_id
     if max_log_files is None:
-        max_log_files = LOG_MAX_LOG_FILES
-        if max_log_files is not None:
-            try:
-                max_log_files = int(max_log_files)
-            except ValueError:
-                max_log_files = None
+        max_log_files = derived.max_files
 
     resolved_log_dir = _resolve_log_directory(log_directory)
     resolved_log_dir.mkdir(parents=True, exist_ok=True)
@@ -203,24 +202,23 @@ def _build_file_handler(path: Path, *, level: int) -> logging.Handler:
     return handler
 
 
-def _resolve_log_directory(directory: str | os.PathLike[str] | None) -> Path:
-    if directory is not None:
-        return Path(directory).expanduser().resolve()
-    return Path(__file__).resolve().parents[2] / LOG_DIR_NAME
+def _resolve_log_directory(directory: str | Path | None) -> Path:
+    if directory is None:
+        return LoggingSettings.from_env().directory
+
+    if isinstance(directory, Path):
+        candidate = directory
+    else:
+        candidate = Path(directory)
+
+    return candidate.expanduser().resolve()
 
 
 def _resolve_max_files(max_log_files: int | None) -> int:
-    if max_log_files is not None:
-        return max(1, max_log_files)
+    if max_log_files is None:
+        return DEFAULT_MAX_LOG_FILES
 
-    raw_value = os.environ.get(LOG_MAX_LOG_FILES)
-    if raw_value is None:
-        return LOG_MAX_LOG_FILES
-
-    try:
-        return max(1, int(raw_value))
-    except ValueError:
-        return LOG_MAX_LOG_FILES
+    return max(1, max_log_files)
 
 
 def _prune_retained_logs(
@@ -242,3 +240,21 @@ def _prune_retained_logs(
             obsolete.unlink(missing_ok=True)
         except OSError:
             continue
+
+
+def reset_logging() -> None:
+    """Remove handlers and cached configuration for the Mangetamain logger."""
+
+    logger = logging.getLogger(BASE_LOGGER_NAME)
+
+    for handler in list(logger.handlers):
+        handler.close()
+        logger.removeHandler(handler)
+
+    logger.filters.clear()
+
+    if hasattr(logger, "__mangetamain_configured__"):
+        delattr(logger, "__mangetamain_configured__")
+
+    if hasattr(logger, "__mangetamain_logging_config__"):
+        delattr(logger, "__mangetamain_logging_config__")

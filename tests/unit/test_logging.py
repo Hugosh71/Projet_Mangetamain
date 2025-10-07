@@ -1,163 +1,200 @@
-#!/usr/bin/env python3
-"""Script de test pour valider la configuration de logging et les variables d'environnement.
+"""Unit tests for the logging configuration and settings modules."""
 
-Ce script teste le système de logging configuré dans mangetamain.logging_config
-et vérifie que les variables d'environnement sont correctement prises en compte.
-"""
+from __future__ import annotations
 
+import logging
 import os
-import sys
-import tempfile
-from datetime import datetime
 from pathlib import Path
 
-# Ajouter le répertoire src au path pour importer mangetamain
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+import pytest
 
-from mangetamain.logging_config import configure_logging, get_logger
-
-
-def test_basic_logging():
-    """Test basique du système de logging."""
-    print("Test 1: Configuration basique du logging")
-
-    # Créer un répertoire temporaire pour les logs
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Configurer le logging
-        config = configure_logging(log_directory=temp_dir)
-
-        # Vérifier que les fichiers ont été créés
-        debug_log = config.debug_log_path
-        error_log = config.error_log_path
-
-        print(f"Repertoire de logs: {config.log_directory}")
-        print(f"Fichier debug: {debug_log.name}")
-        print(f"Fichier error: {error_log.name}")
-
-        # Tester différents niveaux de log
-        logger = get_logger("test_module")
-
-        logger.debug("Message de debug - test basique")
-        logger.info("Message d'information - test basique")
-        logger.warning("Message d'avertissement - test basique")
-        logger.error("Message d'erreur - test basique")
-        logger.critical("Message critique - test basique")
-
-        # Vérifier le contenu des fichiers
-        print("\nContenu du fichier debug:")
-        if debug_log.exists():
-            with open(debug_log, encoding="utf-8") as f:
-                print(f.read())
-        else:
-            print("Fichier debug non trouve")
-
-        print("\nContenu du fichier error:")
-        if error_log.exists():
-            with open(error_log, encoding="utf-8") as f:
-                print(f.read())
-        else:
-            print("Fichier error non trouve")
+from mangetamain.logging_config import configure_logging, get_logger, reset_logging
+from mangetamain.settings import (
+    DEFAULT_LOG_DIR,
+    DEFAULT_MAX_LOG_FILES,
+    LoggingSettings,
+    load_env_file,
+)
 
 
-def test_log_rotation():
-    """Test de la rotation des logs."""
-    print("\nTest 2: Rotation des logs")
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Créer plusieurs fichiers de logs simulés
-        log_dir = Path(temp_dir)
-        log_dir.mkdir(exist_ok=True)
-
-        # Créer des fichiers de logs avec différents timestamps
-        for i in range(15):  # Créer plus de fichiers que la limite
-            timestamp = f"20240101T12000{i:02d}Z"
-            debug_file = log_dir / f"debug-{timestamp}.log"
-            error_file = log_dir / f"error-{timestamp}.log"
-
-            debug_file.write_text(f"Debug log {i}")
-            error_file.write_text(f"Error log {i}")
-
-            # Modifier la date de modification pour simuler des fichiers plus anciens
-            old_time = datetime.now().timestamp() - (i * 3600)  # 1 heure par fichier
-            debug_file.touch()
-            error_file.touch()
-            os.utime(debug_file, (old_time, old_time))
-            os.utime(error_file, (old_time, old_time))
-
-        print(f"Cree {len(list(log_dir.glob('*.log')))} fichiers de logs")
-
-        # Configurer le logging avec une limite de 5 fichiers
-        config = configure_logging(log_directory=temp_dir, max_log_files=5)
-
-        # Vérifier le nombre de fichiers restants
-        remaining_files = list(log_dir.glob("*.log"))
-        print(f"Fichiers restants apres rotation: {len(remaining_files)}")
-
-        if len(remaining_files) <= 10:  # 5 debug + 5 error max
-            print("Rotation des logs fonctionne correctement")
-        else:
-            print("Rotation des logs ne fonctionne pas")
+ENV_KEYS = ("MANG_LOG_DIR", "MANG_LOG_MAX_FILES", "MANG_USER_ID", "MANG_SESSION_ID")
 
 
-def test_log_format():
-    """Test du format des logs."""
-    print("\nTest 3: Format des logs")
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        config = configure_logging(log_directory=temp_dir)
-        logger = get_logger("format_test")
-
-        # Générer un log avec toutes les informations
-        logger.info("Test du format de log")
-
-        debug_log = config.debug_log_path
-        if debug_log.exists():
-            with open(debug_log, encoding="utf-8") as f:
-                content = f.read().strip()
-                print(f"Format du log: {content}")
-
-                # Vérifier les composants du format
-                components = [
-                    "timestamp",
-                    "levelname",
-                    "pathname",
-                    "lineno",
-                    "run=",
-                    "user=",
-                    "session=",
-                    "message",
-                ]
-
-                missing_components = []
-                for component in components:
-                    if component not in content:
-                        missing_components.append(component)
-
-                if not missing_components:
-                    print("Format des logs complet")
-                else:
-                    print(f"Composants manquants: {missing_components}")
-
-
-def main():
-    """Fonction principale de test."""
-    print("Démarrage des tests de logging")
-    print("=" * 50)
-
+@pytest.fixture(autouse=True)
+def _clean_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    saved = {key: os.environ.get(key) for key in ENV_KEYS}
     try:
-        test_basic_logging()
-        test_log_rotation()
-        test_log_format()
-
-        print("\n" + "=" * 50)
-        print("Tous les tests termines avec succes!")
-
-    except Exception as e:
-        print(f"\nErreur lors des tests: {e}")
-        import traceback
-
-        traceback.print_exc()
+        yield
+    finally:
+        for key in ENV_KEYS:
+            monkeypatch.delenv(key, raising=False)
+        for key, value in saved.items():
+            if value is not None:
+                os.environ[key] = value
 
 
-if __name__ == "__main__":
-    main()
+@pytest.fixture(autouse=True)
+def _reset_logging() -> None:
+    """Ensure each test starts from a fresh logging configuration."""
+
+    reset_logging()
+    yield
+    reset_logging()
+
+
+@pytest.fixture
+def temp_workdir(tmp_path: Path) -> Path:
+    """Switch to a temporary working directory for the duration of a test."""
+
+    origin = Path.cwd()
+    os.chdir(tmp_path)
+    try:
+        yield tmp_path
+    finally:
+        os.chdir(origin)
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def test_basic_logging_creates_files(temp_workdir: Path) -> None:
+    config = configure_logging(log_directory=temp_workdir)
+
+    logger = get_logger("basic")
+    logger.debug("debug message")
+    logger.error("error message")
+
+    assert config.debug_log_path.exists()
+    assert config.error_log_path.exists()
+
+    debug_content = _read(config.debug_log_path)
+    error_content = _read(config.error_log_path)
+
+    assert "debug message" in debug_content
+    assert "error message" in error_content
+
+
+def test_error_file_contains_only_error_records(temp_workdir: Path) -> None:
+    config = configure_logging(log_directory=temp_workdir)
+
+    logger = get_logger("levels")
+    logger.info("info message")
+    logger.warning("warning message")
+    logger.error("error message")
+
+    assert "error message" in _read(config.error_log_path)
+    assert "info message" not in _read(config.error_log_path)
+    assert "warning message" not in _read(config.error_log_path)
+
+
+@pytest.mark.parametrize("requested", [None, 1, 3, 5])
+def test_rotation_prunes_old_files(requested: int | None, temp_workdir: Path) -> None:
+    configure_logging(log_directory=temp_workdir, max_log_files=requested)
+
+    for index in range(6):
+        configure_logging(
+            log_directory=temp_workdir,
+            max_log_files=requested,
+            reset_existing=True,
+        )
+
+    keep = requested or 10
+    debug_files = sorted(temp_workdir.glob("debug-*.log"))
+    error_files = sorted(temp_workdir.glob("error-*.log"))
+
+    assert len(debug_files) <= keep
+    assert len(error_files) <= keep
+
+
+def test_configure_logging_returns_cached_configuration(temp_workdir: Path) -> None:
+    first = configure_logging(log_directory=temp_workdir)
+    second = configure_logging()
+
+    assert first is second
+
+
+def test_contextual_information_is_present(temp_workdir: Path) -> None:
+    config = configure_logging(log_directory=temp_workdir)
+    logger = get_logger("context")
+
+    logger.info("context message")
+
+    content = _read(config.debug_log_path)
+
+    assert f"run={config.run_identifier}" in content
+    assert "user=" in content
+    assert "session=" in content
+
+
+def test_reset_logging_removes_handlers(temp_workdir: Path) -> None:
+    configure_logging(log_directory=temp_workdir)
+    logger = logging.getLogger("mangetamain")
+
+    assert logger.handlers
+
+    reset_logging()
+
+    assert not logger.handlers
+
+
+def test_logging_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
+    for key in ENV_KEYS:
+        monkeypatch.delenv(key, raising=False)
+
+    settings = LoggingSettings.from_env()
+
+    assert settings.directory == DEFAULT_LOG_DIR
+    assert settings.max_files == DEFAULT_MAX_LOG_FILES
+    assert settings.user_id is None
+    assert settings.session_id is None
+
+
+def test_logging_settings_respects_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    custom_dir = tmp_path / "custom-logs"
+    monkeypatch.setenv("MANG_LOG_DIR", str(custom_dir))
+    monkeypatch.setenv("MANG_LOG_MAX_FILES", "7")
+    monkeypatch.setenv("MANG_USER_ID", "tester")
+    monkeypatch.setenv("MANG_SESSION_ID", "session-xyz")
+
+    settings = LoggingSettings.from_env()
+
+    assert settings.directory == custom_dir.resolve()
+    assert settings.max_files == 7
+    assert settings.user_id == "tester"
+    assert settings.session_id == "session-xyz"
+
+
+def test_logging_settings_invalid_max_files_uses_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MANG_LOG_MAX_FILES", "not-a-number")
+
+    settings = LoggingSettings.from_env()
+
+    assert settings.max_files == DEFAULT_MAX_LOG_FILES
+
+
+def test_load_env_file_reads_values(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    env_path = tmp_path / "settings.env"
+    env_path.write_text("MANG_LOG_MAX_FILES=12\nMANG_USER_ID=from_env\n", encoding="utf-8")
+
+    monkeypatch.delenv("MANG_LOG_MAX_FILES", raising=False)
+    monkeypatch.delenv("MANG_USER_ID", raising=False)
+
+    load_env_file(env_path)
+
+    assert os.environ["MANG_LOG_MAX_FILES"] == "12"
+    assert os.environ["MANG_USER_ID"] == "from_env"
+
+
+def test_load_env_file_respects_override_flag(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    env_path = tmp_path / "settings.env"
+    env_path.write_text("MANG_LOG_MAX_FILES=5\n", encoding="utf-8")
+
+    monkeypatch.setenv("MANG_LOG_MAX_FILES", "20")
+
+    load_env_file(env_path)
+    assert os.environ["MANG_LOG_MAX_FILES"] == "20"
+
+    load_env_file(env_path, override=True)
+    assert os.environ["MANG_LOG_MAX_FILES"] == "5"
+
