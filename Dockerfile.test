@@ -19,9 +19,9 @@ COPY pyproject.toml README.md ./
 
 RUN pip install --upgrade pip && pip install poetry
 
-# Install dependencies
+# Install dependencies (exclude heavy 'ml' group)
 RUN poetry config virtualenvs.create false \
- && poetry install --only main --with dev --no-root \
+ && poetry install --only main --with dev --without ml --no-root \
  && poetry cache clear pypi --all --no-interaction \
  && rm -rf /tmp/poetry_cache
 

@@ -1,3 +1,50 @@
+# VCS
+.git
+.gitignore
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+
+# Coverage / reports
+.coverage
+coverage.xml
+htmlcov/
+
+# Datasets and logs (mounted at runtime instead)
+data/
+logs/
+
+# CI temp
+.temp/
+
+# Docs and notebooks (not needed in runtime image)
+docs/
+notebooks/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
 # General ignores
 .git
 .github
