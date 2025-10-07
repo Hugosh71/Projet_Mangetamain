@@ -1,18 +1,17 @@
-"""Page d'accueil de l'application — version optimisée."""
+"""Page d'accueil de l'application"""
 
+import plotly.express as px
 import streamlit as st
-from mangetamain import (
+
+from src.mangetamain import (
     get_top_recipes_cached,
     get_vegetarian_stats_cached,
 )
-import os
-import plotly.express as px
 
-# ✅ Configurer la page en premier
 st.set_page_config(page_title="Accueil", page_icon="📈", layout="wide")
 
 top_recipes = get_top_recipes_cached(top_k=10)
-vagetarian_stats = get_vegetarian_stats_cached()
+vegetarian_stats = get_vegetarian_stats_cached()
 
 st.markdown("# Accueil")
 st.sidebar.header("Accueil")
@@ -39,18 +38,18 @@ col1, col2 = st.columns(2)
 
 with col1:
     fig_pie = px.pie(
-        vagetarian_stats,
+        vegetarian_stats,
         values="Nombre de recettes uniques",
         names="Type",
         title="Répartition des recettes (végétarien vs viande)",
-        hole=0.4,  # effet donut
+        hole=0.4,
     )
     fig_pie.update_traces(textposition="inside", textinfo="percent+label")
     st.plotly_chart(fig_pie, use_container_width=True)
 
 with col2:
     fig_bar = px.bar(
-        vagetarian_stats,
+        vegetarian_stats,
         x="Type",
         y="Note moyenne",
         color="Type",
