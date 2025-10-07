@@ -1,18 +1,17 @@
-"""Page d'accueil de l'application — version optimisée."""
+"""Page d'accueil de l'application"""
 
 import streamlit as st
-from mangetamain import (
+import plotly.express as px
+
+from src.mangetamain import (
     get_top_recipes_cached,
     get_vegetarian_stats_cached,
 )
-import os
-import plotly.express as px
 
-# ✅ Configurer la page en premier
 st.set_page_config(page_title="Accueil", page_icon="📈", layout="wide")
 
 top_recipes = get_top_recipes_cached(top_k=10)
-vagetarian_stats = get_vegetarian_stats_cached()
+vegetarian_stats = get_vegetarian_stats_cached()
 
 st.markdown("# Accueil")
 st.sidebar.header("Accueil")
@@ -50,7 +49,7 @@ with col1:
 
 with col2:
     fig_bar = px.bar(
-        vagetarian_stats,
+        vegetarian_stats,
         x="Type",
         y="Note moyenne",
         color="Type",

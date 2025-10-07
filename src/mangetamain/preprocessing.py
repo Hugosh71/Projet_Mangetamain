@@ -11,8 +11,8 @@ import streamlit as st
 class DataPaths:
     """Container for dataset paths used by the preprocessor."""
 
-    recipes_csv: str = "data/raw/RAW_recipes.csv"
-    interactions_csv: str = "data/raw/RAW_interactions.csv"
+    recipes_csv: str = "data/RAW_recipes.csv"
+    interactions_csv: str = "data/RAW_interactions.csv"
 
 
 class DataPreprocessor:
