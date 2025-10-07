@@ -261,3 +261,29 @@ Trigger all hooks manually before committing:
 ```commandline
 poetry run pre-commit run --all-files
 ```
+
+## How to Use the Documentation
+
+### Build Documentation:
+
+```commandline
+# Install dependencies
+poetry install --with dev
+
+# Build documentation
+cd docs
+poetry run sphinx-build -b html . _build/html
+
+# Or use the build script
+python docs/build_docs.py build
+```
+
+### View Documentation:
+
+```commandline
+# Open the built HTML files
+open docs/_build/html/index.html # or start docs/_build/html/index.html
+
+# Or serve locally
+python serve_docs.py
+```
