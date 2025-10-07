@@ -176,6 +176,57 @@ git add <file-with-conflict>
 git commit -m "..."
 ```
 
+After your Pull Request has been validated and merged to the main/develop branch, follow these steps to keep your local repository up to date:
+
+**1. Switch to the main/develop branch:**
+```commandline
+git checkout main
+```
+or
+
+```commandline
+git checkout develop
+```
+
+**2. Fetch the latest changes from remote:**
+```commandline
+git fetch origin # or git fetch --all
+```
+
+**3. Pull the merged changes:**
+```commandline
+git pull origin main
+```
+or
+
+```commandline
+git pull origin develop
+```
+
+**4. If working on a feature branch, rebase it on the updated main/develop branch:**
+```commandline
+git checkout <your-feature-branch>
+```
+
+```commandline
+git rebase main
+```
+
+**5. You can push your branch:**
+
+```commandline
+git push --force-with-lease origin <branch-name>
+```
+
+**6. Clean up merged branches (optional):**
+```commandline
+# Delete local branch that was merged
+git branch -d <merged-branch-name>
+
+# Delete remote tracking branch
+git push origin --delete <merged-branch-name>
+```
+
 ## Quality & CI Workflow
 
 - Launch the Streamlit app locally with Docker Compose:
@@ -209,4 +260,30 @@ Trigger all hooks manually before committing:
 
 ```commandline
 poetry run pre-commit run --all-files
+```
+
+## How to Use the Documentation
+
+### Build Documentation:
+
+```commandline
+# Install dependencies
+poetry install --with dev
+
+# Build documentation
+cd docs
+poetry run sphinx-build -b html . _build/html
+
+# Or use the build script
+python docs/build_docs.py build
+```
+
+### View Documentation:
+
+```commandline
+# Open the built HTML files
+open docs/_build/html/index.html # or start docs/_build/html/index.html
+
+# Or serve locally
+python serve_docs.py
 ```
