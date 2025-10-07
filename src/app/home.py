@@ -1,7 +1,7 @@
 """Page d'accueil de l'application"""
 
-import streamlit as st
 import plotly.express as px
+import streamlit as st
 
 from src.mangetamain import (
     get_top_recipes_cached,
@@ -38,7 +38,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     fig_pie = px.pie(
-        vagetarian_stats,
+        vegetarian_stats,
         values="Nombre de recettes uniques",
         names="Type",
         title="Répartition des recettes (végétarien vs viande)",
