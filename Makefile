@@ -57,6 +57,21 @@ pre-commit:
 run:
 	poetry run streamlit run src/app/main.py --server.port=8501 --server.address=0.0.0.0
 
+## Build documentation
+.PHONY: docs
+docs:
+	cd docs && poetry run sphinx-build -b html . _build/html
+
+## Build documentation and open in browser
+.PHONY: docs-serve
+docs-serve: docs
+	cd docs/_build/html && python -m http.server 8000
+
+## Clean documentation build
+.PHONY: docs-clean
+docs-clean:
+	rm -rf docs/_build
+
 ## Build Docker image
 .PHONY: docker-build
 docker-build:
