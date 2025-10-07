@@ -123,6 +123,13 @@ make requirements
 make run
 ```
 
+or run via Docker Compose
+
+```commandline
+make requirements
+make docker-run
+```
+
 The app will be available at `http://localhost:8501`.
 
 ## Collaborative Development
