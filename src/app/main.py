@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from mangetamain.logging_config import configure_logging
+from src.mangetamain.logging_config import configure_logging, get_logger
 
 def _initialise_logging() -> None:
     configure_logging(reset_existing=True)
@@ -10,6 +10,8 @@ def _initialise_logging() -> None:
 
 if __name__ == "__main__":
     _initialise_logging()
+    logger = get_logger()
+    logger.debug("Starting the application")
 
     home_page = st.Page("home.py", title="Home", icon=":material/home:")
     clustering_page = st.Page(
