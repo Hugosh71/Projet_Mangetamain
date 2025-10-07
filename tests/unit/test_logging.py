@@ -16,7 +16,6 @@ from mangetamain.settings import (
     load_env_file,
 )
 
-
 ENV_KEYS = ("MANG_LOG_DIR", "MANG_LOG_MAX_FILES", "MANG_USER_ID", "MANG_SESSION_ID")
 
 
@@ -92,7 +91,7 @@ def test_error_file_contains_only_error_records(temp_workdir: Path) -> None:
 def test_rotation_prunes_old_files(requested: int | None, temp_workdir: Path) -> None:
     configure_logging(log_directory=temp_workdir, max_log_files=requested)
 
-    for index in range(6):
+    for _index in range(6):
         configure_logging(
             log_directory=temp_workdir,
             max_log_files=requested,
@@ -150,7 +149,9 @@ def test_logging_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.session_id is None
 
 
-def test_logging_settings_respects_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_logging_settings_respects_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     custom_dir = tmp_path / "custom-logs"
     monkeypatch.setenv("MANG_LOG_DIR", str(custom_dir))
     monkeypatch.setenv("MANG_LOG_MAX_FILES", "7")
@@ -165,7 +166,9 @@ def test_logging_settings_respects_environment(monkeypatch: pytest.MonkeyPatch, 
     assert settings.session_id == "session-xyz"
 
 
-def test_logging_settings_invalid_max_files_uses_default(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_logging_settings_invalid_max_files_uses_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("MANG_LOG_MAX_FILES", "not-a-number")
 
     settings = LoggingSettings.from_env()
@@ -173,9 +176,13 @@ def test_logging_settings_invalid_max_files_uses_default(monkeypatch: pytest.Mon
     assert settings.max_files == DEFAULT_MAX_LOG_FILES
 
 
-def test_load_env_file_reads_values(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_env_file_reads_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     env_path = tmp_path / "settings.env"
-    env_path.write_text("MANG_LOG_MAX_FILES=12\nMANG_USER_ID=from_env\n", encoding="utf-8")
+    env_path.write_text(
+        "MANG_LOG_MAX_FILES=12\nMANG_USER_ID=from_env\n", encoding="utf-8"
+    )
 
     monkeypatch.delenv("MANG_LOG_MAX_FILES", raising=False)
     monkeypatch.delenv("MANG_USER_ID", raising=False)
@@ -186,7 +193,9 @@ def test_load_env_file_reads_values(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert os.environ["MANG_USER_ID"] == "from_env"
 
 
-def test_load_env_file_respects_override_flag(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_load_env_file_respects_override_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     env_path = tmp_path / "settings.env"
     env_path.write_text("MANG_LOG_MAX_FILES=5\n", encoding="utf-8")
 
@@ -197,4 +206,3 @@ def test_load_env_file_respects_override_flag(tmp_path: Path, monkeypatch: pytes
 
     load_env_file(env_path, override=True)
     assert os.environ["MANG_LOG_MAX_FILES"] == "5"
-
