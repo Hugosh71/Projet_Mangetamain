@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
-
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 DEFAULT_LOG_DIR_NAME: Final[str] = "logs"
 DEFAULT_LOG_DIR: Final[Path] = PROJECT_ROOT / DEFAULT_LOG_DIR_NAME
@@ -59,7 +58,7 @@ class LoggingSettings:
     max_files: int
 
     @classmethod
-    def from_env(cls) -> "LoggingSettings":
+    def from_env(cls) -> LoggingSettings:
         """Create logging settings using environment variables or defaults."""
 
         load_env_file()
@@ -67,9 +66,16 @@ class LoggingSettings:
         directory = _resolve_directory(os.getenv(ENV_LOG_DIR))
         user_id = os.getenv(ENV_USER_ID)
         session_id = os.getenv(ENV_SESSION_ID)
-        max_files = _parse_positive_int(os.getenv(ENV_LOG_MAX_FILES), DEFAULT_MAX_LOG_FILES)
+        max_files = _parse_positive_int(
+            os.getenv(ENV_LOG_MAX_FILES), DEFAULT_MAX_LOG_FILES
+        )
 
-        return cls(directory=directory, user_id=user_id, session_id=session_id, max_files=max_files)
+        return cls(
+            directory=directory,
+            user_id=user_id,
+            session_id=session_id,
+            max_files=max_files,
+        )
 
 
 def _resolve_directory(raw: str | None) -> Path:
@@ -94,4 +100,3 @@ def _parse_positive_int(raw: str | None, default: int) -> int:
         return default
 
     return max(1, value)
-

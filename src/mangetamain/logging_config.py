@@ -155,7 +155,8 @@ def configure_logging(
         run_timestamp=run_timestamp,
     )
 
-    # Ajouter le filtre aux handlers pour s'assurer qu'il est appliqué avant le formatage
+    # Ajouter le filtre aux handlers pour s'assurer qu'il est appliqué
+    # avant le formatage
     debug_handler.addFilter(context_filter)
     error_handler.addFilter(context_filter)
 
