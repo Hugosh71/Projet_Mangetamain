@@ -77,7 +77,6 @@ def test_compute_top_recipes_basic(
     ]
 
     assert top["Note moyenne"].dtype.kind in {"i", "f"}
-    # Ensure zero ratings were filtered: recipe 2 had a zero but also a 3 → still present
     assert (top["ID recette"] == 2).any()
 
     # Sorting: highest mean first, then lowest std
