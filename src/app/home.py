@@ -42,7 +42,7 @@ with col1:
         values="Nombre de recettes uniques",
         names="Type",
         title="Répartition des recettes (végétarien vs viande)",
-        hole=0.4,  # effet donut
+        hole=0.4,
     )
     fig_pie.update_traces(textposition="inside", textinfo="percent+label")
     st.plotly_chart(fig_pie, use_container_width=True)
