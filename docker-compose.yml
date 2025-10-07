@@ -1,0 +1,52 @@
+x-defaults: &default-env
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+  PIP_NO_CACHE_DIR: 1
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mangetamain_app
+    ports:
+      - "8501:8501"
+    environment:
+      <<: *default-env
+      PYTHONPATH: .
+    volumes:
+      - ./src:/app/src
+      - ./docs:/app/docs
+    restart: unless-stopped
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: mangetamain_tests
+    depends_on:
+      - app
+    environment:
+      <<: *default-env
+      PYTHONPATH: /app/src
+    command: >-
+      python -m pytest --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=90
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    profiles:
+      - test
+
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: mangetamain_lint
+    command: >-
+      sh -c "black --check src tests && ruff check src tests"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    profiles:
+      - lint
