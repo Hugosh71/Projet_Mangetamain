@@ -15,9 +15,11 @@ services:
     environment:
       <<: *default-env
       PYTHONPATH: .
+      STREAMLIT_CACHE_DIR: /app/.streamlit/cache
     volumes:
       - ./src:/app/src
       - ./docs:/app/docs
+      - ./.streamlit:/app/.streamlit
     restart: unless-stopped
 
   tests:
