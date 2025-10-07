@@ -5,7 +5,7 @@ import streamlit as st
 from src.mangetamain.logging_config import configure_logging, get_logger
 
 def _initialise_logging() -> None:
-    configure_logging(reset_existing=True)
+    configure_logging(log_directory="./logs", reset_existing=True)
 
 
 if __name__ == "__main__":
