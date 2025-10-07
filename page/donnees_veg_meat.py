@@ -11,55 +11,41 @@ def show():
     if st.button("🥦 Aller aux recettes végétariennes"):
         st.session_state.page = "vegetables"
     
-ratings = pd.read_csv(r"C:\Users\const\TELECOM\DATA\Projet_Mangetamain\data\RAW_interactions.csv")
-recipes = pd.read_csv(r"C:\Users\const\TELECOM\DATA\Projet_Mangetamain\data\RAW_recipes.csv")
-meat_tags = ["meat", "chicken", "pork", "turkey", "fish", "beef", "lamb"]
 
-data = pd.merge(ratings, recipes, left_on="recipe_id", right_on="id")
-
-print(data.head())
-
-veg = data[data["tags"].str.contains("vegetarian", case=False, na=False)]
-meat = data[data["tags"].str.contains("|".join(meat_tags), case=False, na=False)]
-
-# --- Compter et calculer les moyennes ---
-nb_veg = len(veg)
-nb_meat = len(meat)
-moy_veg = veg["rating"].mean()
-moy_meat = meat["rating"].mean()
-
-# --- Affichage Streamlit ---
 st.title("Analyse des recettes 🌱🍖")
 
-st.write("### Nombre de recettes")
-st.write(f"🥦 Végétarien : {nb_veg}")
-st.write(f"🍗 Viande : {nb_meat}")
+@st.cache_data
+def load_data():
+    counts = pd.read_csv("stats_counts.csv")
+    means = pd.read_csv("stats_mean.csv")
+    ratings = pd.read_csv("stats_rating.csv")
+    return counts, means, ratings
 
-st.write("### Moyenne des notes")
-st.write(f"🥦 Végétarien : {moy_veg:.2f}")
-st.write(f"🍗 Viande : {moy_meat:.2f}")
+# --- Charger les données ---
+counts, means, ratings = load_data()
 
-# --- Graphiques ---
-counts = pd.Series({"Végétarien": nb_veg, "Viande": nb_meat})
-means = pd.Series({"Végétarien": moy_veg, "Viande": moy_meat})
+# --- Affichage des données ---
+st.subheader("📋 Résumé des données")
+st.dataframe(counts)
+st.dataframe(means)
+st.dataframe(ratings.head())
 
-# Barres
+# --- Barres : moyenne des notes ---
 st.subheader("📊 Moyenne des notes par catégorie")
-st.bar_chart(means)
+fig_bar = px.bar(means, x="type", y="moyenne_notes", color="type",
+                 title="Moyenne des notes (végétarien vs viande)")
+st.plotly_chart(fig_bar)
 
-# Camembert
-st.subheader("🥧 Répartition des plats")
-fig_pie = px.pie(values=counts.values, names=counts.index, title="Proportion de plats")
+# --- Camembert : proportion des plats ---
+st.subheader("🥧 Proportion de plats")
+fig_pie = px.pie(counts, names="type", values="nombre", title="Répartition des recettes")
 st.plotly_chart(fig_pie)
 
-# Histogramme
+# --- Histogramme : distribution des notes ---
 st.subheader("📉 Distribution des notes")
-fig_hist = px.histogram(data[data["tags"].str.contains("vegetarian|meat|chicken|pork|fish|beef|lamb", case=False, na=False)],
-                        x="rating", color=data["tags"].str.contains("vegetarian", case=False, na=False).map({True: "Végétarien", False: "Viande"}),
-                        nbins=10, title="Distribution des notes selon le type de plat")
+fig_hist = px.histogram(ratings, x="rating", color="type", nbins=10,
+                        title="Distribution des notes selon le type de plat")
 st.plotly_chart(fig_hist)
-
-
 
 
 
