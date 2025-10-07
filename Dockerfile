@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12-slim AS base
+### ---------- Base builder stage ----------
+FROM python:3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -9,23 +10,41 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Install build dependencies (needed only for building wheels)
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy only the dependency files first (to leverage Docker cache)
 COPY pyproject.toml README.md ./
 
+# Install Poetry
 RUN pip install --upgrade pip && pip install poetry
 
-RUN poetry config virtualenvs.create false && poetry install --with dev --no-root
+# Install only **production** dependencies, no dev, no project itself
+RUN poetry config virtualenvs.create false \
+    && poetry install --without dev --no-root
 
+# Copy the actual source code last
 COPY src/ ./src/
 COPY docs/ ./docs/
 
+### ---------- Final runtime stage ----------
+FROM python:3.12-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# Copy installed packages from builder (this avoids reinstalling everything)
+COPY --from=builder /usr/local /usr/local
+
+# Copy only the source code
+COPY src/ ./src/
+COPY docs/ ./docs/
+COPY .streamlit/ ./.streamlit/
+
 EXPOSE 8501
 
-ENV STREAMLIT_SERVER_PORT=8501 \
-    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
-    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
-
-CMD ["streamlit", "run", "src/app/main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "src/app/main.py"]
