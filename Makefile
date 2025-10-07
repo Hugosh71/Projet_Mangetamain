@@ -108,12 +108,12 @@ test-file:
 ## Run Streamlit locally
 .PHONY: run
 run:
-	PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY)
+	STREAMLIT_CACHE_DIR=.streamlit/cache PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY)
 
 ## Run Streamlit in dev mode (auto-reload)
 .PHONY: run-dev
 run-dev:
-	PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY) --server.runOnSave=true
+	STREAMLIT_CACHE_DIR=.streamlit/cache PYTHONPATH=. $(STREAMLIT) run $(APP_ENTRY) --server.runOnSave=true
 
 #################################################################################
 # Jupyter Notebook                                                              #
