@@ -19,9 +19,9 @@ COPY pyproject.toml README.md ./
 
 RUN pip install --upgrade pip && pip install poetry
 
-# Install dependencies (exclude heavy 'ml' group)
+# Install dependencies
 RUN poetry config virtualenvs.create false \
- && poetry install --with test  --without ml --no-root \
+ && poetry install --with lint  --without ml --no-root \
  && poetry cache clear pypi --all --no-interaction \
  && rm -rf /tmp/poetry_cache
 
@@ -29,4 +29,5 @@ RUN poetry config virtualenvs.create false \
 COPY src/ ./src/
 COPY tests/ ./tests/
 
-CMD ["pytest", "--cov=src", "--cov-report=term-missing", "--cov-report=xml", "--cov-fail-under=90"]
+CMD ["black", "--check", "src", "tests"]
+CMD ["ruff", "check", "src", "tests"]
