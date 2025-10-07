@@ -19,6 +19,7 @@ services:
       - ./src:/app/src
       - ./docs:/app/docs
       - ./.streamlit:/app/.streamlit
+      - ./data:/app/data:ro
     restart: unless-stopped
 
   tests:
@@ -36,6 +37,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./tests:/app/tests
+      - ./data:/app/data:ro
     profiles:
       - test
 
