@@ -100,10 +100,10 @@ fig = px.bar(
 
 # Beautify layout
 fig.update_layout(
-    xaxis=dict(
-        tickmode="array",
-        tickvals=list(range(1, 13)),
-        ticktext=[
+    xaxis={
+        "tickmode": "array",
+        "tickvals": list(range(1, 13)),
+        "ticktext": [
             "Jan",
             "Fév",
             "Mar",
@@ -117,7 +117,7 @@ fig.update_layout(
             "Nov",
             "Déc",
         ],
-    ),
+    },
     yaxis_tickformat=".0%",
     yaxis_title="Ratio",
     xaxis_title="Mois",
