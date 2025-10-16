@@ -6,6 +6,8 @@ from typing import Sequence  # noqa: UP035
 import pandas as pd
 import streamlit as st
 
+from src.mangetamain.utils import read_csv
+
 
 @dataclass(frozen=True)
 class DataPaths:
@@ -29,10 +31,8 @@ class DataPreprocessor:
         interaction_usecols: Sequence[str] | None = ("recipe_id", "rating"),
     ) -> None:
         self._paths = data_paths or DataPaths()
-        self._recipe_usecols = list(recipe_usecols) if recipe_usecols else None
-        self._interaction_usecols = (
-            list(interaction_usecols) if interaction_usecols else None
-        )
+        self._recipe_usecols = recipe_usecols
+        self._interaction_usecols = interaction_usecols
 
     @property
     def data_paths(self) -> DataPaths:
@@ -42,17 +42,19 @@ class DataPreprocessor:
     def load_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Load recipes and interactions DataFrames.
 
-        Returns a tuple of (recipes_df, interactions_df).
+        Returns a tuple of (df_recipes, df_interactions).
         """
-        recipes_df = pd.read_csv(self._paths.recipes_csv, usecols=self._recipe_usecols)
-        interactions_df = pd.read_csv(
-            self._paths.interactions_csv, usecols=self._interaction_usecols
+        df_recipes = read_csv(
+            self._paths.recipes_csv, usecols=tuple(self._recipe_usecols)
         )
-        return recipes_df, interactions_df
+        df_interactions = read_csv(
+            self._paths.interactions_csv, usecols=tuple(self._interaction_usecols)
+        )
+        return df_recipes, df_interactions
 
     @staticmethod
-    def _filter_valid_ratings(interactions_df: pd.DataFrame) -> pd.DataFrame:
-        return interactions_df[interactions_df["rating"] != 0]
+    def _filter_valid_ratings(df_interactions: pd.DataFrame) -> pd.DataFrame:
+        return df_interactions[df_interactions["rating"] != 0]
 
     @staticmethod
     def _compute_recipe_stats(filtered_interactions: pd.DataFrame) -> pd.DataFrame:
@@ -71,9 +73,9 @@ class DataPreprocessor:
         ascending: Sequence[bool] = (False, True, False),
     ) -> pd.DataFrame:
         """Return top-k recipes with statistics merged with recipe names."""
-        recipes_df, interactions_df = self.load_data()
+        df_recipes, df_interactions = self.load_data()
 
-        filtered = self._filter_valid_ratings(interactions_df)
+        filtered = self._filter_valid_ratings(df_interactions)
         stats = self._compute_recipe_stats(filtered)
 
         top_stats = (
@@ -83,7 +85,7 @@ class DataPreprocessor:
         )
 
         top_merged = top_stats.merge(
-            recipes_df[["id", "name"]],
+            df_recipes[["id", "name"]],
             left_on="recipe_id",
             right_on="id",
             how="left",
@@ -117,10 +119,15 @@ class DataPreprocessor:
     def compute_vegetarian_stats(self) -> pd.DataFrame:
         """Compute statistics comparing vegetarian vs meat recipes."""
         meat_tags = ["meat", "chicken", "pork", "turkey", "fish", "beef", "lamb"]
-        recipes_df, interactions_df = self.load_data()
-        filtered = self._filter_valid_ratings(interactions_df)
+        df_recipes, df_interactions = self.load_data()
+        df_interactions["date"] = pd.to_datetime(
+            df_interactions["date"], errors="coerce"
+        )
+        df_interactions["month"] = df_interactions["date"].dt.month
+
+        filtered = self._filter_valid_ratings(df_interactions)
         filtered = pd.merge(
-            recipes_df[["id", "tags"]],
+            df_recipes[["id", "tags"]],
             filtered,
             left_on="id",
             right_on="recipe_id",
@@ -129,12 +136,22 @@ class DataPreprocessor:
 
         filtered["type"] = "autre"
         filtered.loc[
-            filtered["tags"].str.contains("vegetarian", case=False, na=False), "type"
+            filtered["tags"].str.contains("vegetarian|vegan", case=False, na=False),
+            "type",
         ] = "végétarien"
         filtered.loc[
             filtered["tags"].str.contains("|".join(meat_tags), case=False, na=False),
             "type",
         ] = "viande"
+
+        monthly_counts = (
+            filtered.groupby(["month", "type"]).size().reset_index(name="count")
+        )
+        monthly_total = monthly_counts.groupby("month")["count"].transform("sum")
+        monthly_counts["ratio"] = monthly_counts["count"] / monthly_total
+        monthly_pivot = monthly_counts.pivot(
+            index="month", columns="type", values="ratio"
+        ).fillna(0)
 
         stats = (
             filtered.groupby("type")
@@ -144,19 +161,19 @@ class DataPreprocessor:
                 unique_recipes=("recipe_id", "nunique"),
             )
             .reset_index()
-            .rename(
-                columns={
-                    "type": "Type",
-                    "mean_rating": "Note moyenne",
-                    "count_rating": "Nombre d'évaluations",
-                    "unique_recipes": "Nombre de recettes uniques",
-                }
-            )
-            .sort_values(by="Note moyenne", ascending=False)
+            .sort_values(by="mean_rating", ascending=False)
             .reset_index(drop=True)
         )
 
-        return stats
+        results = {
+            "monthly_ratios": monthly_pivot.reset_index(),
+            "stats": stats,
+        }
+
+        print(results["monthly_ratios"])
+        print(results["stats"])
+
+        return results
 
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
@@ -178,6 +195,6 @@ def get_vegetarian_stats_cached():
     preprocessor = DataPreprocessor(
         data_paths=DataPaths(),
         recipe_usecols=["id", "name", "tags"],
-        interaction_usecols=["recipe_id", "rating"],
+        interaction_usecols=["recipe_id", "rating", "date"],
     )
     return preprocessor.compute_vegetarian_stats()
