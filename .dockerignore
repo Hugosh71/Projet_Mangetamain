@@ -1,0 +1,36 @@
+# General ignores
+.git
+.github
+.venv
+__pycache__
+*.py[cod]
+build/
+dist/
+.pytest_cache/
+coverage.xml
+.ruff_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# Node artifacts
+node_modules/
+
+# Notebooks
+*.ipynb
+*.ipynb_checkpoints
+
+# Project data
+data/
+notebooks/
+
+# Docker
+Dockerfile
+Dockerfile.test
+.dockerignore
+
+# Logs
+*.log
+
+# poetry lock
+poetry.lock
