@@ -1,4 +1,9 @@
 """Main entry point of the app."""
+import sys
+from pathlib import Path
+
+# Ajouter "src" au chemin des modules
+sys.path.append(str(Path(__file__).resolve().parents[1]))  # remonte 2 niveaux → src
 
 import streamlit as st
 
