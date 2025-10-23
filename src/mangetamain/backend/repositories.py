@@ -28,7 +28,7 @@ class CSVDataRepository(IDataRepository):
         self,
         paths: RepositoryPaths | None = None,
         *,
-        recipe_usecols: Sequence[str] | None = ("id", "name", "tags"),
+        recipe_usecols: Sequence[str] | None = ("id", "name"),
         interaction_usecols: Sequence[str] | None = ("recipe_id", "rating"),
         logger: logging.Logger | None = None,
     ) -> None:
