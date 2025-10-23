@@ -1,23 +1,23 @@
 """Clustering visualization page for recipe analysis."""
 
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.express as px
-import numpy as np
 from collections import Counter
-import sys
-import os
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.express as px
+import streamlit as st
 
 from src.mangetamain.preprocessing.streamlit import (
-    load_recipes_data,
-    get_cluster_names,
-    get_data_summary,
-    remove_outliers_iqr,
     add_month_labels,
+    get_cluster_names,
+    get_col_names,
+    load_recipes_data,
+    min_max_scale,
+    remove_outliers_iqr,
     rgb_to_hex,
 )
 
+# Set Streamlit page configuration
 st.set_page_config(
     page_title="Analyse de clusters des recettes", page_icon="🍽️", layout="wide"
 )
@@ -35,48 +35,9 @@ color_map = {
     for i, cn in enumerate(cluster_names.values())
 }
 
-# # Check if data loaded successfully
-# if df.empty:
-#     st.error("❌ Failed to load data. Please check the data files.")
-#     st.stop()
-
-# # Get data summary
-# summary = get_data_summary(df)
-
-# # Overview section with modern styling
-# st.markdown("## 📊 Dataset Overview")
-
-# # Key numbers in one row
-# col1, col2, col3, col4 = st.columns(4)
-# with col1:
-#     st.metric(
-#         label="📈 Average Metric 1",
-#         value=f"{summary['metric_1_mean']:.2f}",
-#         delta=None
-#     )
-# with col2:
-#     st.metric(
-#         label="⏱️ Average Metric 2",
-#         value=f"{summary['metric_2_mean']:.2f}",
-#         delta=None
-#     )
-# with col3:
-#     st.metric(
-#         label="🍽️ Total Recipes",
-#         value=f"{summary['total_recipes']:,}",
-#         delta=None
-#     )
-# with col4:
-#     st.metric(
-#         label="🎯 Total Clusters",
-#         value=f"{summary['total_clusters']}",
-#         delta=None
-#     )
-
-# # Distributions by cluster with modern styling
-
 st.markdown("### Comparaison des Clusters de Recettes")
 
+# Cluster selection pills
 clusters = sorted(df_recipes["cluster"].unique())
 selected_clusters = st.pills(
     "Sélectionnez les clusters à comparer :",
@@ -90,53 +51,13 @@ if not selected_clusters:
         "Vous devez sélectionner au moins un cluster.", icon=":material/warning:"
     )
 
-# col_a, col_b = st.columns(2)
-
-# with col_a:
-#     if 'metric_1' in df.columns:
-#         m1_by_cluster = df.groupby('cluster', as_index=False)['metric_1'].mean()
-#         fig_m1 = px.bar(
-#             m1_by_cluster,
-#             x='cluster',
-#             y='metric_1',
-#             title='📈 Metric 1 by Cluster',
-#             color='metric_1',
-#             color_continuous_scale='viridis',
-#             template='plotly_white'
-#         )
-#         fig_m1.update_layout(
-#             xaxis_title="Cluster ID",
-#             yaxis_title="Average Metric 1",
-#             showlegend=False,
-#             height=400
-#         )
-#         st.plotly_chart(fig_m1, use_container_width=True)
-
-# with col_b:
-#     if 'metric_2' in df.columns:
-#         m2_by_cluster = df.groupby('cluster', as_index=False)['metric_2'].mean()
-#         fig_m2 = px.bar(
-#             m2_by_cluster,
-#             x='cluster',
-#             y='metric_2',
-#             title='⏱️ Metric 2 by Cluster',
-#             color='metric_2',
-#             color_continuous_scale='plasma',
-#             template='plotly_white'
-#         )
-#         fig_m2.update_layout(
-#             xaxis_title="Cluster ID",
-#             yaxis_title="Average Metric 2",
-#             showlegend=False,
-#             height=400
-#         )
-#         st.plotly_chart(fig_m2, use_container_width=True)
-
-# Create two columns for scatter plot and pie chart
-col_scatter, col_pie = st.columns([2, 1])
-
 df_recipes_filtered = df_recipes[df_recipes["cluster_name"].isin(selected_clusters)]
 
+col_scatter, col_pie = st.columns([2, 1])
+
+#################################################
+# Scatter plot of PCA components
+#################################################
 with col_scatter.container(border=True, height="stretch"):
     fig = px.scatter(
         remove_outliers_iqr(df_recipes_filtered, ["pc_1", "pc_2"]),
@@ -153,10 +74,14 @@ with col_scatter.container(border=True, height="stretch"):
     fig.update_layout(
         title={"x": 0},
         margin={"t": 50, "b": 0, "l": 0, "r": 0},
+        legend_title="Cluster",
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
+#################################################
+# Pie chart of recipe distribution by cluster
+#################################################
 with col_pie.container(border=True, height="stretch"):
     cluster_counts = (
         df_recipes_filtered["cluster_name"]
@@ -185,13 +110,93 @@ with col_pie.container(border=True, height="stretch"):
         title={"x": 0, "xanchor": "left"},
         showlegend=False,
         margin={"l": 10, "r": 0, "t": 50, "b": 0},
+        legend_title="Cluster",
     )
 
     st.plotly_chart(fig_pie, use_container_width=True)
 
-col_comp_seasonality, _, __ = st.columns([1, 1, 1])
+#################################################
+# Box plots of favor scores by cluster
+#################################################
+with st.container(border=True, height="stretch"):
+    st.markdown("**Scores faveur par cluster**")
+    cols_favor = [
+        "score_sweet_savory",
+        "score_spicy_mild",
+        "score_lowcal_rich",
+        "score_vegetarian_meat",
+        "score_solid_liquid",
+        "score_raw_processed",
+        "score_western_exotic",
+    ]
 
-with col_comp_seasonality.container(border=True, height="stretch"):
+    df_melted = min_max_scale(df_recipes_filtered, cols_favor).melt(
+        id_vars="cluster_name",
+        value_vars=cols_favor,
+        var_name="Faveur",
+        value_name="Score",
+    )
+    df_melted["Faveur"] = df_melted["Faveur"].map(get_col_names(cols_favor))
+
+    fig = px.box(
+        df_melted,
+        x="Faveur",
+        y="Score",
+        color="cluster_name",
+        color_discrete_map=color_map,
+        template="simple_white",
+        points="outliers",  # Show outliers
+    )
+
+    fig.update_layout(
+        title="",
+        title_x=0,
+        xaxis_title="Faveur",
+        yaxis_title="Score (normalisé)",
+        boxmode="group",  # Group the boxes together by cluster
+        height=500,
+        margin={"l": 20, "r": 20, "t": 50, "b": 50},
+        legend_title="Cluster",
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+col_nutrition, col_seasonality = st.columns([2, 1])
+
+###############################################################
+# Radar chart of average nutritional characteristics by cluster
+###############################################################
+with col_nutrition.container(border=True, height="stretch"):
+    st.markdown("**Caractéristiques nutritionnelles moyennes**")
+    metrics = ["energy_density", "protein_ratio", "fat_ratio", "nutrient_balance_index"]
+    df_recipes_nutrition = min_max_scale(
+        df_recipes_filtered[["cluster_name", *metrics]], metrics
+    )
+    df_cluster_mean = (
+        df_recipes_nutrition.groupby("cluster_name")[metrics].mean().reset_index()
+    )
+    df_melted = df_cluster_mean.melt(
+        id_vars="cluster_name", var_name="metric", value_name="value"
+    )
+    fig = px.line_polar(
+        df_melted,
+        r="value",
+        theta="metric",
+        color="cluster_name",
+        line_close=True,
+        markers=True,
+        color_discrete_map=color_map,
+        template="plotly_white",
+    )
+    fig.update_traces(fill="toself", opacity=0.6)
+    fig.update_layout(title="", title_x=0, height=400, legend_title="Cluster")
+
+    st.plotly_chart(fig, use_container_width=True)
+
+#################################################
+# Seasonality scatter plot
+#################################################
+with col_seasonality.container(border=True, height="stretch"):
     st.markdown("**Position saisonnière des interactions (lissée)**")
 
     fig, ax = plt.subplots(figsize=(6, 6))
@@ -221,6 +226,59 @@ with col_comp_seasonality.container(border=True, height="stretch"):
     fig.tight_layout()
     st.pyplot(fig, use_container_width=False)
 
+col_rating, col_time = st.columns([1, 1])
+
+######################################################
+# Bar chart of average ratings distribution by cluster
+######################################################
+with col_rating.container(border=True, height="stretch"):
+    st.markdown("**Distribution des notes moyennes**")
+    bins = [1, 2, 3, 4, 5]
+    df_binned = df_recipes_filtered.copy()
+    df_binned["rating_bin"] = pd.cut(
+        df_binned["rating_mean"], bins=bins, include_lowest=True
+    )
+
+    df_binned["rating_bin"] = df_binned["rating_bin"].apply(
+        lambda x: f"{x.left:.1f}–{x.right:.1f}" if pd.notnull(x) else "NA"
+    )
+
+    df_counts = (
+        df_binned.groupby(["rating_bin", "cluster_name"])
+        .size()
+        .reset_index(name="count")
+    )
+
+    fig = px.bar(
+        df_counts,
+        x="rating_bin",
+        y="count",
+        color="cluster_name",
+        barmode="group",
+        color_discrete_map=color_map,
+        template="simple_white",
+    )
+
+    fig.update_layout(
+        title="",
+        title_x=0,
+        xaxis_title="Note moyenne",
+        yaxis_title="Nombre de recettes",
+        height=300,
+        margin={"l": 40, "r": 20, "t": 50, "b": 40},
+        legend_title="Cluster",
+    )
+
+    fig.update_xaxes(categoryorder="category ascending")
+
+    st.plotly_chart(fig, use_container_width=True, key="multi_series_bar_chart")
+
+##################################################
+# Cluster exploration section
+##################################################
+with col_time.container(border=True, height="stretch"):
+    st.markdown("**Durée de préparation des recettes**")
+
 st.markdown("### Exploration des Recettes par Cluster")
 
 # Create dropdown with cluster names
@@ -234,12 +292,13 @@ selected_cluster = st.selectbox(
 # Filter data for selected cluster
 cluster_data = df_recipes[df_recipes["cluster"] == selected_cluster].copy()
 
-# Display cluster information with modern styling
+# Display cluster information
 st.metric(label="Nombre de recettes", value=f"{len(cluster_data):,}", delta=None)
 
 
 # Helper function for token frequencies
 def top_token_frequencies(series: pd.Series, top_n: int = 15) -> pd.DataFrame:
+    """Compute top token frequencies from a series of comma-separated strings."""
     tokens: Counter = Counter()
     for s in series.dropna().astype(str):
         parts = [p.strip().lower() for p in s.split(",") if p.strip()]
@@ -248,95 +307,29 @@ def top_token_frequencies(series: pd.Series, top_n: int = 15) -> pd.DataFrame:
     return pd.DataFrame(most_common, columns=["token", "count"])
 
 
-# Ingredients and Tags clouds for selected cluster
-if not cluster_data.empty:
-    col_ing, col_tag = st.columns(2)
-
-    with col_ing:
-        if "ingredients_clean" in cluster_data.columns:
-            ing_df = top_token_frequencies(cluster_data["ingredients_clean"], top_n=15)
-            if not ing_df.empty:
-                cluster_name = cluster_names.get(
-                    selected_cluster, f"Cluster {selected_cluster}"
-                )
-                fig_ing = px.bar(
-                    ing_df,
-                    x="count",
-                    y="token",
-                    orientation="h",
-                    title=f"🥘 Top Ingredients in {cluster_name}",
-                    color="count",
-                    color_continuous_scale="blues",
-                    template="plotly_white",
-                )
-                fig_ing.update_layout(
-                    xaxis_title="Frequency",
-                    yaxis_title="Ingredients",
-                    height=400,
-                    showlegend=False,
-                )
-                st.plotly_chart(fig_ing, use_container_width=True)
-
-    with col_tag:
-        if "tags_clean" in cluster_data.columns:
-            tag_df = top_token_frequencies(cluster_data["tags_clean"], top_n=15)
-            if not tag_df.empty:
-                cluster_name = cluster_names.get(
-                    selected_cluster, f"Cluster {selected_cluster}"
-                )
-                fig_tag = px.bar(
-                    tag_df,
-                    x="count",
-                    y="token",
-                    orientation="h",
-                    title=f"🏷️ Top Tags in {cluster_name}",
-                    color="count",
-                    color_continuous_scale="greens",
-                    template="plotly_white",
-                )
-                fig_tag.update_layout(
-                    xaxis_title="Frequency",
-                    yaxis_title="Tags",
-                    height=400,
-                    showlegend=False,
-                )
-                st.plotly_chart(fig_tag, use_container_width=True)
-
-# Display recipe table with modern styling
 st.markdown("**Détails des recettes du cluster sélectionné**")
+##################################################
+# Recipe details dataframe
+##################################################
 if not cluster_data.empty:
     # Select available columns for display
-    display_cols = ["id"]
-    col_names = ["ID"]
-
-    # Add name column if available
-    if "name" in cluster_data.columns:
-        display_cols.append("name")
-        col_names.append("Recipe Name")
-    elif "description" in cluster_data.columns:
-        display_cols.append("description")
-        col_names.append("Description")
-
-    # Add metrics
-    if "metric_1" in cluster_data.columns:
-        display_cols.append("metric_1")
-        col_names.append("Metric 1")
-    if "metric_2" in cluster_data.columns:
-        display_cols.append("metric_2")
-        col_names.append("Metric 2")
-
-    # Add time information
-    if "minutes" in cluster_data.columns:
-        display_cols.append("minutes")
-        col_names.append("Minutes")
-
-    # Add ingredients and tags
-    if "ingredients_clean" in cluster_data.columns:
-        display_cols.append("ingredients_clean")
-        col_names.append("Ingredients")
-    if "tags_clean" in cluster_data.columns:
-        display_cols.append("tags_clean")
-        col_names.append("Tags")
+    display_cols = [
+        "id",
+        "name",
+        "energy_density",
+        "protein_ratio",
+        "fat_ratio",
+        "nutrient_balance_index",
+        "score_sweet_savory",
+        "score_spicy_mild",
+        "score_lowcal_rich",
+        "score_vegetarian_meat",
+        "score_solid_liquid",
+        "score_raw_processed",
+        "score_western_exotic",
+        "rating_mean",
+    ]
+    col_names = get_col_names(display_cols, return_values=True)
 
     # Create display dataframe
     display_data = cluster_data[display_cols].copy()
@@ -347,29 +340,18 @@ if not cluster_data.empty:
     for i, col in enumerate(display_cols):
         col_name = col_names[i]
         if col == "id":
-            column_config[col_name] = st.column_config.NumberColumn("ID", width="small")
-        elif col in ["comp_1", "comp_2"]:
             column_config[col_name] = st.column_config.NumberColumn(
-                col_name, format="%.3f", width="small"
+                col_name, width="small"
             )
-        elif col in ["metric_1", "metric_2"]:
-            column_config[col_name] = st.column_config.NumberColumn(
-                col_name, format="%.2f", width="small"
-            )
-        elif col == "minutes":
-            column_config[col_name] = st.column_config.NumberColumn(
-                col_name, format="%.0f", width="small"
-            )
-        elif col in ["name", "description"]:
+        elif col in ["name"]:
             column_config[col_name] = st.column_config.TextColumn(
                 col_name, width="medium"
             )
         else:
             column_config[col_name] = st.column_config.TextColumn(
-                col_name, width="large"
+                col_name, width="medium"
             )
 
-    # Style the dataframe
     st.dataframe(
         display_data,
         use_container_width=True,

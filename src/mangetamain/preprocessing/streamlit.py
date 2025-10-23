@@ -1,10 +1,10 @@
 """Data preprocessing functions for Streamlit application."""
 
+import re
+
+import numpy as np
 import pandas as pd
 import streamlit as st
-import numpy as np
-import re
-from typing import Tuple
 
 
 @st.cache_data
@@ -15,73 +15,11 @@ def load_recipes_data() -> pd.DataFrame:
         pd.DataFrame: Combined recipes and clustering data
     """
     # Load recipes data
-    recipes_path = "data/preprocessed/recipes_clustering_pca.csv.gz"
+    recipes_path = "data/preprocessed/recipes_merged.csv.gz"
     recipes_df = pd.read_csv(recipes_path)
+    print(recipes_df)
 
     return recipes_df
-
-
-def create_visualization_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Create additional features for visualization purposes.
-
-    Args:
-        df: Input dataframe
-
-    Returns:
-        pd.DataFrame: Dataframe with additional features
-    """
-    # Create mock metrics based on existing data
-    np.random.seed(42)  # For reproducibility
-
-    # Metric 1: Rating-like score based on nutrition and steps
-    if "nutrition" in df.columns and "n_steps" in df.columns:
-        # Extract nutrition values (assuming format like "[51.5, 0.0, 13.0, 0.0, 2.0, 0.0, 4.0]")
-        nutrition_scores = []
-        for nut in df["nutrition"]:
-            try:
-                # Parse nutrition string and take first value (calories)
-                nut_clean = nut.strip("[]").split(",")[0]
-                nutrition_scores.append(float(nut_clean))
-            except:
-                nutrition_scores.append(0)
-
-        df["metric_1"] = np.array(nutrition_scores) / 100  # Normalize
-    else:
-        df["metric_1"] = np.random.normal(3, 1, len(df))
-
-    # Metric 2: Time-based metric (minutes)
-    if "minutes" in df.columns:
-        df["metric_2"] = df["minutes"].fillna(df["minutes"].median())
-    else:
-        df["metric_2"] = np.random.normal(50, 20, len(df))
-
-    # Ensure positive values
-    df["metric_1"] = np.maximum(df["metric_1"], 0.1)
-    df["metric_2"] = np.maximum(df["metric_2"], 1)
-
-    # Create ingredients string from ingredients column
-    if "ingredients" in df.columns:
-        # Convert ingredients list string to comma-separated string
-        df["ingredients_clean"] = (
-            df["ingredients"].astype(str).str.strip("[]").str.replace("'", "")
-        )
-    else:
-        df["ingredients_clean"] = "unknown"
-
-    # Create tags string from tags column
-    if "tags" in df.columns:
-        # Convert tags list string to comma-separated string
-        df["tags_clean"] = df["tags"].astype(str).str.strip("[]").str.replace("'", "")
-    else:
-        df["tags_clean"] = "unknown"
-
-    # Rename PCA columns to match expected format
-    if "pc_1" in df.columns:
-        df["comp_1"] = df["pc_1"]
-    if "pc_2" in df.columns:
-        df["comp_2"] = df["pc_2"]
-
-    return df
 
 
 @st.cache_data
@@ -92,31 +30,50 @@ def get_cluster_names() -> dict:
         dict: Mapping of cluster IDs to names
     """
     return {
-        0: "Italian Cuisine",
-        1: "Asian Cuisine",
-        2: "Mediterranean Cuisine",
-        3: "Mexican Cuisine",
-        4: "French Cuisine",
+        0: "Plats complets équilibrés et élaborés",
+        1: "Plats simples et salés",
+        2: "Recettes sucrées et riches",
+        3: "Snacks sucrés ultra riches",
+        4: "Repas rapides semi-équilibrés",
     }
 
 
-def get_data_summary(df: pd.DataFrame) -> dict:
-    """Get summary statistics for the dataset.
-
+@st.cache_data
+def get_col_names(cols=None, return_values=False) -> dict:
+    """Get column names mapping.
     Args:
-        df: Input dataframe
-
+        cols (list, optional): List of column keys to get names for.
+        If None, return all.
     Returns:
-        dict: Summary statistics
+        dict: Mapping of column keys to French names
     """
-    summary = {
-        "total_recipes": len(df),
-        "total_clusters": df["cluster"].nunique() if "cluster" in df.columns else 0,
-        "metric_1_mean": df["metric_1"].mean() if "metric_1" in df.columns else 0,
-        "metric_2_mean": df["metric_2"].mean() if "metric_2" in df.columns else 0,
-        "clusters": sorted(df["cluster"].unique()) if "cluster" in df.columns else [],
+
+    col_map = {
+        "id": "ID",
+        "name": "Nom de recette",
+        "energy_density": "Densité énergétique",
+        "protein_ratio": "Proportion de protéines par calorie",
+        "fat_ratio": "Proportion de lipides par calorie",
+        "nutrient_balance_index": "Indice d'équilibre nutritionnel",
+        "score_sweet_savory": "Sucré → Salé",
+        "score_spicy_mild": "Épicé → Doux",
+        "score_lowcal_rich": "Léger → Riche",
+        "score_vegetarian_meat": "Végétarien → Carné",
+        "score_solid_liquid": "Solide → Liquide",
+        "score_raw_processed": "Cru → Transformé",
+        "score_western_exotic": "Occidental → Exotique",
+        "rating_mean": "Note moyenne",
     }
-    return summary
+
+    if cols is not None:
+        col_names = {col: col_map[col] for col in cols if col in col_map}
+    else:
+        col_names = col_map
+
+    if return_values:
+        return list(col_names.values())
+    else:
+        return col_names
 
 
 def remove_outliers_iqr(df, cols, k=5):
@@ -168,9 +125,34 @@ def add_month_labels(ax):
 
 
 def rgb_to_hex(rgb_str):
+    """Convert RGB string to HEX format.
+    Args:
+        rgb_str: RGB string in the format "rgb(r, g, b)"
+    Returns:
+        str: HEX color string
+    """
+
     match = re.match(r"rgb\((\d+),\s*(\d+),\s*(\d+)\)", rgb_str)
     if match:
         r, g, b = [int(x) for x in match.groups()]
-        return "#{:02x}{:02x}{:02x}".format(r, g, b)
+        return f"#{r:02x}{g:02x}{b:02x}"
     else:
         return rgb_str
+
+
+def min_max_scale(df: pd.DataFrame, cols: list) -> pd.DataFrame:
+    """Apply Min-Max scaling to specified columns in the dataframe.
+
+    Args:
+        df: Input dataframe
+        columns: List of column names to scale
+
+    Returns:
+        pd.DataFrame: DataFrame with scaled columns
+    """
+    df_scaled = df.copy()
+    for col in cols:
+        min_val = df[col].min()
+        max_val = df[col].max()
+        df_scaled[col] = (df[col] - min_val) / (max_val - min_val)
+    return df_scaled
