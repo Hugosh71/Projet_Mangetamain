@@ -29,7 +29,7 @@ class CSVDataRepository(IDataRepository):
         paths: RepositoryPaths | None = None,
         *,
         recipe_usecols: Sequence[str] | None = ("id", "name"),
-        interaction_usecols: Sequence[str] | None = ("recipe_id", "rating"),
+        interaction_usecols: Sequence[str] | None = ("recipe_id"),
         logger: logging.Logger | None = None,
     ) -> None:
         self._paths = paths or RepositoryPaths()
