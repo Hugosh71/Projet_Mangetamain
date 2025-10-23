@@ -14,34 +14,22 @@ from .interfaces import (
 )
 
 
-class RemoveZeroRatingCleaning(ICleaningStrategy):
-    """Simple cleaning: drop zero ratings and NA ratings."""
+class NoOpCleaning(ICleaningStrategy):
+    """No-op cleaning strategy to keep processors generic by default."""
+
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        interactions_clean = interactions.copy()
-        if "rating" in interactions_clean.columns:
-            interactions_clean = interactions_clean[
-                interactions_clean["rating"] != 0
-            ]
-            interactions_clean = interactions_clean.dropna(
-                subset=["rating"]
-            )  # type: ignore[call-overload]
-        return recipes.copy(), interactions_clean
+        return recipes.copy(), interactions.copy()
 
 
-class BasicPreprocessing(IPreprocessingStrategy):
-    """Add lightweight derived columns useful for basic analysis."""
+class NoOpPreprocessing(IPreprocessingStrategy):
+    """No-op preprocessing strategy."""
 
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        interactions_pp = interactions.copy()
-        if "rating" in interactions_pp.columns:
-            interactions_pp["rating_normalized"] = (
-                interactions_pp["rating"].astype(float) / 5.0
-            )
-        return recipes.copy(), interactions_pp
+        return recipes.copy(), interactions.copy()
 
 
 class BasicDataProcessor(DataProcessor):
@@ -56,8 +44,8 @@ class BasicDataProcessor(DataProcessor):
         logger: logging.Logger | None = None,
     ) -> None:
         super().__init__(repository, logger=logger)
-        self._cleaning = cleaning or RemoveZeroRatingCleaning()
-        self._preprocessing = preprocessing or BasicPreprocessing()
+        self._cleaning = cleaning or NoOpCleaning()
+        self._preprocessing = preprocessing or NoOpPreprocessing()
 
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame

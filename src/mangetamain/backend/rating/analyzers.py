@@ -1,27 +1,20 @@
-"""Concrete analyzers to derive insights from processed data."""
+"""Analyzers for rating feature."""
+
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from typing import Any, Dict
 
 import pandas as pd
 
-
-@dataclass(frozen=True)
-class AnalysisResult:
-    """Container for analysis artefacts."""
-
-    top_recipes: pd.DataFrame
-    summary: Dict[str, Any]
+from ..interfaces import Analyser, AnalysisResult
 
 
-class RecipeAnalyzer:
-    """Produce high-level insights over recipes and interactions."""
+class RatingAnalyser(Analyser):
+    """Produce high-level insights for ratings (top-K by mean, etc.)."""
 
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
         self._logger = logger or logging.getLogger(
-            "mangetamain.backend.analyzer"
+            "mangetamain.backend.rating"
         )
 
     def analyze(
@@ -31,7 +24,6 @@ class RecipeAnalyzer:
         *,
         top_k: int = 10,
     ) -> AnalysisResult:
-        """Compute top-k recipes by mean rating with variability and counts."""
         self._logger.debug("Computing per-recipe rating statistics")
         grouped = (
             interactions.groupby("recipe_id")["rating"]
@@ -77,16 +69,8 @@ class RecipeAnalyzer:
         }
         return AnalysisResult(top_recipes=merged, summary=summary)
 
-    def generate_report(
-        self, result: AnalysisResult
-    ) -> dict[str, Any]:
-        """Return a minimal, serializable analysis payload.
-
-        The report is JSON-friendly: dataframes are summarized into
-        light-weight previews and metadata.
-        """
-        self._logger.debug("Generating analysis report payload")
-        # Keep the report minimal and JSON-friendly; dataframes are summarized.
+    def generate_report(self, result: AnalysisResult) -> dict[str, object]:
+        self._logger.debug("Generating rating analysis report payload")
         head_rows = result.top_recipes.head(5).to_dict(
             orient="records"
         )
@@ -98,3 +82,5 @@ class RecipeAnalyzer:
                 len(result.top_recipes)
             ),
         }
+
+
