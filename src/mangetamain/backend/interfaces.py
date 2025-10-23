@@ -60,7 +60,13 @@ class ProcessedPair:
 class AnalysisResult:
     """Container for analyzer outputs shared across implementations."""
 
+    # Full per-recipe dataframe with all computed metrics
+    per_recipe: pd.DataFrame
+    # Convenience view (e.g., top-k subset for UI)
     top_recipes: pd.DataFrame
+    # Optional global tables (e.g., rating distribution)
+    table: pd.DataFrame
+    # Global summary metrics
     summary: dict[str, object]
 
 

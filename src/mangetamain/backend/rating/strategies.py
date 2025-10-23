@@ -15,15 +15,15 @@ class RatingCleaning(ICleaningStrategy):
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        interactions_clean = interactions.copy()
-        if "rating" in interactions_clean.columns:
-            interactions_clean = interactions_clean[
-                interactions_clean["rating"] != 0
-            ]
-            interactions_clean = interactions_clean.dropna(
-                subset=["rating"]
-            )  # type: ignore[call-overload]
-        return recipes.copy(), interactions_clean
+        # interactions_clean = interactions.copy()
+        # if "rating" in interactions_clean.columns:
+        #     interactions_clean = interactions_clean[
+        #         interactions_clean["rating"] != 0
+        #     ]
+        #     interactions_clean = interactions_clean.dropna(
+        #         subset=["rating"]
+        #     )  # type: ignore[call-overload]
+        return recipes.copy(), interactions.copy()
 
 
 class RatingPreprocessing(IPreprocessingStrategy):
@@ -32,10 +32,10 @@ class RatingPreprocessing(IPreprocessingStrategy):
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        interactions_pp = interactions.copy()
-        if "rating" in interactions_pp.columns:
-            interactions_pp["rating_normalized"] = (
-                interactions_pp["rating"].astype(float) / 5.0
-            )
-        return recipes.copy(), interactions_pp
+        # interactions_pp = interactions.copy()
+        # if "rating" in interactions_pp.columns:
+        #     interactions_pp["rating_normalized"] = (
+        #         interactions_pp["rating"].astype(float) / 5.0
+        #     )
+        return recipes.copy(), interactions.copy()
 
