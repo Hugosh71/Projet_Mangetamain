@@ -11,6 +11,8 @@ from .interfaces import (
     IDataRepository,
     IValidator,
     DataProcessor,
+    Analyser,
+    AnalysisResult,
     ICleaningStrategy,
     IPreprocessingStrategy,
 )
@@ -22,14 +24,16 @@ from .exceptions import (
 )
 from .repositories import CSVDataRepository, RepositoryPaths
 from .processors import BasicDataProcessor
-from .analyzers import RecipeAnalyzer
 from .factories import ProcessorFactory
+from . import rating as rating
 
 __all__ = [
     # Interfaces / ABCs
     "IDataRepository",
     "IValidator",
     "DataProcessor",
+    "Analyser",
+    "AnalysisResult",
     "ICleaningStrategy",
     "IPreprocessingStrategy",
     # Exceptions
@@ -41,7 +45,8 @@ __all__ = [
     "RepositoryPaths",
     "CSVDataRepository",
     "BasicDataProcessor",
-    "RecipeAnalyzer",
+    # Submodules
+    "rating",
     # Factories
     "ProcessorFactory",
 ]

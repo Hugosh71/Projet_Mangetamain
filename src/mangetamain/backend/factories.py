@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 from .processors import (
     BasicDataProcessor,
-    BasicPreprocessing,
-    RemoveZeroRatingCleaning,
+    NoOpPreprocessing,
+    NoOpCleaning,
 )
+from .rating import RatingCleaning, RatingPreprocessing
 
 
 class ProcessorFactory:
@@ -18,7 +19,18 @@ class ProcessorFactory:
     ) -> BasicDataProcessor:
         return BasicDataProcessor(
             repository,
-            cleaning=RemoveZeroRatingCleaning(),
-            preprocessing=BasicPreprocessing(),
+            cleaning=NoOpCleaning(),
+            preprocessing=NoOpPreprocessing(),
+            logger=logger,
+        )
+
+    @staticmethod
+    def create_rating(
+        repository, *, logger: logging.Logger | None = None
+    ) -> BasicDataProcessor:
+        return BasicDataProcessor(
+            repository,
+            cleaning=RatingCleaning(),
+            preprocessing=RatingPreprocessing(),
             logger=logger,
         )

@@ -56,6 +56,33 @@ class ProcessedPair:
     interactions: pd.DataFrame
 
 
+@dataclass(frozen=True)
+class AnalysisResult:
+    """Container for analyzer outputs shared across implementations."""
+
+    top_recipes: pd.DataFrame
+    summary: dict[str, object]
+
+
+class Analyser(abc.ABC):
+    """Abstract base for domain analyzers (rating, ingredients, steps, …)."""
+
+    @abc.abstractmethod
+    def analyze(
+        self,
+        recipes: pd.DataFrame,
+        interactions: pd.DataFrame,
+        **kwargs: object,
+    ) -> AnalysisResult:  # pragma: no cover - interface only
+        """Produce analysis artefacts from processed dataframes."""
+
+    @abc.abstractmethod
+    def generate_report(
+        self, result: AnalysisResult
+    ) -> dict[str, object]:  # pragma: no cover - interface only
+        """Return a minimal, serializable representation of the result."""
+
+
 class DataProcessor(abc.ABC):
     """Abstract processor defining the high-level pipeline steps.
 
