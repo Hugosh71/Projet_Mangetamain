@@ -1,0 +1,37 @@
+import pandas as pd
+
+from mangetamain.backend.rating.analyzers import RatingAnalyser
+
+def test_rating_analyser_basic_topk() -> None:
+    recipes = pd.DataFrame([
+        {"id": 1, "name": "A"},
+        {"id": 2, "name": "B"},
+        {"id": 3, "name": "C"},
+    ])
+    interactions = pd.DataFrame(
+        [
+            {"recipe_id": 1, "rating": 5},
+            {"recipe_id": 1, "rating": 4},
+            {"recipe_id": 2, "rating": 3},
+            {"recipe_id": 2, "rating": 3},
+            {"recipe_id": 3, "rating": 1},
+        ]
+    )
+
+    analyser = RatingAnalyser()
+    result = analyser.analyze(recipes, interactions, top_k=2)
+
+    assert list(result.top_recipes.columns) == [
+        "recipe_name",
+        "recipe_id",
+        "rating_mean",
+        "rating_std",
+        "num_ratings",
+    ]
+    assert len(result.top_recipes) == 2
+
+    report = analyser.generate_report(result)
+    assert "summary" in report and "top_recipes_preview" in report
+    assert report["total_top_rows"] == 2
+
+
