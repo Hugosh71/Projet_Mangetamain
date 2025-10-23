@@ -1,4 +1,5 @@
 """Clustering visualization page for recipe analysis."""
+from collections import Counter
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -273,18 +274,35 @@ with col_rating.container(border=True, height="stretch"):
 
     st.plotly_chart(fig, use_container_width=True, key="multi_series_bar_chart")
 
-######################################################
-# Bar chart of average preparation time by cluster
-######################################################
-
-with col_time.container(border=True, height="stretch"):
-    st.markdown("**Durée de préparation des recettes**")
-
-st.markdown("### Exploration des Recettes par Cluster")
-
 ##################################################
 # Cluster exploration section
 ##################################################
+with col_time.container(border=True, height="stretch"):
+    cluster_summary = df_recipes_filtered.groupby("cluster_name")["minutes_log"].mean().reset_index()
+
+    fig = px.bar(
+        cluster_summary,
+        x="minutes_log",
+        y="cluster_name",
+        orientation="h",
+        color="cluster_name",
+        color_discrete_map=color_map,
+        text="minutes_log"  # affiche la valeur sur la barre
+    )
+
+    fig.update_layout(
+        title="Durée moyenne des recettes par cluster",
+        xaxis_title="Durée moyenne (log minutes)",
+        yaxis_title="Cluster",
+        yaxis=dict(autorange="reversed"),  # pour que la barre la plus grande soit en haut
+        height=600,
+        margin=dict(l=100, r=20, t=50, b=50),
+        showlegend=False
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+st.markdown("### Exploration des Recettes par Cluster")
+
 # Create dropdown with cluster names
 selected_cluster = st.selectbox(
     "Sélectionnez un cluster à explorer :",
