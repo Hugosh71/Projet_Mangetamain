@@ -16,6 +16,9 @@ from src.mangetamain.preprocessing.streamlit import (
     rgb_to_hex,
 )
 
+st.markdown("# Clustering")
+st.sidebar.header(" 📊 Clustering")
+
 # Set Streamlit page configuration
 st.set_page_config(
     page_title="Analyse de clusters des recettes", page_icon="🍽️", layout="wide"
@@ -285,14 +288,14 @@ with col_time.container(border=True, height="stretch"):
         orientation="h",
         color="cluster_name",
         color_discrete_map=color_map,
-        text="minutes_log"  # affiche la valeur sur la barre
+        text="minutes_log"  
     )
 
     fig.update_layout(
         title="Durée moyenne des recettes par cluster",
         xaxis_title="Durée moyenne (log minutes)",
         yaxis_title="Cluster",
-        yaxis=dict(autorange="reversed"),  # pour que la barre la plus grande soit en haut
+        yaxis=dict(autorange="reversed"),
         height=600,
         margin=dict(l=100, r=20, t=50, b=50),
         showlegend=False
