@@ -1,10 +1,13 @@
 """Data preprocessing functions for Streamlit application."""
 
+import ast
 import re
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.feature_extraction.text import TfidfVectorizer
+from wordcloud import WordCloud
 
 
 @st.cache_data
@@ -51,6 +54,9 @@ def get_col_names(cols=None, return_values=False) -> dict:
     col_map = {
         "id": "ID",
         "name": "Nom de recette",
+        "minutes": "Durée de préparation (minutes)",
+        "n_steps": "Nombre d'étapes",
+        "n_ingredients": "Nombre d'ingrédients",
         "energy_density": "Densité énergétique",
         "protein_ratio": "Proportion de protéines par calorie",
         "fat_ratio": "Proportion de lipides par calorie",
@@ -156,3 +162,76 @@ def min_max_scale(df: pd.DataFrame, cols: list) -> pd.DataFrame:
         max_val = df[col].max()
         df_scaled[col] = (df[col] - min_val) / (max_val - min_val)
     return df_scaled
+
+
+@st.cache_data
+def get_tag_cloud(df: pd.DataFrame, tag_col: str, use_tfidf: bool = True):
+    """
+    Generate a tag cloud using the WordCloud package.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing a column with tag lists as strings.
+        tag_col (str): Column name containing the tags (stringified lists).
+        use_tfidf (bool): Whether to compute TF-IDF weights instead of simple counts.
+
+    Returns:
+        WordCloud: Generated WordCloud object
+    """
+    # Parse tags column
+    df["parsed_tags"] = df[tag_col].apply(
+        lambda x: ast.literal_eval(x) if isinstance(x, str) else x
+    )
+
+    # Preprocess tags so multi-word tags stay together
+    # Replace spaces with underscores: "hello world" → "hello-world"
+    df["parsed_tags"] = df["parsed_tags"].apply(
+        lambda tags: [
+            tag.replace(" ", "-")
+            for tag in tags
+            if tag not in ["time-to-make", "preparation", "course"]
+        ]
+    )
+
+    # Build corpus (each row = space-separated tags)
+    corpus = [" ".join(tags) for tags in df["parsed_tags"]]
+
+    # Compute weights
+    if use_tfidf:
+        vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b[\w-]+\b")
+        X = vectorizer.fit_transform(corpus)
+        weights = np.asarray(X.sum(axis=0)).flatten()
+        tags = vectorizer.get_feature_names_out()
+        tag_weights = dict(zip(tags, weights, strict=False))
+    else:
+        # Simple count frequency
+        all_tags = [tag for tags in df["parsed_tags"] for tag in tags]
+        tag_weights = pd.Series(all_tags).value_counts().to_dict()
+
+    # Generate WordCloud
+    wordcloud = WordCloud(
+        width=300,
+        height=300,
+        background_color="white",
+        colormap="viridis",
+        max_words=30,
+        random_state=42,
+    ).generate_from_frequencies(tag_weights)
+
+    return wordcloud
+
+
+@st.cache_data
+def get_cluster_summary(df: pd.DataFrame, cluster: int):
+    df_cluster = df[df["cluster"] == cluster]
+
+    n = df_cluster.shape[0]
+    n_steps_mean = df_cluster["n_steps"].mean()
+    minutes_mean = df_cluster["minutes"].median()
+    n_ingredients = df_cluster["n_ingredients"].mean()
+
+    return {
+        "n": n,
+        "minutes_mean": minutes_mean,
+        "n_steps_mean": n_steps_mean,
+        "n_ingredients": n_ingredients,
+    }

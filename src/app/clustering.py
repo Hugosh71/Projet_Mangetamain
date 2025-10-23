@@ -1,7 +1,5 @@
 """Clustering visualization page for recipe analysis."""
 
-from collections import Counter
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
@@ -15,6 +13,8 @@ from src.mangetamain.preprocessing.streamlit import (
     min_max_scale,
     remove_outliers_iqr,
     rgb_to_hex,
+    get_tag_cloud,
+    get_cluster_summary,
 )
 
 # Set Streamlit page configuration
@@ -273,14 +273,18 @@ with col_rating.container(border=True, height="stretch"):
 
     st.plotly_chart(fig, use_container_width=True, key="multi_series_bar_chart")
 
-##################################################
-# Cluster exploration section
-##################################################
+######################################################
+# Bar chart of average preparation time by cluster
+######################################################
+
 with col_time.container(border=True, height="stretch"):
     st.markdown("**Durée de préparation des recettes**")
 
 st.markdown("### Exploration des Recettes par Cluster")
 
+##################################################
+# Cluster exploration section
+##################################################
 # Create dropdown with cluster names
 selected_cluster = st.selectbox(
     "Sélectionnez un cluster à explorer :",
@@ -292,20 +296,133 @@ selected_cluster = st.selectbox(
 # Filter data for selected cluster
 cluster_data = df_recipes[df_recipes["cluster"] == selected_cluster].copy()
 
-# Display cluster information
-st.metric(label="Nombre de recettes", value=f"{len(cluster_data):,}", delta=None)
+col_metric_1, col_metric_2, col_metric_3 = st.columns([1, 2, 1])
+
+cluster_summary = get_cluster_summary(cluster_data, selected_cluster)
+
+with col_metric_1.container(border=True, height="stretch"):
+    # Display cluster information
+    st.metric(
+        label="Nombre de recettes", value=f"{cluster_summary['n']:,.0f}", delta=None
+    )
+    st.metric(
+        label="Nombre moyen d'étapes",
+        value=f"{cluster_summary['n_steps_mean']:.0f}",
+        delta=None,
+    )
+    st.metric(
+        label="Durée de préparation (minutes)",
+        value=f"{cluster_summary['minutes_mean']:.0f}",
+        delta=None,
+    )
+
+with col_metric_2.container(border=True, height="stretch"):
+    if selected_cluster == 0:
+        st.markdown(
+            """
+<div style="font-size:14px; line-height:1.5;">
+<p><strong>Description du cluster</strong></p>
+<strong>Recettes longues, équilibrées, riches en protéines — type plats principaux familiaux</strong>
+<ul>
+<li>Énergie modérée : 4.8 kcal/g</li>
+<li>Bon ratio protéines (0.12), lipides modérés (0.07)</li>
+<li>Indice nutritionnel positif (0.036) : plutôt équilibré</li>
+<li>Recettes assez longues : ~82 minutes</li>
+<li>Beaucoup d’étapes et d’ingrédients (n_steps_z = +0.77, n_ingredients_z = +1.12)</li>
+<li>Saveur neutre-salée, peu sucrée (0.035)</li>
+<li>Légèrement solide, un peu transformée (0.05)</li>
+</ul>
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
+    elif selected_cluster == 1:
+        st.markdown(
+            """
+<div style="font-size:14px; line-height:1.5;">
+<p><strong>Description du cluster</strong></p>
+<strong>Recettes faciles, équilibrées, plutôt salées et rapides — plats du quotidien</strong>
+<ul>
+<li>Énergie similaire (4.93 kcal/g)</li>
+<li>Protéines et graisses modérées, indice nutritionnel plus faible (0.021)</li>
+<li>Recettes plus rapides (~40 minutes)</li>
+<li>Moins d’ingrédients et d’étapes</li>
+<li>Profil gustatif doux et salé, un peu plus épicé</li>
+</ul>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    elif selected_cluster == 2:
+        st.markdown(
+            """
+<div style="font-size:14px; line-height:1.5;">
+<p><strong>Description du cluster</strong></p>
+<strong>Peu de protéines, plus caloriques, sucrées — desserts, pâtisseries, douceurs</strong>
+<ul>
+<li>Énergie plus élevée (6.9 kcal/g)</li>
+<li>Peu de protéines (0.033)</li>
+<li>Indice nutritionnel négatif (-0.106)</li>
+<li>Durée moyenne (~48 minutes)</li>
+<li>Saveur sucrée prononcée (0.13)</li>
+<li>Légèrement transformé (0.063)</li>
+<li>Assez “exotique” (0.054)</li>
+</ul>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    elif selected_cluster == 3:
+        st.markdown(
+            """
+<div style="font-size:14px; line-height:1.5;">
+<p><strong>Description du cluster</strong></p>
+<strong>Densité énergétique très haute, faible qualité nutritionnelle — gâteaux, barres, confiseries</strong>
+<ul>
+<li>Très énergétique (15.75 kcal/g)</li>
+<li>Très pauvres en protéines et lipides (faible densité nutritionnelle)</li>
+<li>Indice nutritionnel très négatif (-0.513)</li>
+<li>Recettes rapides (~13 minutes)</li>
+<li>Très sucrées (0.15) et peu salées, plus transformées (0.10)</li>
+<li>Très simples, peu d’ingrédients</li>
+</ul>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+    elif selected_cluster == 4:
+        st.markdown(
+            """
+<div style="font-size:14px; line-height:1.5;">
+<p><strong>Description du cluster</strong></p>
+<strong>Recettes ni trop longues ni trop riches, un peu transformées — plats rapides ou préparations express</strong>
+<ul>
+<li>Énergie modérée (5.42 kcal/g)</li>
+<li>Protéines faibles (0.083), graisses modérées (0.078)</li>
+<li>Indice nutritionnel légèrement négatif (-0.045)</li>
+<li>Temps moyen (~23 minutes)</li>
+<li>Assez équilibré en goût, légèrement sucré/salé, plutôt transformé (0.068)</li>
+</ul>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
 
 
-# Helper function for token frequencies
-def top_token_frequencies(series: pd.Series, top_n: int = 15) -> pd.DataFrame:
-    """Compute top token frequencies from a series of comma-separated strings."""
-    tokens: Counter = Counter()
-    for s in series.dropna().astype(str):
-        parts = [p.strip().lower() for p in s.split(",") if p.strip()]
-        tokens.update(parts)
-    most_common = tokens.most_common(top_n)
-    return pd.DataFrame(most_common, columns=["token", "count"])
-
+with col_metric_3.container(border=True, height="stretch"):
+    st.markdown(
+        '<strong style="font-size:14px;">Top tags</strong>',
+        unsafe_allow_html=True,
+    )
+    wordcloud = get_tag_cloud(
+        cluster_data,
+        tag_col="tags",
+        use_tfidf=True,
+    )
+    fig, ax = plt.subplots(figsize=(15, 15))
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    st.pyplot(fig, use_container_width=False)
 
 st.markdown("**Détails des recettes du cluster sélectionné**")
 ##################################################
@@ -316,10 +433,9 @@ if not cluster_data.empty:
     display_cols = [
         "id",
         "name",
-        "energy_density",
-        "protein_ratio",
-        "fat_ratio",
-        "nutrient_balance_index",
+        "minutes",
+        "n_steps",
+        "n_ingredients",
         "score_sweet_savory",
         "score_spicy_mild",
         "score_lowcal_rich",
@@ -327,6 +443,10 @@ if not cluster_data.empty:
         "score_solid_liquid",
         "score_raw_processed",
         "score_western_exotic",
+        "energy_density",
+        "protein_ratio",
+        "fat_ratio",
+        "nutrient_balance_index",
         "rating_mean",
     ]
     col_names = get_col_names(display_cols, return_values=True)
@@ -354,7 +474,7 @@ if not cluster_data.empty:
 
     st.dataframe(
         display_data,
-        use_container_width=True,
+        width="content",
         hide_index=True,
         column_config=column_config,
     )
