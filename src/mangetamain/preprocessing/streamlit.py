@@ -18,7 +18,7 @@ def load_recipes_data() -> pd.DataFrame:
         pd.DataFrame: Combined recipes and clustering data
     """
     # Load recipes data
-    recipes_path = "data/preprocessed/recipes_merged.csv.gz"
+    recipes_path = "s3://mangetamain/recipes_merged.csv.gz"
     recipes_df = pd.read_csv(recipes_path)
     print(recipes_df)
 
