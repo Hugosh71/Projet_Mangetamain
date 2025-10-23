@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-
+from pathlib import Path
 import pandas as pd
 
 from ..interfaces import Analyser, AnalysisResult
@@ -175,35 +175,17 @@ class RatingAnalyser(Analyser):
             summary=summary,
         )
 
-    def generate_report(self, result: AnalysisResult) -> dict[str, object]:
+    def generate_report(self, result: AnalysisResult, path: Path) -> dict[str, object]:
         self._logger.debug(
             "Generating consolidated CSV content for rating analysis"
         )
 
-        # Summary as tidy rows (metric, value)
-        summary_df = pd.DataFrame([result.summary]).melt(
-            var_name="metric", value_name="value"
-        )
-        summary_df.insert(0, "section", "summary")
-
         # Rating table section
-        rating_table_df = result.rating_table.copy()
-        rating_table_df.insert(0, "section", "rating_table")
-
-        # Per recipe section (full metrics)
-        per_recipe_df = result.per_recipe.copy()
-        per_recipe_df.insert(0, "section", "per_recipe")
-
-        combined_df = pd.concat(
-            [summary_df, rating_table_df, per_recipe_df],
-            ignore_index=True,
-            axis=0,
-        )
-        csv_content = combined_df.to_csv(index=False)
+        rating_table_df = result.table
+        rating_table_df.to_csv(path, index=False)
 
         return {
-            "csv": csv_content,
-            "rows": int(len(combined_df)),
+            "path": str(path),
         }
 
 
