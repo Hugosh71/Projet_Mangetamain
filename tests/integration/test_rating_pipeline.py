@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 import pandas as pd
 from mangetamain.backend import (
     CSVDataRepository,
@@ -32,7 +33,10 @@ def test_rating_pipeline_e2e(tmp_path: Path) -> None:
         paths=RepositoryPaths(
             recipes_csv=str(recipes_path),
             interactions_csv=str(interactions_path),
-        )
+        ),
+        recipe_usecols=["id", "name"],
+        interaction_usecols=["recipe_id", "rating"],
+        logger=logging.getLogger("test_rating_pipeline"),
     )
 
     processor = ProcessorFactory.create_rating(repo)
