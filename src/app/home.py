@@ -1,17 +1,8 @@
 """Page d'accueil de l'application"""
 
-import plotly.express as px
 import streamlit as st
 
-from src.mangetamain import (
-    get_top_recipes_cached,
-    get_vegetarian_stats_cached,
-)
-
 st.set_page_config(page_title="Accueil", page_icon="📈", layout="wide")
-
-top_recipes = get_top_recipes_cached(top_k=10)
-vegetarian_stats = get_vegetarian_stats_cached()
 
 st.markdown("# Accueil")
 st.sidebar.header("Accueil")
