@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import RobustScaler
 from wordcloud import WordCloud
 
 
@@ -20,7 +21,6 @@ def load_recipes_data() -> pd.DataFrame:
     # Load recipes data
     recipes_path = "s3://mangetamain/recipes_merged.csv.gz"
     recipes_df = pd.read_csv(recipes_path)
-    print(recipes_df)
 
     return recipes_df
 
@@ -151,16 +151,14 @@ def min_max_scale(df: pd.DataFrame, cols: list) -> pd.DataFrame:
 
     Args:
         df: Input dataframe
-        columns: List of column names to scale
+        cols: List of column names to scale
 
     Returns:
         pd.DataFrame: DataFrame with scaled columns
     """
     df_scaled = df.copy()
-    for col in cols:
-        min_val = df[col].min()
-        max_val = df[col].max()
-        df_scaled[col] = (df[col] - min_val) / (max_val - min_val)
+    scaler = RobustScaler()
+    df_scaled[cols] = scaler.fit_transform(df[cols])
     return df_scaled
 
 
