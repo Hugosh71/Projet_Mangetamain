@@ -1,6 +1,45 @@
 ![Mangetamain Logo](docs/images/logo.jpeg)
 
-# Mangetamain
+<h1 align="center">Mangetamain</h1>
+<p align="center">
+  <em>Data exploration, preprocessing, and visualization of recipe & rating datasets — including a modular Streamlit web application and CI/CD pipeline.</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Hugosh71/Projet_Mangetamain/actions">
+    <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/Hugosh71/Projet_Mangetamain/<workflow>.yml?branch=<branch_ref>">
+  </a>
+  <img alt="Python" src="https://img.shields.io/badge/python-3.12-blue">
+  <img alt="Poetry" src="https://img.shields.io/badge/packaging-Poetry-60A5FA">
+  <img alt="Streamlit" src="https://img.shields.io/badge/app-Streamlit-FF4B4B">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED">
+  <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen">
+</p>
+
+---
+
+## Objectives
+
+- **Exploratory Data Analysis (EDA)** on recipe and rating datasets: distributions, seasonality, popularity.
+- **Feature engineering** (scores, aggregations, confidence intervals).
+- **Modular architecture** (repositories, processors, analyzers) for a maintainable data pipeline.
+- **Streamlit web application** for visualizing analyses (top recipes, distributions, durations, etc.).
+- **Quality & CI/CD**: testing, linting, Dockerized environments, pre-commit hooks, and automated documentation (Sphinx).
+
+---
+
+## 🧭 Table of Contents
+- [Prerequisites](#-prerequisites)
+- [Quick Installation](#-quick-installation)
+- [Run the Application](#-run-the-application)
+- [Project Structure](#-project-structure)
+- [Branch Log (Work Summary)](#-branch-log-work-summary)
+- [Collaborative Development](#-collarborative-development)
+- [Quality, Tests & CI](#-quality-tests--ci)
+- [Sphinx Documentation](#-sphinx-documentation)
+  
+---
+
 
 ## Prerequisites
 
@@ -46,6 +85,8 @@ Even Poetry is always run within this native Python environment.
 ### Install Git (for version control)
 
 Install [Git](https://git-scm.com/downloads) and [set up it](https://docs.github.com/fr/get-started/git-basics/set-up-git)
+
+---
 
 ## Installation
 
@@ -116,6 +157,8 @@ If you see the (mangetamain-py3.12) prefix, the environment is **activated** fro
 
 Then you may use `pip freeze` to check whether `streamlit` is installed. If `streamlit` exist in the list of dependencies, the virtual environment is ready and we can start a local backend and web app servers later!
 
+---
+
 ## Run locally
 
 ```commandline
@@ -131,6 +174,68 @@ make docker-run
 ```
 
 The app will be available at `http://localhost:8501`.
+
+---
+
+## Project Structure
+```
+Projet_Mangetamain/
+├─ .github/workflows/           # CI (lint, tests, Docker build)
+├─ .streamlit/                  # Streamlit configuration
+├─ docs/                        # Sphinx documentation
+├─ notebooks/                   # Jupyter notebooks for EDA
+├─ scripts/                     # Utility scripts
+├─ src/
+│  ├─ app/                     # Streamlit webapp code
+│  ├─ mangetamain/             # Preprocessing and core
+├─ tests/                      # Unit & integration tests
+├─ Dockerfile / Dockerfile.test
+├─ docker-compose.yml
+├─ Makefile
+├─ pyproject.toml
+└─ README.md
+```
+
+---
+
+# Branch Log (Work Summary)
+
+### feature/eda
+- Exploratory Data Analysis: data cleaning, visualization, clustering, and enriched CSV exports.
+- Analysis of score distributions, durations, popularity trends, and correlations.
+
+### feature/eda_rating
+- Rating-focused EDA: confidence score calculations (e.g., Wilson lower bound), weighted means.
+- Enhanced CSV exports with aggregated statistics and confidence intervals.
+
+### feature/webapp
+- Streamlit Web Application: multi-page interface (Home, Top Recipes, Distributions, Durations).
+- Integrated EDA outputs and repositories; added lightweight caching for performance.
+- UI/UX refinements, theme integration, and removal of large unused CSV files.
+
+### feature/modularisation_base
+- Backend refactor: modular architecture using Analyzer interfaces and AnalysisResult objects.
+- Creation of the rating module (RatingCleaning, RatingPreprocessing).
+- Implemented caching for “top recipes” and integrated into the Streamlit home page.
+
+### feature/preprocessing
+- Added dedicated preprocessing package: cleaning and normalization pipelines.
+- Included matching unit tests.
+
+### feature/logging
+- Centralized logging system using environment variables.
+- Mounted log volumes in Docker; added dedicated tests for configuration validation.
+
+### feature/docs_sphinx
+- Complete Sphinx documentation setup.
+- Added build/serve scripts, integrated with CI (lint, test, Docker build).
+- Activated pre-commit hooks (black, isort, ruff).
+
+### develop / main
+- Integration and release branches.
+- Consolidated merges from all validated feature branches.
+
+---
 
 ## Collaborative Development
 
@@ -234,6 +339,8 @@ git branch -d <merged-branch-name>
 git push origin --delete <merged-branch-name>
 ```
 
+---
+
 ## Quality & CI Workflow
 
 - Launch the Streamlit app locally with Docker Compose:
@@ -268,6 +375,7 @@ Trigger all hooks manually before committing:
 ```commandline
 poetry run pre-commit run --all-files
 ```
+---
 
 ## How to Use the Documentation
 
