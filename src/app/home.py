@@ -4,7 +4,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
 
-
 st.markdown(
     """
 <div style="background-color:#f8f9fa; padding:20px; border-radius:15px;">
@@ -23,13 +22,15 @@ st.write("\n")
 
 st.markdown("👋 Bienvenue sur **Mangetamain**!")
 
-st.markdown("""
+st.markdown(
+    """
 **Mangetamain**, leader de la recommandation B2C de recettes, met à votre disposition 
 une application interactive qui vous permet de :  
 - Explorer les recettes analysées  
 - Visualiser les regroupements (clusters)  
 - Découvrir des patterns nutritionnels et sensoriels
-""")
+"""
+)
 st.write("\n")
 st.write("\n")
 
@@ -85,7 +86,8 @@ with col3:
 st.write("\n")
 st.write("\n")
 
-st.markdown("""
+st.markdown(
+    """
 ### 🧪 Explorer notre méthodologie
 Nous avons construit les clusters à partir d'une analyse regroupant plusieurs 
 caractéristiques des recettes, telles que la composition nutritionnelle, les scores 
@@ -94,4 +96,5 @@ sensoriels, le nombre d’ingrédients et d’étapes, ainsi que les interaction
 
 💡 Cliquez sur la page **“Méthodologie”** pour comprendre comment nous avons segmenté 
 les recettes et construit nos visualisations.
-""")
+"""
+)
