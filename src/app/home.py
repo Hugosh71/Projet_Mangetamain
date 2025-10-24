@@ -1,66 +1,100 @@
 """Page d'accueil de l'application"""
 
-import plotly.express as px
 import streamlit as st
 
-from src.mangetamain import (
-    get_top_recipes_cached,
-    get_vegetarian_stats_cached,
-)
-
-st.set_page_config(page_title="Accueil", page_icon="📈", layout="wide")
-
-top_recipes = get_top_recipes_cached(top_k=10)
-vegetarian_stats = get_vegetarian_stats_cached()
-
-st.markdown("# Accueil")
-st.sidebar.header("Accueil")
+st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
 
 st.markdown(
     """
-    Bienvenue sur **Mangetamain** !
-    
-    Cette application est conçue pour vous aider à explorer des recettes saines.
+<div style="background-color:#f8f9fa; padding:20px; border-radius:15px;">
+<h2 style="text-align:center;">Bienvenue sur Mangetamain !</h2>
+<p style="text-align:center;">Explorez nos clusters de recettes bio et traditionnelles 
+et découvrez des patterns nutritionnels et sensoriels uniques.</p>
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+st.sidebar.header("🏠 Accueil")
+
+st.write("\n")
+st.write("\n")
+
+st.markdown("👋 Bienvenue sur **Mangetamain**!")
+
+st.markdown(
     """
+**Mangetamain**, leader de la recommandation B2C de recettes, met à votre disposition 
+une application interactive qui vous permet de :  
+- Explorer les recettes analysées  
+- Visualiser les regroupements (clusters)  
+- Découvrir des patterns nutritionnels et sensoriels
+"""
+)
+st.write("\n")
+st.write("\n")
+
+st.markdown("### 🔍 Caractéristiques analysées :")
+
+features = [
+    ("🍽️", "Densité énergétique"),
+    ("🥩", "Proportion protéines/lipides/glucides"),
+    ("🥦", "Indice d’équilibre nutritionnel"),
+    ("📅", "Dates et interactions"),
+    ("⭐", "Nombre d’évaluations"),
+    ("📊", "Proportion d’interactions"),
+    ("👩‍🍳", "Nombre d’étapes et d’ingrédients"),
+    ("⏱️", "Durée de préparation"),
+    ("🍭", "Scores sensoriels et nutritionnels"),
+]
+
+st.write("\n")
+
+
+st.write("\n")
+cols = st.columns(3)
+for i, (emoji, text) in enumerate(features):
+    with cols[i % 3]:
+        st.markdown(f"{emoji} **{text}**")
+
+st.write("\n")
+st.write("\n")
+
+st.markdown(
+    """
+<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;
+text-align:center;">
+🚀 Cliquez sur la page 📊 Clustering pour commencer votre exploration des données !
+</div>
+</div>
+""",
+    unsafe_allow_html=True,
 )
 
-st.subheader("Recettes les mieux notées")
-st.caption(
-    "Classées par note moyenne la plus élevée, puis par la plus faible variabilité, et "
-    "enfin par le plus grand nombre d'évaluations."
-)
+st.write("\n")
+st.write("\n")
+st.write("\n")
 
-st.dataframe(top_recipes, width="stretch")
-
-st.subheader("📊 Analyse des recettes : Végétarien vs Viande")
-
-col1, col2 = st.columns(2)
-
+col1, col2, col3 = st.columns(3)
 with col1:
-    fig_pie = px.pie(
-        vegetarian_stats,
-        values="Nombre de recettes uniques",
-        names="Type",
-        title="Répartition des recettes (végétarien vs viande)",
-        hole=0.4,
-    )
-    fig_pie.update_traces(textposition="inside", textinfo="percent+label")
-    st.plotly_chart(fig_pie, use_container_width=True)
-
+    st.metric("🥗 Recettes analysées", "3 200+")
 with col2:
-    fig_bar = px.bar(
-        vegetarian_stats,
-        x="Type",
-        y="Note moyenne",
-        color="Type",
-        title="Moyenne des notes (végétarien vs viande)",
-        text="Note moyenne",
-    )
-    fig_bar.update_traces(texttemplate="%{text:.2f}", textposition="outside")
-    fig_bar.update_layout(
-        yaxis_title="Note moyenne",
-        xaxis_title="Catégorie",
-        uniformtext_minsize=8,
-        uniformtext_mode="hide",
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.metric("🧩 Clusters identifiés", "5")
+with col3:
+    st.metric("👩‍🍳 Ingrédients uniques", "1 500+")
+
+st.write("\n")
+st.write("\n")
+
+st.markdown(
+    """
+### 🧪 Explorer notre méthodologie
+Nous avons construit les clusters à partir d'une analyse regroupant plusieurs 
+caractéristiques des recettes, telles que la composition nutritionnelle, les scores 
+sensoriels, le nombre d’ingrédients et d’étapes, ainsi que les interactions et 
+évaluations des utilisateurs.  
+
+💡 Cliquez sur la page **“Méthodologie”** pour comprendre comment nous avons segmenté 
+les recettes et construit nos visualisations.
+"""
+)
