@@ -33,9 +33,9 @@
 - [Quick Installation](#installation)
 - [Run the Application](#run-locally)
 - [Project Structure](#project-structure)
-- [Branch Log (Work Summary)](#branch-log)
+- [Branch Log (Work Summary)](#branch-log-work-summary)
 - [Collaborative Development](#collaborative-development)
-- [Quality, Tests & CI](#quality-&-ci-workflow)
+- [Quality, Tests & CI](#quality--ci-workflow)
 - [Sphinx Documentation](#how-to-use-the-documentation)
   
 ---
