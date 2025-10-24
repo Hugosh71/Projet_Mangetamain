@@ -23,7 +23,7 @@ RUN pip install --upgrade pip && pip install poetry
 
 # Install only **production** dependencies, no dev, no project itself
 RUN poetry config virtualenvs.create false \
-    && poetry install --without dev --no-root
+    && poetry install --only main --no-root
 
 # Copy the actual source code last
 COPY src/ ./src/
