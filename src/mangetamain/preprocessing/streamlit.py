@@ -188,7 +188,7 @@ def get_tag_cloud(df: pd.DataFrame, tag_col: str, use_tfidf: bool = True):
         lambda tags: [
             tag.replace(" ", "-")
             for tag in tags
-            if tag not in ["time-to-make", "preparation", "course"]
+            if tag not in ["time-to-make", "preparation", "course", "dietary"]
         ]
     )
 

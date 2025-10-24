@@ -1,4 +1,5 @@
 """Clustering visualization page for recipe analysis."""
+
 from collections import Counter
 
 import matplotlib.pyplot as plt
@@ -274,33 +275,42 @@ with col_rating.container(border=True, height="stretch"):
 
     st.plotly_chart(fig, use_container_width=True, key="multi_series_bar_chart")
 
-##################################################
-# Cluster exploration section
-##################################################
+#######################################################
+# Durée moyenne de préparation des recettes par cluster
+#######################################################
 with col_time.container(border=True, height="stretch"):
-    cluster_summary = df_recipes_filtered.groupby("cluster_name")["minutes_log"].mean().reset_index()
+    st.markdown("**Durée moyenne de préparation des recettes**")
+    cluster_summary = (
+        df_recipes_filtered.groupby("cluster_name")["minutes"].median().reset_index()
+    )
 
     fig = px.bar(
         cluster_summary,
-        x="minutes_log",
+        x="minutes",
         y="cluster_name",
         orientation="h",
         color="cluster_name",
         color_discrete_map=color_map,
-        text="minutes_log"  # affiche la valeur sur la barre
+        text="minutes",  # affiche la valeur sur la barre
     )
 
     fig.update_layout(
-        title="Durée moyenne des recettes par cluster",
-        xaxis_title="Durée moyenne (log minutes)",
+        title="",
+        xaxis_title="Durée moyenne (minutes)",
         yaxis_title="Cluster",
-        yaxis=dict(autorange="reversed"),  # pour que la barre la plus grande soit en haut
-        height=600,
-        margin=dict(l=100, r=20, t=50, b=50),
-        showlegend=False
+        yaxis={
+            "autorange": "reversed"
+        },  # pour que la barre la plus grande soit en haut
+        height=300,
+        margin={"l": 100, "r": 20, "t": 50, "b": 50},
+        showlegend=False,
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+##################################################
+# Cluster exploration section
+##################################################
 st.markdown("### Exploration des Recettes par Cluster")
 
 # Create dropdown with cluster names
