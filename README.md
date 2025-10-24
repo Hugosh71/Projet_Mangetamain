@@ -29,14 +29,14 @@
 ---
 
 ## 🧭 Table of Contents
-- [Prerequisites](#-prerequisites)
-- [Quick Installation](#-quick-installation)
-- [Run the Application](#-run-the-application)
-- [Project Structure](#-project-structure)
-- [Branch Log (Work Summary)](#-branch-log-work-summary)
-- [Collaborative Development](#-collarborative-development)
-- [Quality, Tests & CI](#-quality-tests--ci)
-- [Sphinx Documentation](#-sphinx-documentation)
+- [Prerequisites](#prerequisites)
+- [Quick Installation](#installation)
+- [Run the Application](#run-locally)
+- [Project Structure](#project-structure)
+- [Branch Log (Work Summary)](#branch-log)
+- [Collaborative Development](#collaborative-development)
+- [Quality, Tests & CI](#quality-&-ci-workflow)
+- [Sphinx Documentation](#how-to-use-the-documentation)
   
 ---
 
