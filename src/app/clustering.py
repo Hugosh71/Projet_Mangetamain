@@ -1,7 +1,5 @@
 """Clustering visualization page for recipe analysis."""
 
-from collections import Counter
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
@@ -10,22 +8,27 @@ import streamlit as st
 from src.mangetamain.preprocessing.streamlit import (
     add_month_labels,
     get_cluster_names,
+    get_cluster_summary,
     get_col_names,
+    get_tag_cloud,
     load_recipes_data,
     min_max_scale,
     remove_outliers_iqr,
     rgb_to_hex,
-    get_tag_cloud,
-    get_cluster_summary,
 )
 
 # Set Streamlit page configuration
-st.set_page_config(
-    page_title="Analyse de clusters des recettes", page_icon="🍽️", layout="wide"
-)
+st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
 
-st.markdown("# Analyse de Clusters des Recettes")
-st.sidebar.markdown("")
+st.markdown("# Clustering")
+st.sidebar.markdown(
+    '<p style="color:#78a08a;font-size:0.9em;line-heitht:normal;">'
+    "L'analyse de <strong>clustering</strong> appliquée aux "
+    "recettes représente une étape essentielle pour la mise en place du système "
+    "de recommandation, permettant l'exploration des similarités et des patterns "
+    "entre les recettes, au sein de l'équipe Data Science de Mangetamain.</p>",
+    unsafe_allow_html=True,
+)
 
 # Load data and cluster names
 df_recipes = load_recipes_data()
@@ -121,7 +124,7 @@ with col_pie.container(border=True, height="stretch"):
 # Box plots of favor scores by cluster
 #################################################
 with st.container(border=True, height="stretch"):
-    st.markdown("**Scores faveur par cluster**")
+    st.markdown("""**Scores faveur par cluster**""")
     cols_favor = [
         "score_sweet_savory",
         "score_spicy_mild",
@@ -163,6 +166,23 @@ with st.container(border=True, height="stretch"):
 
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown(
+        """
+        <div style="position:relative;font-size:12px;color:#666;background-color:#eee;
+        padding:10px;border-radius:5px;margin-bottom:10px;">
+            <p style="margin-bottom:0;line-height:normal;">
+            Le score représente ici la valeur normalisée d'une caractéristique 
+            gustative d'une recette. Par exemple, le score Sucré → Salé indique dans 
+            quelle mesure un plat se situe entre le goût sucré et le goût salé. 
+            Ce score est calculé à partir de la similarité, dans un espace sémantique 
+            de haute dimension, entre l'embedding de la recette et les embeddings 
+            correspondant aux deux pôles de la caractéristique gustative.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 col_nutrition, col_seasonality = st.columns([2, 1])
 
 ###############################################################
@@ -175,7 +195,7 @@ with col_nutrition.container(border=True, height="stretch"):
         df_recipes_filtered[["cluster_name", *metrics]], metrics
     )
     df_cluster_mean = (
-        df_recipes_nutrition.groupby("cluster_name")[metrics].mean().reset_index()
+        df_recipes_nutrition.groupby("cluster_name")[metrics].median().reset_index()
     )
     df_melted = df_cluster_mean.melt(
         id_vars="cluster_name", var_name="metric", value_name="value"
@@ -194,6 +214,30 @@ with col_nutrition.container(border=True, height="stretch"):
     fig.update_layout(title="", title_x=0, height=400, legend_title="Cluster")
 
     st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(
+        """
+        <div style="font-size:12px;color:#666;background-color:#eee;padding:10px;
+        border-radius:5px;margin-bottom:10px;">
+            <p style="margin-bottom:0;line-height:normal;">
+                <strong>Caractéristiques nutritionnelles :</strong><br><br>
+                - <b>energy_density</b> : rapport entre calories et macronutriments, 
+                indique la richesse énergétique.<br>
+                - <b>protein_ratio</b> : proportion de protéines par calorie.<br>
+                - <b>fat_ratio</b> : proportion de lipides par calorie.<br>
+                - <b>nutrient_balance_index</b> : mesure l'équilibre nutritionnel 
+                global du plat.
+                <br><br>
+                Afin de représenter la distribution de ces caractéristiques nutritionne
+                lles selon les différents clusters dans le radar chart,
+                un <strong>RobustScaler</strong> a été appliqué sur les valeurs 
+                moyennes. On peut observer sur le graphique que ces variables 
+                présentent une distinction significative entre les différents clusters.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 #################################################
 # Seasonality scatter plot
@@ -227,6 +271,27 @@ with col_seasonality.container(border=True, height="stretch"):
 
     fig.tight_layout()
     st.pyplot(fig, use_container_width=False)
+
+    st.markdown(
+        """
+        <div style="position:relative;font-size:12px;color:#666;background-color:#eee;
+        padding:10px;border-radius:5px;margin-bottom:10px;">
+            <p style="margin-bottom:0;line-height:normal;">
+            Ce nuage de points vise à étudier les patterns saisonniers potentiels des 
+            recettes, c'est-à-dire à identifier si certaines recettes suscitent 
+            davantage d'interactions à certaines périodes de l'année (par exemple 
+            en hiver).<br><br>
+            Chaque point représente la moyenne des vecteurs du jour de l'année (sin, 
+            cos) correspondant à l'ensemble des interactions d'une recette.<br><br>
+            La norme du vecteur traduit la concentration saisonnière des interactions : 
+            plus le point est proche du centre, plus les interactions sont réparties de 
+            manière homogène tout au long de l’année ; à l'inverse, plus il est proche 
+            du bord du cercle, plus la recette présente une forte saisonnalité.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 col_rating, col_time = st.columns([1, 1])
 
@@ -350,7 +415,8 @@ with col_metric_2.container(border=True, height="stretch"):
             """
 <div style="font-size:14px; line-height:1.5;">
 <p><strong>Description du cluster</strong></p>
-<strong>Recettes longues, équilibrées, riches en protéines — type plats principaux familiaux</strong>
+<strong>Recettes longues, équilibrées, riches en protéines — type plats principaux 
+familiaux</strong>
 <ul>
 <li>Énergie modérée : 4.8 kcal/g</li>
 <li>Bon ratio protéines (0.12), lipides modérés (0.07)</li>
@@ -369,7 +435,7 @@ with col_metric_2.container(border=True, height="stretch"):
             """
 <div style="font-size:14px; line-height:1.5;">
 <p><strong>Description du cluster</strong></p>
-<strong>Recettes faciles, équilibrées, plutôt salées et rapides — plats du quotidien</strong>
+<b>Recettes faciles, équilibrées, plutôt salées et rapides — plats du quotidien</b>
 <ul>
 <li>Énergie similaire (4.93 kcal/g)</li>
 <li>Protéines et graisses modérées, indice nutritionnel plus faible (0.021)</li>
@@ -386,7 +452,7 @@ with col_metric_2.container(border=True, height="stretch"):
             """
 <div style="font-size:14px; line-height:1.5;">
 <p><strong>Description du cluster</strong></p>
-<strong>Peu de protéines, plus caloriques, sucrées — desserts, pâtisseries, douceurs</strong>
+<b>Peu de protéines, plus caloriques, sucrées — desserts, pâtisseries, douceurs</b>
 <ul>
 <li>Énergie plus élevée (6.9 kcal/g)</li>
 <li>Peu de protéines (0.033)</li>
@@ -405,7 +471,8 @@ with col_metric_2.container(border=True, height="stretch"):
             """
 <div style="font-size:14px; line-height:1.5;">
 <p><strong>Description du cluster</strong></p>
-<strong>Densité énergétique très haute, faible qualité nutritionnelle — gâteaux, barres, confiseries</strong>
+<b>Densité énergétique très haute, faible qualité nutritionnelle — 
+gâteaux, barres, confiseries</b>
 <ul>
 <li>Très énergétique (15.75 kcal/g)</li>
 <li>Très pauvres en protéines et lipides (faible densité nutritionnelle)</li>
@@ -423,7 +490,8 @@ with col_metric_2.container(border=True, height="stretch"):
             """
 <div style="font-size:14px; line-height:1.5;">
 <p><strong>Description du cluster</strong></p>
-<strong>Recettes ni trop longues ni trop riches, un peu transformées — plats rapides ou préparations express</strong>
+<strong>Recettes ni trop longues ni trop riches, un peu transformées — plats rapides ou 
+préparations express</strong>
 <ul>
 <li>Énergie modérée (5.42 kcal/g)</li>
 <li>Protéines faibles (0.083), graisses modérées (0.078)</li>
