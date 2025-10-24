@@ -6,7 +6,8 @@ FROM python:3.12-slim AS builder
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /app
 
@@ -21,13 +22,14 @@ COPY pyproject.toml README.md ./
 # Install Poetry
 RUN pip install --upgrade pip && pip install poetry
 
-# Install only **production** dependencies, no dev, no project itself
+# Install only required groups (exclude heavy 'ml', include 'ui')
 RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-root
+    && poetry install --only main,ui --no-root \
+    && poetry cache clear pypi --all --no-interaction \
+    && rm -rf /tmp/poetry_cache
 
 # Copy the actual source code last
 COPY src/ ./src/
-COPY docs/ ./docs/
 
 ### ---------- Final runtime stage ----------
 FROM python:3.12-slim AS runtime
@@ -43,7 +45,6 @@ COPY --from=builder /usr/local /usr/local
 
 # Copy only the source code
 COPY src/ ./src/
-COPY docs/ ./docs/
 COPY .streamlit/ ./.streamlit/
 
 EXPOSE 8501
