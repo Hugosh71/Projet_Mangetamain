@@ -180,9 +180,11 @@ class RatingAnalyser(Analyser):
             "Generating consolidated CSV content for rating analysis"
         )
 
+        per_recipe_df = result.per_recipe
+        per_recipe_df.to_csv(path, index=False)
         # Rating table section
-        rating_table_df = result.table
-        rating_table_df.to_csv(path, index=False)
+        # rating_table_df = result.table
+        # rating_table_df.to_csv(path, index=False)
 
         return {
             "path": str(path),
