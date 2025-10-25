@@ -102,7 +102,7 @@ class DataProcessor(abc.ABC):
         logger: logging.Logger | None = None,
     ) -> None:
         self._repository = repository
-        self._logger = logger or logging.getLogger("mangetamain.backend")
+        self._logger = logger or logging.getLogger("mangetamain.data_processing")
 
     @abc.abstractmethod
     def clean(

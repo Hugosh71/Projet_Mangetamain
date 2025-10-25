@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from mangetamain.backend import (
+from mangetamain.data_processing import (
     CSVDataRepository,
     ProcessorFactory,
     RepositoryPaths,
 )
-from mangetamain.backend.rating.analyzers import RatingAnalyser
+from mangetamain.data_processing.rating.analyzers import RatingAnalyser
 
 
 def test_rating_pipeline_e2e() -> None:

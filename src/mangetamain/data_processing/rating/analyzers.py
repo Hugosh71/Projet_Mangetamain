@@ -14,7 +14,7 @@ class RatingAnalyser(Analyser):
     """Produce high-level insights for ratings (top-K by mean, etc.)."""
 
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
-        self._logger = logger or logging.getLogger("mangetamain.backend.rating")
+        self._logger = logger or logging.getLogger("mangetamain.data_processing.rating")
 
     def analyze(
         self,

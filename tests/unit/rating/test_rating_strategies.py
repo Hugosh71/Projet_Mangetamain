@@ -1,6 +1,6 @@
 import pandas as pd
 
-from mangetamain.backend.rating.strategies import (
+from mangetamain.data_processing.rating.strategies import (
     RatingCleaning,
     RatingPreprocessing,
 )
