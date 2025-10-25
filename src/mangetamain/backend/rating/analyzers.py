@@ -22,7 +22,10 @@ class RatingAnalyser(Analyser):
         recipes: pd.DataFrame,
         interactions: pd.DataFrame,
         *,
-        top_k: int = 10,
+        c: int | None = None,
+        mu_percentile: float = 0.5,
+        include_zero_ratings: bool = True,
+        with_wilson_per_recipe: bool = False,
     ) -> AnalysisResult:
         self._logger.debug(
             "Computing per-recipe rating statistics with extended metrics"
@@ -35,7 +38,8 @@ class RatingAnalyser(Analyser):
             interactions = interactions.assign(rating=pd.NA)
 
         # Build masks
-        is_rated = interactions["rating"].fillna(0).astype(float) > 0
+        rating_series = interactions["rating"].astype(float)
+        is_rated = rating_series.fillna(0) > 0
 
         # Per-recipe aggregates
         grp = interactions.groupby("recipe_id", dropna=False)
@@ -66,6 +70,18 @@ class RatingAnalyser(Analyser):
                 rating_std="std",
             ).reset_index().fillna({"rating_std": 0})
 
+        # Attach recipe names
+        # rated_agg = rated_agg.merge(
+        #     per_recipe.merge(
+        #         recipes[["id", "name"]],
+        #         left_on="recipe_id",
+        #         right_on="id",
+        #         how="left",
+        #     )
+        #     .drop(columns=["id"])
+        #     .rename(columns={"name": "recipe_name"})
+        # )
+
         # Merge aggregates
         per_recipe = (
             n_interactions.merge(n_rated, on="recipe_id", how="left")
@@ -81,10 +97,17 @@ class RatingAnalyser(Analyser):
         # Bayesian smoothing (simple):
         # bayes_mean = (mu * c + sum_ratings) / (c + n_rated)
         # Choose c as global prior strength; mu as global mean over rated
-        global_mu = (
-            rated_only["rating"].mean() if not rated_only.empty else 0.0
+        # Informative prior mean based on percentile of rated-only distribution
+        mu = (
+            float(rated_only["rating"].quantile(mu_percentile))
+            if not rated_only.empty
+            else 0.0
         )
-        c = max(5, int(per_recipe["n_rated"].median() or 5))
+        c_value = (
+            c if c is not None else max(
+                5, int(per_recipe["n_rated"].median() or 5)
+            )
+        )
         # compute sum_ratings per recipe
         if rated_only.empty:
             sum_ratings = pd.DataFrame(
@@ -101,9 +124,23 @@ class RatingAnalyser(Analyser):
             sum_ratings, on="recipe_id", how="left"
         ).fillna({"sum_ratings": 0.0})
         per_recipe["bayes_mean"] = (
-            (global_mu * c + per_recipe["sum_ratings"]) /
-            (c + per_recipe["n_rated"].clip(lower=0))
+            (mu * c_value + per_recipe["sum_ratings"]) /
+            (c_value + per_recipe["n_rated"].clip(lower=0))
         )
+
+        # Additional dispersion metrics
+        # if not rated_only.empty:
+        #     iqr = (
+        #         rated_only.groupby("recipe_id")["rating"].quantile(0.75)
+        #         - rated_only.groupby("recipe_id")["rating"].quantile(0.25)
+        #     ).rename("iqr_rating").reset_index()
+        #     per_recipe = per_recipe.merge(iqr, on="recipe_id", how="left")
+        #     per_recipe["cv_rating"] = (
+        #         per_recipe["rating_std"] / per_recipe["mean_rating"]
+        #     ).replace([pd.NA, pd.NaT], 0).fillna(0)
+        # else:
+        #     per_recipe["iqr_rating"] = 0.0
+        #     per_recipe["cv_rating"] = 0.0
 
         # Attach recipe names
         per_recipe = (
@@ -117,26 +154,18 @@ class RatingAnalyser(Analyser):
             .rename(columns={"name": "recipe_name"})
         )
 
-        # Sort to derive top_k
-        top = (
-            per_recipe.sort_values(
-                by=["bayes_mean", "mean_rating", "rating_std", "n_rated"],
-                ascending=[False, False, True, False],
-            )
-            .head(top_k)
-            .reset_index(drop=True)
-        )
+        # Optional Wilson bounds per recipe on the proportion of rated interactions
+        if with_wilson_per_recipe:
+            z = 1.96
+            p = per_recipe["share_rated"].fillna(0).astype(float)
+            n = per_recipe["n_interactions"].clip(lower=1).astype(float)
+            denom = 1 + (z**2) / n
+            center = p + (z**2) / (2 * n)
+            rad = z * ((p * (1 - p) + (z**2) / (4 * n)) / n).pow(0.5)
+            per_recipe["wilson_low_rec"] = (center - rad) / denom
+            per_recipe["wilson_high_rec"] = (center + rad) / denom
 
-        # Rating table (distribution) and global summary
-        rating_table = (
-            rated_only["rating"]
-            .value_counts(dropna=False)
-            .sort_index()
-            .rename_axis("rating")
-            .reset_index(name="count")
-            if not rated_only.empty
-            else pd.DataFrame({"rating": [], "count": []})
-        )
+        # Global summary only (distribution can be derived downstream if needed)
 
         # Example global stats (can be extended):
         num_recipes = int(per_recipe["recipe_id"].nunique())
@@ -155,7 +184,9 @@ class RatingAnalyser(Analyser):
         n = max(1, num_recipes)
         denom = 1 + (z**2) / n
         center = p + (z**2) / (2 * n)
-        rad = z * math.sqrt((p * (1 - p) + (z**2) / (4 * n)) / n)
+        rad = z * math.sqrt(
+            (p * (1 - p) + (z**2) / (4 * n)) / n
+        )
         wilson_low = (center - rad) / denom
         wilson_high = (center + rad) / denom
 
@@ -169,9 +200,7 @@ class RatingAnalyser(Analyser):
         }
 
         return AnalysisResult(
-            per_recipe=per_recipe,
-            top_recipes=top,
-            table=rating_table,
+            table=per_recipe,
             summary=summary,
         )
 
@@ -180,7 +209,7 @@ class RatingAnalyser(Analyser):
             "Generating consolidated CSV content for rating analysis"
         )
 
-        per_recipe_df = result.per_recipe
+        per_recipe_df = result.table
         per_recipe_df.to_csv(path, index=False)
         # Rating table section
         # rating_table_df = result.table
