@@ -1,4 +1,5 @@
 """Abstract interfaces and strategies for backend processing."""
+
 from __future__ import annotations
 import abc
 import logging
@@ -10,6 +11,7 @@ import pandas as pd
 
 class IDataRepository(abc.ABC):
     """Abstraction for loading raw dataframes from a data source."""
+
     @abc.abstractmethod
     def load_recipes(self) -> pd.DataFrame:  # pragma: no cover
         """Return the raw recipes dataframe."""
@@ -25,9 +27,7 @@ class IValidator(abc.ABC):
     """Validation contract applied to dataframes before processing."""
 
     @abc.abstractmethod
-    def validate(
-        self, df: pd.DataFrame
-    ) -> None:  # pragma: no cover
+    def validate(self, df: pd.DataFrame) -> None:  # pragma: no cover
         """Raise on invalid dataframe; return None on success."""
 
 

@@ -1,4 +1,5 @@
 """Factories to assemble backend components with sensible defaults."""
+
 from __future__ import annotations
 
 import logging

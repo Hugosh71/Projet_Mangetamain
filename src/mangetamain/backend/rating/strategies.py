@@ -38,4 +38,3 @@ class RatingPreprocessing(IPreprocessingStrategy):
         #         interactions_pp["rating"].astype(float) / 5.0
         #     )
         return recipes.copy(), interactions.copy()
-
