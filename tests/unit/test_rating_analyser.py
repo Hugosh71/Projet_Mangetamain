@@ -29,7 +29,7 @@ def test_rating_analyser_basic_topk() -> None:
     #     "num_ratings",
     # ]
     # assert len(result.top_recipes) == 2
-    tmp_path = Path("tmp")
+    tmp_path = Path("tmp/test_rating_analyser_basic_topk")
     tmp_path.mkdir(parents=True, exist_ok=True)
 
     report = analyser.generate_report(result, tmp_path / "test_rating_analyser_basic_topk.csv")

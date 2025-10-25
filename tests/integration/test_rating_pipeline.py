@@ -8,8 +8,10 @@ from mangetamain.backend import (
 )
 from mangetamain.backend.rating.analyzers import RatingAnalyser
 
-
-def test_rating_pipeline_e2e(tmp_path: Path) -> None:
+def test_rating_pipeline_e2e() -> None:
+    
+    tmp_path = Path("tmp/test_rating_pipeline_e2e")
+    tmp_path.mkdir(parents=True, exist_ok=True)
     recipes = pd.DataFrame(
         [
             {"id": 1, "name": "A"},
@@ -29,6 +31,9 @@ def test_rating_pipeline_e2e(tmp_path: Path) -> None:
     recipes.to_csv(recipes_path, index=False)
     interactions.to_csv(interactions_path, index=False)
 
+    # recipes_path = "data/RAW_recipes.csv"
+    # interactions_path = "data/RAW_interactions.csv"
+
     repo = CSVDataRepository(
         paths=RepositoryPaths(
             recipes_csv=str(recipes_path),
@@ -45,20 +50,9 @@ def test_rating_pipeline_e2e(tmp_path: Path) -> None:
     analyser = RatingAnalyser()
     result = analyser.analyze(
         processed.recipes,
-        processed.interactions,
-        top_k=2,
+        processed.interactions, 
     )
 
-    assert not result.top_recipes.empty
-    # assert {
-    #     "recipe_name",
-    #     "recipe_id",
-    #     "rating_mean",
-    #     "rating_std",
-    #     "num_ratings",
-    # }.issubset(set(result.top_recipes.columns))
-
+    assert not result.table.empty
     report = analyser.generate_report(result, tmp_path / "test_rating_pipeline_e2e.csv")
     assert Path(report["path"]).exists()
-
-

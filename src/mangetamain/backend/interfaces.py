@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol, Tuple
 import pandas as pd
 
@@ -60,11 +61,7 @@ class ProcessedPair:
 class AnalysisResult:
     """Container for analyzer outputs shared across implementations."""
 
-    # Full per-recipe dataframe with all computed metrics
-    per_recipe: pd.DataFrame
-    # Convenience view (e.g., top-k subset for UI)
-    top_recipes: pd.DataFrame
-    # Optional global tables (e.g., rating distribution)
+    # Single detailed table with all per-recipe metrics
     table: pd.DataFrame
     # Global summary metrics
     summary: dict[str, object]
@@ -84,7 +81,7 @@ class Analyser(abc.ABC):
 
     @abc.abstractmethod
     def generate_report(
-        self, result: AnalysisResult
+        self, result: AnalysisResult, path: "Path"
     ) -> dict[str, object]:  # pragma: no cover - interface only
         """Return a minimal, serializable representation of the result."""
 
