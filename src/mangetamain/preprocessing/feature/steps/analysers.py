@@ -1,13 +1,13 @@
-"""Nutrition analysers (stubs)."""
+"""Steps analysers (stubs)."""
 
 from __future__ import annotations
 
 import pandas as pd
 
-from ..interfaces import Analyser, AnalysisResult
+from ...interfaces import Analyser, AnalysisResult
 
 
-class NutritionAnalyser(Analyser):
+class StepsAnalyser(Analyser):
     def analyze(
         self,
         recipes: pd.DataFrame,

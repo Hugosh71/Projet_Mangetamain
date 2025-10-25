@@ -2,6 +2,7 @@
 
 import ast
 import re
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -10,6 +11,73 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import RobustScaler
 from wordcloud import WordCloud
 
+from .feature.rating import RatingAnalyser
+from .feature.seasonality import SeasonalityAnalyser
+from .feature.ingredients import IngredientsAnalyser
+from .feature.nutrition import NutritionAnalyser
+from .feature.steps import StepsAnalyser
+from .factories import ProcessorFactory
+from .repositories import CSVDataRepository, RepositoryPaths
+
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_rating_feature_data() -> pd.DataFrame:
+    repo = CSVDataRepository(paths=RepositoryPaths())
+    processor = ProcessorFactory.create_rating(repo) # or create_basic
+    processed = processor.run()
+
+    analyser = RatingAnalyser()
+    result = analyser.analyze(
+        processed.recipes,
+        processed.interactions,
+    )
+
+    return result.table
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_seasonality_feature_data() -> pd.DataFrame:
+    repo = CSVDataRepository(paths=RepositoryPaths())
+    processor = ProcessorFactory.create_seasonality(repo)
+    processed = processor.run()
+    analyser = SeasonalityAnalyser()
+    result = analyser.analyze(processed.recipes, processed.interactions)
+    return result.table
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_ingredients_feature_data() -> pd.DataFrame:
+    repo = CSVDataRepository(paths=RepositoryPaths())
+    processor = ProcessorFactory.create_ingredients(repo)
+    processed = processor.run()
+    analyser = IngredientsAnalyser()
+    result = analyser.analyze(processed.recipes, processed.interactions)
+    return result.table
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_nutrition_feature_data() -> pd.DataFrame:
+    repo = CSVDataRepository(paths=RepositoryPaths())
+    processor = ProcessorFactory.create_nutrition(repo)
+    processed = processor.run()
+    analyser = NutritionAnalyser()
+    result = analyser.analyze(processed.recipes, processed.interactions)
+    return result.table
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_steps_feature_data() -> pd.DataFrame:
+    repo = CSVDataRepository(paths=RepositoryPaths())
+    processor = ProcessorFactory.create_steps(repo)
+    processed = processor.run()
+    analyser = StepsAnalyser()
+    result = analyser.analyze(processed.recipes, processed.interactions)
+    return result.table
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def get_recipes_all_feature_data() -> pd.DataFrame:
+    return pd.concat([get_recipes_rating_feature_data(), get_recipes_seasonality_feature_data(), get_recipes_ingredients_feature_data(), get_recipes_nutrition_feature_data(), get_recipes_steps_feature_data()])
+
+
+@st.cache_data(persist="disk", show_spinner=False, ttl=None)
+def save_recipes_all_feature_data(path: Path) -> pd.DataFrame:
+    get_recipes_all_feature_data().to_csv(path, index=False)
 
 @st.cache_data
 def load_recipes_data() -> pd.DataFrame:
@@ -23,7 +91,6 @@ def load_recipes_data() -> pd.DataFrame:
     recipes_df = pd.read_csv(recipes_path)
 
     return recipes_df
-
 
 @st.cache_data
 def get_cluster_names() -> dict:

@@ -37,7 +37,7 @@ class CSVDataRepository(IDataRepository):
         self._interaction_usecols = (
             list(interaction_usecols) if interaction_usecols else None
         )
-        self._logger = logger or logging.getLogger("mangetamain.data_processing.repo")
+        self._logger = logger or logging.getLogger("mangetamain.preprocessing.repositories")
 
     def _ensure_exists(self, file_path: str) -> Path:
         path = Path(file_path)

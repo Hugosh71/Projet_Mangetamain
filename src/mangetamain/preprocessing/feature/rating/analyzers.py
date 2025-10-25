@@ -7,14 +7,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from ..interfaces import Analyser, AnalysisResult
+from ...interfaces import Analyser, AnalysisResult
 
 
 class RatingAnalyser(Analyser):
     """Produce high-level insights for ratings (top-K by mean, etc.)."""
 
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
-        self._logger = logger or logging.getLogger("mangetamain.data_processing.rating")
+        self._logger = logger or logging.getLogger(__name__)
 
     def analyze(
         self,

@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from src.mangetamain.logging_config import configure_logging, get_logger
+from app.logging_config import configure_logging, get_logger
 
 
 def _initialise_logging() -> None:
