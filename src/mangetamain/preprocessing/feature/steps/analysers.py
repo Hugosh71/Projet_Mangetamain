@@ -18,5 +18,3 @@ class StepsAnalyser(Analyser):
 
     def generate_report(self, result: AnalysisResult, path):
         return {"table_path": str(path), "summary_path": str(path)}
-
-

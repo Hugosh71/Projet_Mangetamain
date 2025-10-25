@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 from mangetamain.preprocessing.factories import ProcessorFactory
 from mangetamain.preprocessing.repositories import (
@@ -34,4 +35,3 @@ def test_processor_factory_variants(tmp_path: Path) -> None:
         processor = maker(repo)
         out = processor.run()
         assert set(out.recipes.columns) >= {"id", "name"}
-

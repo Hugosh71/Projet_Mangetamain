@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from .strategies import StepsPreprocessing, StepsCleaning
 from .analysers import StepsAnalyser
+from .strategies import StepsCleaning, StepsPreprocessing
 
 __all__ = [
     "StepsCleaning",
     "StepsPreprocessing",
     "StepsAnalyser",
 ]
-
-

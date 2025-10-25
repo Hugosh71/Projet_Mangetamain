@@ -11,19 +11,19 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import RobustScaler
 from wordcloud import WordCloud
 
-from .feature.rating import RatingAnalyser
-from .feature.seasonality import SeasonalityAnalyser
+from .factories import ProcessorFactory
 from .feature.ingredients import IngredientsAnalyser
 from .feature.nutrition import NutritionAnalyser
+from .feature.rating import RatingAnalyser
+from .feature.seasonality import SeasonalityAnalyser
 from .feature.steps import StepsAnalyser
-from .factories import ProcessorFactory
 from .repositories import CSVDataRepository, RepositoryPaths
 
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_rating_feature_data() -> pd.DataFrame:
     repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_rating(repo) # or create_basic
+    processor = ProcessorFactory.create_rating(repo)  # or create_basic
     processed = processor.run()
 
     analyser = RatingAnalyser()
@@ -34,6 +34,7 @@ def get_recipes_rating_feature_data() -> pd.DataFrame:
 
     return result.table
 
+
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_seasonality_feature_data() -> pd.DataFrame:
     repo = CSVDataRepository(paths=RepositoryPaths())
@@ -42,6 +43,7 @@ def get_recipes_seasonality_feature_data() -> pd.DataFrame:
     analyser = SeasonalityAnalyser()
     result = analyser.analyze(processed.recipes, processed.interactions)
     return result.table
+
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_ingredients_feature_data() -> pd.DataFrame:
@@ -52,6 +54,7 @@ def get_recipes_ingredients_feature_data() -> pd.DataFrame:
     result = analyser.analyze(processed.recipes, processed.interactions)
     return result.table
 
+
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_nutrition_feature_data() -> pd.DataFrame:
     repo = CSVDataRepository(paths=RepositoryPaths())
@@ -60,6 +63,7 @@ def get_recipes_nutrition_feature_data() -> pd.DataFrame:
     analyser = NutritionAnalyser()
     result = analyser.analyze(processed.recipes, processed.interactions)
     return result.table
+
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_steps_feature_data() -> pd.DataFrame:
@@ -70,33 +74,70 @@ def get_recipes_steps_feature_data() -> pd.DataFrame:
     result = analyser.analyze(processed.recipes, processed.interactions)
     return result.table
 
+
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_all_feature_data() -> pd.DataFrame:
-    return pd.concat([get_recipes_rating_feature_data(), get_recipes_seasonality_feature_data(), get_recipes_ingredients_feature_data(), get_recipes_nutrition_feature_data(), get_recipes_steps_feature_data()])
+    return pd.concat(
+        [
+            get_recipes_rating_feature_data(),
+            get_recipes_seasonality_feature_data(),
+            get_recipes_ingredients_feature_data(),
+            get_recipes_nutrition_feature_data(),
+            get_recipes_steps_feature_data(),
+        ]
+    )
 
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def save_recipes_all_feature_data(path: Path = Path("data/preprocessed/recipes_all_feature_data.csv")) -> pd.DataFrame:
+def save_recipes_all_feature_data(
+    path: Path = Path("data/preprocessed/recipes_all_feature_data.csv"),
+) -> pd.DataFrame:
     if not path.parent.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
     df = get_recipes_all_feature_data()
     required_cols = [
-        'id', 'name', 'energy_density', 'protein_ratio', 'fat_ratio',
-        'nutrient_balance_index', 'inter_doy_sin_smooth',
-        'inter_doy_cos_smooth', 'inter_strength', 'n_interactions',
-        'bayes_mean', 'minutes_log', 'score_sweet_savory',
-        'score_spicy_mild', 'score_lowcal_rich', 'score_vegetarian_meat',
-        'score_solid_liquid', 'score_raw_processed', 'score_western_exotic',
-        'cluster', 'pc_1', 'pc_2', 'tags', 'minutes', 'n_steps',
-        'n_ingredients', 'rating_mean'
+        "id",
+        "name",
+        "energy_density",
+        "protein_ratio",
+        "fat_ratio",
+        "nutrient_balance_index",
+        "inter_doy_sin_smooth",
+        "inter_doy_cos_smooth",
+        "inter_strength",
+        "n_interactions",
+        "bayes_mean",
+        "minutes_log",
+        "score_sweet_savory",
+        "score_spicy_mild",
+        "score_lowcal_rich",
+        "score_vegetarian_meat",
+        "score_solid_liquid",
+        "score_raw_processed",
+        "score_western_exotic",
+        "cluster",
+        "pc_1",
+        "pc_2",
+        "tags",
+        "minutes",
+        "n_steps",
+        "n_ingredients",
+        "rating_mean",
     ]
     missing = [c for c in required_cols if c not in df.columns]
     if missing:
-        raise ValueError(f"Missing required columns: {missing}")
+        # raise ValueError(f"Missing required columns: {missing}")
+        # logger = get_logger(__name__)
+        # logger.error(f"Missing required columns: {missing}")
+        return None, f"Missing required columns: {missing}"
     df.to_csv(path, index=False)
+    return df, f"Saved data to {path} successfully"
+
 
 @st.cache_data
-def load_recipes_data(path: Path = Path("data/preprocessed/recipes_all_feature_data.csv")) -> pd.DataFrame:
+def load_recipes_data(
+    path: Path = Path("data/preprocessed/recipes_all_feature_data.csv"),
+) -> pd.DataFrame:
     """Load and preprocess recipes data from compressed CSV files.
 
     Returns:
@@ -104,14 +145,15 @@ def load_recipes_data(path: Path = Path("data/preprocessed/recipes_all_feature_d
     """
     # Load recipes data
     df = None
-    try:
-        df = pd.read_csv(path)
-    except FileNotFoundError:
-        recipes_path = "s3://mangetamain/recipes_merged.csv.gz"
-        recipes_df = pd.read_csv(recipes_path)
-        df = recipes_df
-    finally:
-        return df
+    target_path = path
+    if not target_path.exists():
+        target_path = "s3://mangetamain/recipes_merged.csv.gz"
+    df = pd.read_csv(target_path)
+    if df.empty:
+        raise ValueError(f"No data found at {target_path}")
+
+    return df, f"Loaded data from {target_path}"
+
 
 @st.cache_data
 def get_cluster_names() -> dict:

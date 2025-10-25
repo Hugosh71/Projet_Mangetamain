@@ -1,19 +1,25 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 import pandas as pd
 
 from mangetamain.preprocessing.feature.rating.analyzers import RatingAnalyser
 
 
 def test_analyze_handles_zero_ratings() -> None:
-    recipes = pd.DataFrame([
-        {"id": 1, "name": "A"},
-    ])
+    recipes = pd.DataFrame(
+        [
+            {"id": 1, "name": "A"},
+        ]
+    )
     # interactions with zero ratings (no rated entries)
-    interactions = pd.DataFrame([
-        {"recipe_id": 1, "rating": 0},
-        {"recipe_id": 1, "rating": 0},
-    ])
+    interactions = pd.DataFrame(
+        [
+            {"recipe_id": 1, "rating": 0},
+            {"recipe_id": 1, "rating": 0},
+        ]
+    )
 
     analyser = RatingAnalyser()
     result = analyser.analyze(recipes, interactions)
@@ -26,12 +32,16 @@ def test_analyze_handles_zero_ratings() -> None:
 def test_generate_report_with_file_path_outputs_to_parent(
     tmp_path: Path,
 ) -> None:
-    recipes = pd.DataFrame([
-        {"id": 1, "name": "A"},
-    ])
-    interactions = pd.DataFrame([
-        {"recipe_id": 1, "rating": 5},
-    ])
+    recipes = pd.DataFrame(
+        [
+            {"id": 1, "name": "A"},
+        ]
+    )
+    interactions = pd.DataFrame(
+        [
+            {"recipe_id": 1, "rating": 5},
+        ]
+    )
 
     analyser = RatingAnalyser()
     result = analyser.analyze(recipes, interactions)

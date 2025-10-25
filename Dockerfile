@@ -36,17 +36,17 @@ FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=.
+    PYTHONPATH=/app/src
 
-WORKDIR /app
+WORKDIR /app/src
 
 # Copy installed packages from builder (this avoids reinstalling everything)
 COPY --from=builder /usr/local /usr/local
 
-# Copy only the source code
-COPY src/ ./src/
+# Copy only the source code into /app/src so that 'app' is importable
+COPY src/ ./
 COPY .streamlit/ ./.streamlit/
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "src/app/main.py"]
+CMD ["streamlit", "run", "app/main.py"]

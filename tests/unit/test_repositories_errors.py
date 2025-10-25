@@ -1,12 +1,13 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
-from pathlib import Path
 
 from mangetamain.preprocessing import (
     CSVDataRepository,
     RepositoryPaths,
 )
-from mangetamain.preprocessing.exceptions import DataNotFoundError, DataLoadError
+from mangetamain.preprocessing.exceptions import DataLoadError, DataNotFoundError
 
 
 def test_repository_ensure_exists_missing(tmp_path: Path) -> None:
@@ -48,5 +49,3 @@ def test_repository_load_exceptions_bad_usecols(tmp_path: Path) -> None:
 
     with pytest.raises(DataLoadError):
         repo.load_interactions()
-
-

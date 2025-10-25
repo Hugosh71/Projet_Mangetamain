@@ -82,6 +82,7 @@ def test_load_recipes_data_fallback_to_s3(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     dummy = pd.DataFrame({"id": [1]})
+    # dummy_path = Path("s3://mangetamain/recipes_merged.csv.gz")
 
     def fake_read_csv(path: str | Path, *args, **kwargs):
         if isinstance(path, str) and path.startswith("s3://mangetamain/"):
@@ -99,7 +100,8 @@ def test_load_recipes_data_fallback_to_s3(
     # Call underlying function to avoid cache interference
     func = getattr(st_mod.load_recipes_data, "__wrapped__", st_mod.load_recipes_data)
     out = func(missing)
-    assert out.equals(dummy)
+    # assert out[1] is dummy_path
+    assert out[0].equals(dummy)
 
 
 def test_get_recipes_all_feature_data_concat(
@@ -112,18 +114,10 @@ def test_get_recipes_all_feature_data_concat(
     e = pd.DataFrame({"id": [5]})
 
     monkeypatch.setattr(st_mod, "get_recipes_rating_feature_data", lambda: a)
-    monkeypatch.setattr(
-        st_mod, "get_recipes_seasonality_feature_data", lambda: b
-    )
-    monkeypatch.setattr(
-        st_mod, "get_recipes_ingredients_feature_data", lambda: c
-    )
-    monkeypatch.setattr(
-        st_mod, "get_recipes_nutrition_feature_data", lambda: d
-    )
-    monkeypatch.setattr(
-        st_mod, "get_recipes_steps_feature_data", lambda: e
-    )
+    monkeypatch.setattr(st_mod, "get_recipes_seasonality_feature_data", lambda: b)
+    monkeypatch.setattr(st_mod, "get_recipes_ingredients_feature_data", lambda: c)
+    monkeypatch.setattr(st_mod, "get_recipes_nutrition_feature_data", lambda: d)
+    monkeypatch.setattr(st_mod, "get_recipes_steps_feature_data", lambda: e)
 
     out = st_mod.get_recipes_all_feature_data()
     assert len(out) == 5
