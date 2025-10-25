@@ -1,4 +1,4 @@
-"""Seasonnality analysers (stubs)."""
+"""Seasonality analysers (stubs)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pandas as pd
 from ..interfaces import Analyser, AnalysisResult
 
 
-class SeasonnalityAnalyser(Analyser):
+class SeasonalityAnalyser(Analyser):
     def analyze(
         self,
         recipes: pd.DataFrame,
