@@ -3,10 +3,10 @@
 __all__ = [
     "__version__",
     "LoggingSettings",
-    "backend",
+    "data_processing",
 ]
 
 __version__ = "0.1.0"
 
-from . import backend as backend
+from . import data_processing as data_processing
 from .settings import LoggingSettings

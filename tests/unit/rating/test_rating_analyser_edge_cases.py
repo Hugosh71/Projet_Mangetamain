@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from mangetamain.backend.rating.analyzers import RatingAnalyser
+from mangetamain.data_processing.rating.analyzers import RatingAnalyser
 
 
 # def test_no_interactions() -> None:

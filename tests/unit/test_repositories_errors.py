@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 from pathlib import Path
 
-from mangetamain.backend.repositories import (
+from mangetamain.data_processing.repositories import (
     CSVDataRepository,
     RepositoryPaths,
 )
-from mangetamain.backend.exceptions import DataNotFoundError, DataLoadError
+from mangetamain.data_processing.exceptions import DataNotFoundError, DataLoadError
 
 
 def test_repository_ensure_exists_missing(tmp_path: Path) -> None:
