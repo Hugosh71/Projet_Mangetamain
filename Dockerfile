@@ -47,6 +47,9 @@ COPY --from=builder /usr/local /usr/local
 COPY src/ ./
 COPY .streamlit/ ./.streamlit/
 
+# In container builds without a bind mount, copy datasets to expected path
+COPY datasets/ ./data/
+
 EXPOSE 8501
 
 CMD ["streamlit", "run", "app/main.py"]

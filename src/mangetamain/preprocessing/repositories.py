@@ -29,7 +29,7 @@ class CSVDataRepository(IDataRepository):
         paths: RepositoryPaths | None = None,
         *,
         recipe_usecols: Sequence[str] | None = ("id", "name"),
-        interaction_usecols: Sequence[str] | None = ("recipe_id"),
+        interaction_usecols: Sequence[str] | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         self._paths = paths or RepositoryPaths()
@@ -64,4 +64,5 @@ class CSVDataRepository(IDataRepository):
             self._logger.debug("Loaded interactions: %d rows", len(df))
             return df
         except Exception as exc:  # noqa: BLE001 - wrap into domain error
-            raise DataLoadError(f"Failed to load interactions from {path}") from exc
+            msg = f"Failed to load interactions from {path}"
+            raise DataLoadError(msg) from exc
