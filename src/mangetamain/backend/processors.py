@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Tuple
 
 import pandas as pd
 
@@ -20,7 +19,7 @@ class NoOpCleaning(ICleaningStrategy):
 
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         return recipes.copy(), interactions.copy()
 
 
@@ -29,7 +28,7 @@ class NoOpPreprocessing(IPreprocessingStrategy):
 
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         return recipes.copy(), interactions.copy()
 
 

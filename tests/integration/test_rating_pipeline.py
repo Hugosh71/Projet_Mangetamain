@@ -1,6 +1,8 @@
-from pathlib import Path
 import logging
+from pathlib import Path
+
 import pandas as pd
+
 from mangetamain.backend import (
     CSVDataRepository,
     ProcessorFactory,

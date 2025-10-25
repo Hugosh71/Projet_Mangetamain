@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Tuple
-
 import pandas as pd
 
 from ..interfaces import ICleaningStrategy, IPreprocessingStrategy
@@ -14,7 +12,7 @@ class RatingCleaning(ICleaningStrategy):
 
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         # interactions_clean = interactions.copy()
         # if "rating" in interactions_clean.columns:
         #     interactions_clean = interactions_clean[
@@ -31,7 +29,7 @@ class RatingPreprocessing(IPreprocessingStrategy):
 
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         # interactions_pp = interactions.copy()
         # if "rating" in interactions_pp.columns:
         #     interactions_pp["rating_normalized"] = (

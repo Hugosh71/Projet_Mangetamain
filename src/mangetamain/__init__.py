@@ -8,5 +8,5 @@ __all__ = [
 
 __version__ = "0.1.0"
 
-from .settings import LoggingSettings
 from . import backend as backend
+from .settings import LoggingSettings

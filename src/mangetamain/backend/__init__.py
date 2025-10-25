@@ -7,25 +7,25 @@ SOLID principles and reusable design patterns (Factory, Strategy).
 
 from __future__ import annotations
 
-from .interfaces import (
-    IDataRepository,
-    IValidator,
-    DataProcessor,
-    Analyser,
-    AnalysisResult,
-    ICleaningStrategy,
-    IPreprocessingStrategy,
-)
+from . import rating as rating
 from .exceptions import (
     DataError,
-    DataNotFoundError,
     DataLoadError,
+    DataNotFoundError,
     ValidationError,
 )
-from .repositories import CSVDataRepository, RepositoryPaths
-from .processors import BasicDataProcessor
 from .factories import ProcessorFactory
-from . import rating as rating
+from .interfaces import (
+    Analyser,
+    AnalysisResult,
+    DataProcessor,
+    ICleaningStrategy,
+    IDataRepository,
+    IPreprocessingStrategy,
+    IValidator,
+)
+from .processors import BasicDataProcessor
+from .repositories import CSVDataRepository, RepositoryPaths
 
 __all__ = [
     # Interfaces / ABCs
