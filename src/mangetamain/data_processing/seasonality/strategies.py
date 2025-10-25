@@ -1,4 +1,4 @@
-"""Seasonnality strategies (stubs)."""
+"""Seasonality strategies (stubs)."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ import pandas as pd
 from ..interfaces import ICleaningStrategy, IPreprocessingStrategy
 
 
-class SeasonnalityCleaning(ICleaningStrategy):
+class SeasonalityCleaning(ICleaningStrategy):
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         return recipes, interactions
 
 
-class SeasonnalityPreprocessing(IPreprocessingStrategy):
+class SeasonalityPreprocessing(IPreprocessingStrategy):
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:

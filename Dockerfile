@@ -24,7 +24,7 @@ RUN pip install --upgrade pip && pip install poetry
 
 # Install only required groups (exclude heavy 'ml', include 'ui')
 RUN poetry config virtualenvs.create false \
-    && poetry install --only main,ui --no-root \
+    && poetry install --with ui --without ml --no-root \
     && poetry cache clear pypi --all --no-interaction \
     && rm -rf /tmp/poetry_cache
 
