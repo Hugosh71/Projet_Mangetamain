@@ -5,8 +5,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from app.logging_config import get_logger, configure_logging
-
+from app.logging_config import configure_logging, get_logger
 from mangetamain.preprocessing.streamlit import (
     add_month_labels,
     get_cluster_names,

@@ -31,7 +31,7 @@ coverage.xml
 htmlcov/
 
 # Datasets and logs (mounted at runtime instead)
-data/
+# data/
 logs/
 
 # CI temp
@@ -68,7 +68,7 @@ node_modules/
 *.ipynb_checkpoints
 
 # Project data
-data/
+# data/
 notebooks/
 
 # Docker

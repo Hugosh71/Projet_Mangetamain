@@ -23,7 +23,8 @@ def test_save_recipes_all_feature_data_missing_cols(
     # with pytest.raises(ValueError):
     #     save_recipes_all_feature_data(tmp_path / "recipes_all_feature_data.csv")
     assert (
-        save_recipes_all_feature_data(tmp_path / "recipes_all_feature_data.csv")[0] is None
+        save_recipes_all_feature_data(tmp_path / "recipes_all_feature_data.csv")[0]
+        is None
     )
     assert not (tmp_path / "recipes_all_feature_data.csv").exists()
 

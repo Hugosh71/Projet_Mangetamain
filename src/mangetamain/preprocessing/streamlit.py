@@ -77,15 +77,19 @@ def get_recipes_steps_feature_data() -> pd.DataFrame:
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
 def get_recipes_all_feature_data() -> pd.DataFrame:
-    return pd.concat(
-        [
-            get_recipes_rating_feature_data(),
-            get_recipes_seasonality_feature_data(),
-            get_recipes_ingredients_feature_data(),
-            get_recipes_nutrition_feature_data(),
-            get_recipes_steps_feature_data(),
-        ]
-    )
+    try:
+        combined = pd.concat(
+            [
+                get_recipes_rating_feature_data(),
+                get_recipes_seasonality_feature_data(),
+                get_recipes_ingredients_feature_data(),
+                get_recipes_nutrition_feature_data(),
+                get_recipes_steps_feature_data(),
+            ]
+        )
+        return combined, "Concatenated data successfully"
+    except Exception as e:  # keep cached error path informative for UI callers
+        return None, f"Error concatenating data: {e}"
 
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
@@ -94,7 +98,13 @@ def save_recipes_all_feature_data(
 ) -> pd.DataFrame:
     if not path.parent.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-    df = get_recipes_all_feature_data()
+    result = get_recipes_all_feature_data()
+    if isinstance(result, tuple) and len(result) == 2:
+        df, message = result
+    else:
+        df, message = result, "OK"
+    if df is None:
+        return None, message
     required_cols = [
         "id",
         "name",
@@ -128,7 +138,9 @@ def save_recipes_all_feature_data(
     if missing:
         # raise ValueError(f"Missing required columns: {missing}")
         # logger = get_logger(__name__)
-        # logger.error(f"Missing required columns: {missing}")
+        # logger.error(
+        #     f"Missing required columns: {missing}"
+        # )
         return None, f"Missing required columns: {missing}"
     df.to_csv(path, index=False)
     return df, f"Saved data to {path} successfully"
@@ -298,9 +310,11 @@ def get_tag_cloud(df: pd.DataFrame, tag_col: str, use_tfidf: bool = True):
     Generate a tag cloud using the WordCloud package.
 
     Args:
-        df (pd.DataFrame): DataFrame containing a column with tag lists as strings.
+        df (pd.DataFrame): DataFrame containing a column with tag lists as
+            strings.
         tag_col (str): Column name containing the tags (stringified lists).
-        use_tfidf (bool): Whether to compute TF-IDF weights instead of simple counts.
+        use_tfidf (bool): Whether to compute TF-IDF weights instead of simple
+            counts.
 
     Returns:
         WordCloud: Generated WordCloud object

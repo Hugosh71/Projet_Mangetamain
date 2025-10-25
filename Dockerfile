@@ -48,7 +48,7 @@ COPY src/ ./
 COPY .streamlit/ ./.streamlit/
 
 # In container builds without a bind mount, copy datasets to expected path
-COPY datasets/ ./data/
+COPY data/ ./data/
 
 EXPOSE 8501
 

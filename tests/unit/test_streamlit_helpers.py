@@ -120,4 +120,5 @@ def test_get_recipes_all_feature_data_concat(
     monkeypatch.setattr(st_mod, "get_recipes_steps_feature_data", lambda: e)
 
     out = st_mod.get_recipes_all_feature_data()
-    assert len(out) == 5
+    assert len(out[0]) == 5
+    assert out[1] == "Concatenated data successfully"
