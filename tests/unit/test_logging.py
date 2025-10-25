@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from mangetamain.logging_config import configure_logging, get_logger, reset_logging
-from mangetamain.settings import (
+from app.logging_config import configure_logging, get_logger, reset_logging
+from app.settings import (
     DEFAULT_LOG_DIR,
     DEFAULT_MAX_LOG_FILES,
     LoggingSettings,

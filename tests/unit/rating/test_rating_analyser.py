@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from mangetamain.data_processing.rating.analyzers import RatingAnalyser
+from mangetamain.preprocessing.feature.rating.analyzers import RatingAnalyser
 
 
 def test_rating_analyser_basic_topk() -> None:

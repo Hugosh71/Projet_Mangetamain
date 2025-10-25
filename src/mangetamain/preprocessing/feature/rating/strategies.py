@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from ..interfaces import ICleaningStrategy, IPreprocessingStrategy
+from ...interfaces import ICleaningStrategy, IPreprocessingStrategy
 
 
 class RatingCleaning(ICleaningStrategy):

@@ -7,7 +7,6 @@ SOLID principles and reusable design patterns (Factory, Strategy).
 
 from __future__ import annotations
 
-from . import rating as rating
 from .exceptions import (
     DataError,
     DataLoadError,
@@ -26,6 +25,11 @@ from .interfaces import (
 )
 from .processors import BasicDataProcessor
 from .repositories import CSVDataRepository, RepositoryPaths
+from .feature import rating as rating
+from .feature import seasonality as seasonality
+from .feature import ingredients as ingredients
+from .feature import nutrition as nutrition
+from .feature import steps as steps
 
 __all__ = [
     # Interfaces / ABCs
@@ -47,6 +51,10 @@ __all__ = [
     "BasicDataProcessor",
     # Submodules
     "rating",
+    "seasonality",
+    "ingredients",
+    "nutrition",
+    "steps",
     # Factories
     "ProcessorFactory",
 ]
