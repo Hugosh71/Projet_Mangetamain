@@ -62,6 +62,4 @@ class CSVDataRepository(IDataRepository):
             self._logger.debug("Loaded interactions: %d rows", len(df))
             return df
         except Exception as exc:  # noqa: BLE001 - wrap into domain error
-            raise DataLoadError(
-                f"Failed to load interactions from {path}"
-            ) from exc
+            raise DataLoadError(f"Failed to load interactions from {path}") from exc

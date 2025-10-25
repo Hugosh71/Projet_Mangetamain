@@ -1,4 +1,5 @@
 """Concrete data processors and default strategies."""
+
 from __future__ import annotations
 
 import logging
@@ -47,9 +48,7 @@ class BasicDataProcessor(DataProcessor):
         self._cleaning = cleaning or NoOpCleaning()
         self._preprocessing = preprocessing or NoOpPreprocessing()
 
-    def clean(
-        self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> ProcessedPair:
+    def clean(self, recipes: pd.DataFrame, interactions: pd.DataFrame) -> ProcessedPair:
         recipes_c, interactions_c = self._cleaning.clean(recipes, interactions)
         return ProcessedPair(recipes=recipes_c, interactions=interactions_c)
 

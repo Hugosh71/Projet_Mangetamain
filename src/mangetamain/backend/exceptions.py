@@ -17,5 +17,3 @@ class DataLoadError(DataError):
 
 class ValidationError(DataError):
     """Raised when data validation fails."""
-
-

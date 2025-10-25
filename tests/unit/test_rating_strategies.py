@@ -5,11 +5,14 @@ from mangetamain.backend.rating.strategies import (
     RatingPreprocessing,
 )
 
+
 def test_rating_cleaning_filters_zero_and_na() -> None:
-    recipes = pd.DataFrame([
-        {"id": 1, "name": "A"},
-        {"id": 2, "name": "B"},
-    ])
+    recipes = pd.DataFrame(
+        [
+            {"id": 1, "name": "A"},
+            {"id": 2, "name": "B"},
+        ]
+    )
     interactions = pd.DataFrame(
         [
             {"recipe_id": 1, "rating": 0},
@@ -29,9 +32,11 @@ def test_rating_cleaning_filters_zero_and_na() -> None:
 
 
 def test_rating_preprocessing_adds_normalized() -> None:
-    recipes = pd.DataFrame([
-        {"id": 1, "name": "A"},
-    ])
+    recipes = pd.DataFrame(
+        [
+            {"id": 1, "name": "A"},
+        ]
+    )
     interactions = pd.DataFrame(
         [
             {"recipe_id": 1, "rating": 5},
@@ -45,5 +50,3 @@ def test_rating_preprocessing_adds_normalized() -> None:
     assert len(r_out) == len(recipes)
     # assert "rating_normalized" in i_out.columns
     # assert i_out["rating_normalized"].between(0, 1).all()
-
-

@@ -2,12 +2,15 @@ import pandas as pd
 from pathlib import Path
 from mangetamain.backend.rating.analyzers import RatingAnalyser
 
+
 def test_rating_analyser_basic_topk() -> None:
-    recipes = pd.DataFrame([
-        {"id": 1, "name": "A"},
-        {"id": 2, "name": "B"},
-        {"id": 3, "name": "C"},
-    ])
+    recipes = pd.DataFrame(
+        [
+            {"id": 1, "name": "A"},
+            {"id": 2, "name": "B"},
+            {"id": 3, "name": "C"},
+        ]
+    )
     interactions = pd.DataFrame(
         [
             {"recipe_id": 1, "rating": 5},
@@ -50,6 +53,3 @@ def test_rating_analyser_basic_topk() -> None:
         "median_rating",
     }
     assert expected_cols.issubset(set(table.columns))
-
-
-

@@ -13,9 +13,7 @@ class RatingAnalyser(Analyser):
     """Produce high-level insights for ratings (top-K by mean, etc.)."""
 
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
-        self._logger = logger or logging.getLogger(
-            "mangetamain.backend.rating"
-        )
+        self._logger = logger or logging.getLogger("mangetamain.backend.rating")
 
     def analyze(
         self,
@@ -64,11 +62,16 @@ class RatingAnalyser(Analyser):
             )
         else:
             rated_grp = rated_only.groupby("recipe_id")
-            rated_agg = rated_grp["rating"].agg(
-                mean_rating="mean",
-                median_rating="median",
-                rating_std="std",
-            ).reset_index().fillna({"rating_std": 0})
+            rated_agg = (
+                rated_grp["rating"]
+                .agg(
+                    mean_rating="mean",
+                    median_rating="median",
+                    rating_std="std",
+                )
+                .reset_index()
+                .fillna({"rating_std": 0})
+            )
 
         # Attach recipe names
         # rated_agg = rated_agg.merge(
@@ -83,15 +86,12 @@ class RatingAnalyser(Analyser):
         # )
 
         # Merge aggregates
-        per_recipe = (
-            n_interactions.merge(n_rated, on="recipe_id", how="left")
-            .merge(rated_agg, on="recipe_id", how="left")
+        per_recipe = n_interactions.merge(n_rated, on="recipe_id", how="left").merge(
+            rated_agg, on="recipe_id", how="left"
         )
         per_recipe["n_rated"] = per_recipe["n_rated"].fillna(0).astype(int)
         per_recipe["share_rated"] = (
-            per_recipe["n_rated"]
-            .divide(per_recipe["n_interactions"])
-            .fillna(0)
+            per_recipe["n_rated"].divide(per_recipe["n_interactions"]).fillna(0)
         )
 
         # Bayesian smoothing (simple):
@@ -104,9 +104,7 @@ class RatingAnalyser(Analyser):
             else 0.0
         )
         c_value = (
-            c if c is not None else max(
-                5, int(per_recipe["n_rated"].median() or 5)
-            )
+            c if c is not None else max(5, int(per_recipe["n_rated"].median() or 5))
         )
         # compute sum_ratings per recipe
         if rated_only.empty:
@@ -120,12 +118,11 @@ class RatingAnalyser(Analyser):
                 .rename("sum_ratings")
                 .reset_index()
             )
-        per_recipe = per_recipe.merge(
-            sum_ratings, on="recipe_id", how="left"
-        ).fillna({"sum_ratings": 0.0})
-        per_recipe["bayes_mean"] = (
-            (mu * c_value + per_recipe["sum_ratings"]) /
-            (c_value + per_recipe["n_rated"].clip(lower=0))
+        per_recipe = per_recipe.merge(sum_ratings, on="recipe_id", how="left").fillna(
+            {"sum_ratings": 0.0}
+        )
+        per_recipe["bayes_mean"] = (mu * c_value + per_recipe["sum_ratings"]) / (
+            c_value + per_recipe["n_rated"].clip(lower=0)
         )
 
         # Additional dispersion metrics
@@ -161,9 +158,7 @@ class RatingAnalyser(Analyser):
             n = per_recipe["n_interactions"].clip(lower=1).astype(float)
             denom = 1 + (z**2) / n
             center = p + (z**2) / (2 * n)
-            rad = z * (
-                ((p * (1 - p) + (z**2) / (4 * n)) / n)
-            ).pow(0.5)
+            rad = z * (((p * (1 - p) + (z**2) / (4 * n)) / n)).pow(0.5)
             per_recipe["wilson_low_rec"] = (center - rad) / denom
             per_recipe["wilson_high_rec"] = (center + rad) / denom
 
@@ -172,9 +167,7 @@ class RatingAnalyser(Analyser):
         # Example global stats (can be extended):
         num_recipes = int(per_recipe["recipe_id"].nunique())
         n_with_rating = int((per_recipe["n_rated"] > 0).sum())
-        phat = (
-            per_recipe["n_rated"] / per_recipe["n_interactions"]
-        ).fillna(0)
+        phat = (per_recipe["n_rated"] / per_recipe["n_interactions"]).fillna(0)
         phat_mean = float(phat.mean()) if len(phat) else 0.0
 
         # Wilson interval over binary "had rating" at recipe level
@@ -186,9 +179,7 @@ class RatingAnalyser(Analyser):
         n = max(1, num_recipes)
         denom = 1 + (z**2) / n
         center = p + (z**2) / (2 * n)
-        rad = z * math.sqrt(
-            (p * (1 - p) + (z**2) / (4 * n)) / n
-        )
+        rad = z * math.sqrt((p * (1 - p) + (z**2) / (4 * n)) / n)
         wilson_low = (center - rad) / denom
         wilson_high = (center + rad) / denom
 
@@ -207,9 +198,7 @@ class RatingAnalyser(Analyser):
         )
 
     def generate_report(self, result: AnalysisResult, path: Path) -> dict[str, object]:
-        self._logger.debug(
-            "Writing rating_table.csv and rating_summary.csv"
-        )
+        self._logger.debug("Writing rating_table.csv and rating_summary.csv")
 
         path = Path(path)
         if path.is_dir():
@@ -226,9 +215,8 @@ class RatingAnalyser(Analyser):
         result.table.to_csv(out_table, index=False)
 
         # Write summary as key,value rows
-        summary_df = (
-            pd.DataFrame([result.summary])
-            .melt(var_name="metric", value_name="value")
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
         )
         summary_df.to_csv(out_summary, index=False)
 
@@ -236,5 +224,3 @@ class RatingAnalyser(Analyser):
             "table_path": str(out_table),
             "summary_path": str(out_summary),
         }
-
-
