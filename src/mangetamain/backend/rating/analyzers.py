@@ -161,7 +161,9 @@ class RatingAnalyser(Analyser):
             n = per_recipe["n_interactions"].clip(lower=1).astype(float)
             denom = 1 + (z**2) / n
             center = p + (z**2) / (2 * n)
-            rad = z * ((p * (1 - p) + (z**2) / (4 * n)) / n).pow(0.5)
+            rad = z * (
+                ((p * (1 - p) + (z**2) / (4 * n)) / n)
+            ).pow(0.5)
             per_recipe["wilson_low_rec"] = (center - rad) / denom
             per_recipe["wilson_high_rec"] = (center + rad) / denom
 
@@ -206,17 +208,33 @@ class RatingAnalyser(Analyser):
 
     def generate_report(self, result: AnalysisResult, path: Path) -> dict[str, object]:
         self._logger.debug(
-            "Generating consolidated CSV content for rating analysis"
+            "Writing rating_table.csv and rating_summary.csv"
         )
 
-        per_recipe_df = result.table
-        per_recipe_df.to_csv(path, index=False)
-        # Rating table section
-        # rating_table_df = result.table
-        # rating_table_df.to_csv(path, index=False)
+        path = Path(path)
+        if path.is_dir():
+            out_table = path / "rating_table.csv"
+            out_summary = path / "rating_summary.csv"
+        else:
+            # If a file path is passed, use its parent directory
+            out_table = path.parent / "rating_table.csv"
+            out_summary = path.parent / "rating_summary.csv"
+
+        out_table.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write detailed per-recipe table
+        result.table.to_csv(out_table, index=False)
+
+        # Write summary as key,value rows
+        summary_df = (
+            pd.DataFrame([result.summary])
+            .melt(var_name="metric", value_name="value")
+        )
+        summary_df.to_csv(out_summary, index=False)
 
         return {
-            "path": str(path),
+            "table_path": str(out_table),
+            "summary_path": str(out_summary),
         }
 
 
