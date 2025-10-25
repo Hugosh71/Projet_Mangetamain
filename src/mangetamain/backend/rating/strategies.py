@@ -21,7 +21,9 @@ class RatingCleaning(ICleaningStrategy):
         #     interactions_clean = interactions_clean.dropna(
         #         subset=["rating"]
         #     )  # type: ignore[call-overload]
-        return recipes.copy(), interactions.copy()
+        interactions_clean = interactions.copy()
+        recipes_clean = recipes.copy()
+        return recipes_clean, interactions_clean
 
 
 class RatingPreprocessing(IPreprocessingStrategy):
@@ -35,4 +37,6 @@ class RatingPreprocessing(IPreprocessingStrategy):
         #     interactions_pp["rating_normalized"] = (
         #         interactions_pp["rating"].astype(float) / 5.0
         #     )
-        return recipes.copy(), interactions.copy()
+        recipes_pp = recipes.copy()
+        interactions_pp = interactions.copy()
+        return recipes_pp, interactions_pp
