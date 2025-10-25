@@ -32,7 +32,24 @@ def test_rating_analyser_basic_topk() -> None:
     tmp_path = Path("tmp/test_rating_analyser_basic_topk")
     tmp_path.mkdir(parents=True, exist_ok=True)
 
-    report = analyser.generate_report(result, tmp_path / "test_rating_analyser_basic_topk.csv")
-    assert Path(report["path"]).exists()
+    report = analyser.generate_report(result, tmp_path)
+    assert Path(report["table_path"]).exists()
+    assert Path(report["summary_path"]).exists()
+
+    # Basic schema checks on table
+    table = pd.read_csv(report["table_path"])
+    expected_cols = {
+        "recipe_name",
+        "recipe_id",
+        "mean_rating",
+        "rating_std",
+        "n_rated",
+        "bayes_mean",
+        "n_interactions",
+        "share_rated",
+        "median_rating",
+    }
+    assert expected_cols.issubset(set(table.columns))
+
 
 

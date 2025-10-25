@@ -8,8 +8,8 @@ from mangetamain.backend import (
 )
 from mangetamain.backend.rating.analyzers import RatingAnalyser
 
+
 def test_rating_pipeline_e2e() -> None:
-    
     tmp_path = Path("tmp/test_rating_pipeline_e2e")
     tmp_path.mkdir(parents=True, exist_ok=True)
     recipes = pd.DataFrame(
@@ -50,9 +50,14 @@ def test_rating_pipeline_e2e() -> None:
     analyser = RatingAnalyser()
     result = analyser.analyze(
         processed.recipes,
-        processed.interactions, 
+        processed.interactions,
     )
 
     assert not result.table.empty
-    report = analyser.generate_report(result, tmp_path / "test_rating_pipeline_e2e.csv")
-    assert Path(report["path"]).exists()
+    report = analyser.generate_report(result, tmp_path)
+    assert Path(report["table_path"]).exists()
+    assert Path(report["summary_path"]).exists()
+
+    table = pd.read_csv(report["table_path"])
+    # Edge cases covered: rating=0 included in interactions
+    assert (table["n_interactions"] >= table["n_rated"]).all()
