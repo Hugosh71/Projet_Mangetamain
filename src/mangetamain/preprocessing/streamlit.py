@@ -76,21 +76,42 @@ def get_recipes_all_feature_data() -> pd.DataFrame:
 
 
 @st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def save_recipes_all_feature_data(path: Path) -> pd.DataFrame:
-    get_recipes_all_feature_data().to_csv(path, index=False)
+def save_recipes_all_feature_data(path: Path = Path("data/preprocessed/recipes_all_feature_data.csv")) -> pd.DataFrame:
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+    df = get_recipes_all_feature_data()
+    required_cols = [
+        'id', 'name', 'energy_density', 'protein_ratio', 'fat_ratio',
+        'nutrient_balance_index', 'inter_doy_sin_smooth',
+        'inter_doy_cos_smooth', 'inter_strength', 'n_interactions',
+        'bayes_mean', 'minutes_log', 'score_sweet_savory',
+        'score_spicy_mild', 'score_lowcal_rich', 'score_vegetarian_meat',
+        'score_solid_liquid', 'score_raw_processed', 'score_western_exotic',
+        'cluster', 'pc_1', 'pc_2', 'tags', 'minutes', 'n_steps',
+        'n_ingredients', 'rating_mean'
+    ]
+    missing = [c for c in required_cols if c not in df.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+    df.to_csv(path, index=False)
 
 @st.cache_data
-def load_recipes_data() -> pd.DataFrame:
+def load_recipes_data(path: Path = Path("data/preprocessed/recipes_all_feature_data.csv")) -> pd.DataFrame:
     """Load and preprocess recipes data from compressed CSV files.
 
     Returns:
         pd.DataFrame: Combined recipes and clustering data
     """
     # Load recipes data
-    recipes_path = "s3://mangetamain/recipes_merged.csv.gz"
-    recipes_df = pd.read_csv(recipes_path)
-
-    return recipes_df
+    df = None
+    try:
+        df = pd.read_csv(path)
+    except FileNotFoundError:
+        recipes_path = "s3://mangetamain/recipes_merged.csv.gz"
+        recipes_df = pd.read_csv(recipes_path)
+        df = recipes_df
+    finally:
+        return df
 
 @st.cache_data
 def get_cluster_names() -> dict:
