@@ -58,4 +58,7 @@ def test_rating_pipeline_e2e(tmp_path: Path) -> None:
     #     "num_ratings",
     # }.issubset(set(result.top_recipes.columns))
 
+    report = analyser.generate_report(result, tmp_path / "test_rating_pipeline_e2e.csv")
+    assert Path(report["path"]).exists()
+
 
