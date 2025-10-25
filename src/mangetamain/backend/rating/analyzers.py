@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+
 import pandas as pd
 
 from ..interfaces import Analyser, AnalysisResult
@@ -158,7 +159,7 @@ class RatingAnalyser(Analyser):
             n = per_recipe["n_interactions"].clip(lower=1).astype(float)
             denom = 1 + (z**2) / n
             center = p + (z**2) / (2 * n)
-            rad = z * (((p * (1 - p) + (z**2) / (4 * n)) / n)).pow(0.5)
+            rad = z * ((p * (1 - p) + (z**2) / (4 * n)) / n).pow(0.5)
             per_recipe["wilson_low_rec"] = (center - rad) / denom
             per_recipe["wilson_high_rec"] = (center + rad) / denom
 

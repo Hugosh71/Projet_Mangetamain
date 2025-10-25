@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import logging
+
 from .processors import (
     BasicDataProcessor,
-    NoOpPreprocessing,
     NoOpCleaning,
+    NoOpPreprocessing,
 )
 from .rating import RatingCleaning, RatingPreprocessing
 

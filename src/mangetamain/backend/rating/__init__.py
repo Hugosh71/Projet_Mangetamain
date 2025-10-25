@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from .strategies import RatingCleaning, RatingPreprocessing
 from .analyzers import RatingAnalyser
+from .strategies import RatingCleaning, RatingPreprocessing
 
 __all__ = [
     "RatingCleaning",

@@ -1,11 +1,13 @@
 """Abstract interfaces and strategies for backend processing."""
 
 from __future__ import annotations
+
 import abc
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol, Tuple
+from typing import Protocol
+
 import pandas as pd
 
 
@@ -36,7 +38,7 @@ class ICleaningStrategy(Protocol):
 
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:  # pragma: no cover - protocol only
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:  # pragma: no cover - protocol only
         ...
 
 
@@ -45,7 +47,7 @@ class IPreprocessingStrategy(Protocol):
 
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:  # pragma: no cover - protocol only
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:  # pragma: no cover - protocol only
         ...
 
 
@@ -81,7 +83,7 @@ class Analyser(abc.ABC):
 
     @abc.abstractmethod
     def generate_report(
-        self, result: AnalysisResult, path: "Path"
+        self, result: AnalysisResult, path: Path
     ) -> dict[str, object]:  # pragma: no cover - interface only
         """Return a minimal, serializable representation of the result."""
 
