@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from .strategies import NutritionPreprocessing, NutritionCleaning
 from .analysers import NutritionAnalyser
+from .strategies import NutritionCleaning, NutritionPreprocessing
 
 __all__ = [
     "NutritionCleaning",
     "NutritionPreprocessing",
     "NutritionAnalyser",
 ]
-
-

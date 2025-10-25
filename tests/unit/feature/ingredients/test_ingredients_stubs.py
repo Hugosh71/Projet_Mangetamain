@@ -26,5 +26,3 @@ def test_ingredients_strategies_stub() -> None:
     assert r2.equals(recipes) and i2.equals(interactions)
     r3, i3 = pre.preprocess(recipes, interactions)
     assert r3.equals(recipes) and i3.equals(interactions)
-
-

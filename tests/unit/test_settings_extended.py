@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import os
 from pathlib import Path
+
 from app.settings import LoggingSettings, load_env_file
 
 
@@ -28,9 +30,7 @@ def test_load_env_file_skips_comments_and_no_separator(
     assert os.environ["MANG_USER_ID"] == "quoted-user"
 
 
-def test_from_env_resolves_relative_directory(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_from_env_resolves_relative_directory(tmp_path: Path, monkeypatch) -> None:
     rel_dir = Path("rel_logs")
     monkeypatch.setenv("MANG_LOG_DIR", str(rel_dir))
 
@@ -40,9 +40,7 @@ def test_from_env_resolves_relative_directory(
     assert settings.directory.is_absolute()
 
 
-def test_parse_empty_string_behaves_like_default(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_parse_empty_string_behaves_like_default(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("MANG_LOG_MAX_FILES", "")
     settings = LoggingSettings.from_env()
     # Default defined in module is 10

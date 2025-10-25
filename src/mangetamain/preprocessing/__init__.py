@@ -14,6 +14,11 @@ from .exceptions import (
     ValidationError,
 )
 from .factories import ProcessorFactory
+from .feature import ingredients as ingredients
+from .feature import nutrition as nutrition
+from .feature import rating as rating
+from .feature import seasonality as seasonality
+from .feature import steps as steps
 from .interfaces import (
     Analyser,
     AnalysisResult,
@@ -25,11 +30,6 @@ from .interfaces import (
 )
 from .processors import BasicDataProcessor
 from .repositories import CSVDataRepository, RepositoryPaths
-from .feature import rating as rating
-from .feature import seasonality as seasonality
-from .feature import ingredients as ingredients
-from .feature import nutrition as nutrition
-from .feature import steps as steps
 
 __all__ = [
     # Interfaces / ABCs

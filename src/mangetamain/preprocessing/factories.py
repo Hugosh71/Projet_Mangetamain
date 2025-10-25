@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import logging
 
+from .feature.ingredients import IngredientsCleaning, IngredientsPreprocessing
+from .feature.nutrition import NutritionCleaning, NutritionPreprocessing
+from .feature.rating import RatingCleaning, RatingPreprocessing
+from .feature.seasonality import SeasonalityCleaning, SeasonalityPreprocessing
+from .feature.steps import StepsCleaning, StepsPreprocessing
 from .processors import (
     BasicDataProcessor,
     NoOpCleaning,
     NoOpPreprocessing,
 )
-from .feature.rating import RatingCleaning, RatingPreprocessing
-from .feature.seasonality import SeasonalityCleaning, SeasonalityPreprocessing
-from .feature.ingredients import IngredientsCleaning, IngredientsPreprocessing
-from .feature.nutrition import NutritionCleaning, NutritionPreprocessing
-from .feature.steps import StepsCleaning, StepsPreprocessing
 
 
 class ProcessorFactory:
