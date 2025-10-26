@@ -220,6 +220,20 @@ def get_tag_cloud(df: pd.DataFrame, tag_col: str, use_tfidf: bool = True):
 
 @st.cache_data
 def get_cluster_summary(df: pd.DataFrame, cluster: int):
+    """
+    Compute summary statistics for a specific cluster in the recipes DataFrame.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing recipe data with a "cluster" column.
+        cluster (int): Cluster ID for which summary statistics are computed.
+
+    Returns:
+        dict: Dictionary with summary statistics including:
+            - "n": Number of recipes in the cluster
+            - "minutes_mean": Median preparation time (in minutes) for the cluster
+            - "n_steps_mean": Mean number of steps for the cluster
+            - "n_ingredients": Mean number of ingredients for the cluster
+    """
     df_cluster = df[df["cluster"] == cluster]
 
     n = df_cluster.shape[0]
