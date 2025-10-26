@@ -20,6 +20,7 @@ REGISTRY         ?=
 
 DOCKER_COMPOSE   := docker compose
 RUFF            := $(POETRY) run ruff
+BLACK			:= $(POETRY) run black
 FLAKE8          := $(POETRY) run flake8
 PYTEST          := $(POETRY) run pytest
 STREAMLIT       := $(POETRY) run streamlit
@@ -64,7 +65,7 @@ clean:
 ## Lint source and tests
 .PHONY: lint
 lint:
-	$(RUFF) check $(SRC_DIR) $(TEST_DIR)
+	$(BLACK) --check $(SRC_DIR) $(TEST_DIR) && $(RUFF) check $(SRC_DIR) $(TEST_DIR)
 
 ## Format code (fix lint + format)
 .PHONY: format
