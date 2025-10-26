@@ -18,7 +18,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./docs:/app/docs
-      - ./.streamlit:/app/.streamlit
+      - ./.streamlit:/app/src/.streamlit
       - ./data:/app/src/data:ro
       - ./logs:/app/logs
     restart: unless-stopped
