@@ -19,7 +19,7 @@ services:
       - ./src:/app/src
       - ./docs:/app/docs
       - ./.streamlit:/app/.streamlit
-      - ./data:/app/data:ro
+      - ./data:/app/src/data:ro
       - ./logs:/app/logs
     restart: unless-stopped
 

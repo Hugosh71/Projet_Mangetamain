@@ -5,7 +5,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.mangetamain.preprocessing.streamlit import (
+from app.logging_config import configure_logging, get_logger
+from mangetamain.preprocessing.streamlit import (
     add_month_labels,
     get_cluster_names,
     get_cluster_summary,
@@ -15,7 +16,11 @@ from src.mangetamain.preprocessing.streamlit import (
     min_max_scale,
     remove_outliers_iqr,
     rgb_to_hex,
+    save_recipes_all_feature_data,
 )
+
+configure_logging(log_directory="./logs", reset_existing=True)
+logger = get_logger("clustering")
 
 # Set Streamlit page configuration
 st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
@@ -29,9 +34,25 @@ st.sidebar.markdown(
     "entre les recettes, au sein de l'équipe Data Science de Mangetamain.</p>",
     unsafe_allow_html=True,
 )
+df_all_features, message = save_recipes_all_feature_data()
+if df_all_features is None:
+    logger.error(message)
+    # st.error(message)
+    # st.stop()
+else:
+    logger.debug(message)
+    st.success(message)
 
 # Load data and cluster names
-df_recipes = load_recipes_data()
+df_recipes, message = load_recipes_data()
+if df_recipes is None:
+    logger.error(message)
+    st.error(message)
+    st.stop()
+
+logger.debug(message)
+st.success(message)
+
 cluster_names = get_cluster_names()
 df_recipes["cluster_name"] = df_recipes["cluster"].map(cluster_names)
 colors = px.colors.qualitative.Set2

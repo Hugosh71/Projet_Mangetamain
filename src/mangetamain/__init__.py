@@ -2,7 +2,9 @@
 
 __all__ = [
     "__version__",
-    "LoggingSettings",
+    "preprocessing",
 ]
 
 __version__ = "0.1.0"
+
+from . import preprocessing as preprocessing
