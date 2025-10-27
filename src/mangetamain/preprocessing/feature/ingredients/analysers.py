@@ -52,6 +52,13 @@ class IngredientsAnalyser(Analyser):
         cos_sim_matrix = np.dot(emb_norm, axis_norm.T)   # shape (n_ingredients, n_axes)
 
         scores_df = pd.DataFrame(cos_sim_matrix, index=ingredients, columns=axes_names)
+        
+        # Ajout des scores moyens aux recettes
+        for axe in axes_names:
+            score_map = scores_df[axe].to_dict()
+            recipes[f'score_{axe}'] = recipes['ingredients'].apply(
+                lambda ingr_list: np.mean([score_map[ingr] for ingr in ast.literal_eval(ingr_list)])
+            )       
 
         return AnalysisResult(table=recipes.assign(_stub=True), summary={})
 
