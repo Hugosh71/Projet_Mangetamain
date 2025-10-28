@@ -1,6 +1,7 @@
 # Data
 /data/
 !data/preprocessed/.gitkeep
+/notebooks/Features/
 
 # Mac OS-specific storage files
 .DS_Store
