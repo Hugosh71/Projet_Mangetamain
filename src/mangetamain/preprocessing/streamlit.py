@@ -147,9 +147,7 @@ from wordcloud import WordCloud
 
 
 @st.cache_data
-def load_recipes_data(
-    path: Path = Path("data/clustering/recipes_clustering_with_pca.csv"),
-) -> pd.DataFrame:
+def load_recipes_data() -> pd.DataFrame:
     """Load and preprocess recipes data from compressed CSV files.
 
     Returns:
@@ -157,15 +155,14 @@ def load_recipes_data(
     """
     # Load recipes data
     df = None
-    target_path = path
-    if not target_path.exists():
-        target_path = "s3://mangetamain/recipes_merged.csv.gz"
+    target_path = "s3://mangetamain/recipes_merged.csv.gz"
     df = pd.read_csv(target_path)
     if df.empty:
-        raise ValueError(f"No data found at {target_path}")
+        df = pd.read_csv("data/clustering/recipes_merged.csv.gz")
+        if df.empty:
+            raise ValueError(f"No data found at {target_path}")
 
     return df, f"Loaded data from {target_path}"
-
 
 @st.cache_data
 def get_cluster_names() -> dict:

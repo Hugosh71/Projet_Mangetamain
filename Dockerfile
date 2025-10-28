@@ -36,19 +36,17 @@ FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/src
+    PYTHONPATH=/app
 
 WORKDIR /app
 
-# Copy installed packages from builder (this avoids reinstalling everything)
 COPY --from=builder /usr/local /usr/local
 
-# Copy source code into /app/src so that packages are importable
+
+# Copy all sources
 COPY src/ ./src/
 COPY .streamlit/ ./src/.streamlit/
-COPY run_all.py ./run_all.py
-
-# In container builds, copy datasets under /app/data
 COPY data/ ./data/
 
-ENTRYPOINT ["python", "run_all.py"]
+EXPOSE 8501
+CMD ["streamlit", "run", "src/app/main.py"]

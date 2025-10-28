@@ -1,6 +1,11 @@
 """Page d'accueil de l'application"""
 
 import streamlit as st
+from pathlib import Path
+
+from src.app.run_all import run_pipeline
+from src.app.upload_to_s3 import upload_to_s3_stub
+from src.app.download_from_s3 import download_from_s3_stub
 
 st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
 
@@ -85,6 +90,30 @@ with col3:
 
 st.write("\n")
 st.write("\n")
+
+st.markdown("### ⚙️ Pipeline")
+btn_run, btn_upload, btn_download = st.columns(3)
+with btn_run:
+    if st.button("Lancer pipeline", type="primary"):
+        try:
+            out = run_pipeline()
+            st.success(f"Pipeline terminé → {out}")
+        except Exception as exc:
+            st.error(f"Erreur pipeline: {exc}")
+with btn_upload:
+    up = st.file_uploader("Uploader CSV local", type=["csv", "gz"])
+    if up is not None:
+        dest = Path("data/clustering")
+        dest.mkdir(parents=True, exist_ok=True)
+        target = dest / "recipes_merged.csv.gz"
+        with open(target, "wb") as f:
+            f.write(up.getbuffer())
+        upload_to_s3_stub(target)
+        st.success(f"Fichier uploadé vers S3 (stub): {target}")
+with btn_download:
+    if st.button("Télécharger CSV"):
+        local = download_from_s3_stub("recipes_merged.csv.gz")
+        st.success(f"Fichier téléchargé (stub): {local}")
 
 st.markdown(
     """
