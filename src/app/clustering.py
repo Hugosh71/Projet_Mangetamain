@@ -16,7 +16,7 @@ from mangetamain.preprocessing.streamlit import (
     min_max_scale,
     remove_outliers_iqr,
     rgb_to_hex,
-    save_recipes_all_feature_data,
+    # save_recipes_all_feature_data,
 )
 
 configure_logging(log_directory="./logs", reset_existing=True)
@@ -34,14 +34,14 @@ st.sidebar.markdown(
     "entre les recettes, au sein de l'équipe Data Science de Mangetamain.</p>",
     unsafe_allow_html=True,
 )
-df_all_features, message = save_recipes_all_feature_data()
-if df_all_features is None:
-    logger.error(message)
-    # st.error(message)
-    # st.stop()
-else:
-    logger.debug(message)
-    st.success(message)
+# df_all_features, message = save_recipes_all_feature_data()
+# if df_all_features is None:
+#     logger.error(message)
+#     # st.error(message)
+#     # st.stop()
+# else:
+#     logger.debug(message)
+#     st.success(message)
 
 # Load data and cluster names
 df_recipes, message = load_recipes_data()

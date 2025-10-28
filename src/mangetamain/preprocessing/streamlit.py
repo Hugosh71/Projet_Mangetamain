@@ -11,144 +11,144 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import RobustScaler
 from wordcloud import WordCloud
 
-from .factories import ProcessorFactory
-from .feature.ingredients import IngredientsAnalyser
-from .feature.nutrition import NutritionAnalyser
-from .feature.rating import RatingAnalyser
-from .feature.seasonality import SeasonalityAnalyzer
-from .feature.steps import StepsAnalyser
-from .repositories import CSVDataRepository, RepositoryPaths
+# from .factories import ProcessorFactory
+# from .feature.ingredients import IngredientsAnalyser
+# from .feature.nutrition import NutritionAnalyser
+# from .feature.rating import RatingAnalyser
+# from .feature.seasonality import SeasonalityAnalyzer
+# from .feature.steps import StepsAnalyser
+# from .repositories import CSVDataRepository, RepositoryPaths
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_rating_feature_data() -> pd.DataFrame:
-    repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_rating(repo)  # or create_basic
-    processed = processor.run()
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_rating_feature_data() -> pd.DataFrame:
+#     repo = CSVDataRepository(paths=RepositoryPaths())
+#     processor = ProcessorFactory.create_rating(repo)  # or create_basic
+#     processed = processor.run()
 
-    analyser = RatingAnalyser()
-    result = analyser.analyze(
-        processed.recipes,
-        processed.interactions,
-    )
+#     analyser = RatingAnalyser()
+#     result = analyser.analyze(
+#         processed.recipes,
+#         processed.interactions,
+#     )
 
-    return result.table
-
-
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_seasonality_feature_data() -> pd.DataFrame:
-    repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_seasonality(repo)
-    processed = processor.run()
-    analyser = SeasonalityAnalyzer()
-    result = analyser.analyze(processed.recipes, processed.interactions)
-    return result.table
+#     return result.table
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_ingredients_feature_data() -> pd.DataFrame:
-    repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_ingredients(repo)
-    processed = processor.run()
-    analyser = IngredientsAnalyser()
-    result = analyser.analyze(processed.recipes, processed.interactions)
-    return result.table
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_seasonality_feature_data() -> pd.DataFrame:
+#     repo = CSVDataRepository(paths=RepositoryPaths())
+#     processor = ProcessorFactory.create_seasonality(repo)
+#     processed = processor.run()
+#     analyser = SeasonalityAnalyzer()
+#     result = analyser.analyze(processed.recipes, processed.interactions)
+#     return result.table
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_nutrition_feature_data() -> pd.DataFrame:
-    repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_nutrition(repo)
-    processed = processor.run()
-    analyser = NutritionAnalyser()
-    result = analyser.analyze(processed.recipes, processed.interactions)
-    return result.table
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_ingredients_feature_data() -> pd.DataFrame:
+#     repo = CSVDataRepository(paths=RepositoryPaths())
+#     processor = ProcessorFactory.create_ingredients(repo)
+#     processed = processor.run()
+#     analyser = IngredientsAnalyser()
+#     result = analyser.analyze(processed.recipes, processed.interactions)
+#     return result.table
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_steps_feature_data() -> pd.DataFrame:
-    repo = CSVDataRepository(paths=RepositoryPaths())
-    processor = ProcessorFactory.create_steps(repo)
-    processed = processor.run()
-    analyser = StepsAnalyser()
-    result = analyser.analyze(processed.recipes, processed.interactions)
-    return result.table
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_nutrition_feature_data() -> pd.DataFrame:
+#     repo = CSVDataRepository(paths=RepositoryPaths())
+#     processor = ProcessorFactory.create_nutrition(repo)
+#     processed = processor.run()
+#     analyser = NutritionAnalyser()
+#     result = analyser.analyze(processed.recipes, processed.interactions)
+#     return result.table
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def get_recipes_all_feature_data() -> pd.DataFrame:
-    try:
-        combined = pd.concat(
-            [
-                get_recipes_rating_feature_data(),
-                get_recipes_seasonality_feature_data(),
-                get_recipes_ingredients_feature_data(),
-                get_recipes_nutrition_feature_data(),
-                get_recipes_steps_feature_data(),
-            ]
-        )
-        return combined, "Concatenated data successfully"
-    except Exception as e:  # keep cached error path informative for UI callers
-        return None, f"Error concatenating data: {e}"
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_steps_feature_data() -> pd.DataFrame:
+#     repo = CSVDataRepository(paths=RepositoryPaths())
+#     processor = ProcessorFactory.create_steps(repo)
+#     processed = processor.run()
+#     analyser = StepsAnalyser()
+#     result = analyser.analyze(processed.recipes, processed.interactions)
+#     return result.table
 
 
-@st.cache_data(persist="disk", show_spinner=False, ttl=None)
-def save_recipes_all_feature_data(
-    path: Path = Path("data/preprocessed/recipes_all_feature_data.csv"),
-) -> pd.DataFrame:
-    if not path.parent.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
-    result = get_recipes_all_feature_data()
-    if isinstance(result, tuple) and len(result) == 2:
-        df, message = result
-    else:
-        df, message = result, "OK"
-    if df is None:
-        return None, message
-    required_cols = [
-        "id",
-        "name",
-        "energy_density",
-        "protein_ratio",
-        "fat_ratio",
-        "nutrient_balance_index",
-        "inter_doy_sin_smooth",
-        "inter_doy_cos_smooth",
-        "inter_strength",
-        "n_interactions",
-        "bayes_mean",
-        "minutes_log",
-        "score_sweet_savory",
-        "score_spicy_mild",
-        "score_lowcal_rich",
-        "score_vegetarian_meat",
-        "score_solid_liquid",
-        "score_raw_processed",
-        "score_western_exotic",
-        "cluster",
-        "pc_1",
-        "pc_2",
-        "tags",
-        "minutes",
-        "n_steps",
-        "n_ingredients",
-        "rating_mean",
-    ]
-    missing = [c for c in required_cols if c not in df.columns]
-    if missing:
-        # raise ValueError(f"Missing required columns: {missing}")
-        # logger = get_logger(__name__)
-        # logger.error(
-        #     f"Missing required columns: {missing}"
-        # )
-        return None, f"Missing required columns: {missing}"
-    df.to_csv(path, index=False)
-    return df, f"Saved data to {path} successfully"
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def get_recipes_all_feature_data() -> pd.DataFrame:
+#     try:
+#         combined = pd.concat(
+#             [
+#                 get_recipes_rating_feature_data(),
+#                 get_recipes_seasonality_feature_data(),
+#                 get_recipes_ingredients_feature_data(),
+#                 get_recipes_nutrition_feature_data(),
+#                 get_recipes_steps_feature_data(),
+#             ]
+#         )
+#         return combined, "Concatenated data successfully"
+#     except Exception as e:  # keep cached error path informative for UI callers
+#         return None, f"Error concatenating data: {e}"
+
+
+# @st.cache_data(persist="disk", show_spinner=False, ttl=None)
+# def save_recipes_all_feature_data(
+#     path: Path = Path("data/preprocessed/recipes_all_feature_data.csv"),
+# ) -> pd.DataFrame:
+#     if not path.parent.exists():
+#         path.parent.mkdir(parents=True, exist_ok=True)
+#     result = get_recipes_all_feature_data()
+#     if isinstance(result, tuple) and len(result) == 2:
+#         df, message = result
+#     else:
+#         df, message = result, "OK"
+#     if df is None:
+#         return None, message
+#     required_cols = [
+#         "id",
+#         "name",
+#         "energy_density",
+#         "protein_ratio",
+#         "fat_ratio",
+#         "nutrient_balance_index",
+#         "inter_doy_sin_smooth",
+#         "inter_doy_cos_smooth",
+#         "inter_strength",
+#         "n_interactions",
+#         "bayes_mean",
+#         "minutes_log",
+#         "score_sweet_savory",
+#         "score_spicy_mild",
+#         "score_lowcal_rich",
+#         "score_vegetarian_meat",
+#         "score_solid_liquid",
+#         "score_raw_processed",
+#         "score_western_exotic",
+#         "cluster",
+#         "pc_1",
+#         "pc_2",
+#         "tags",
+#         "minutes",
+#         "n_steps",
+#         "n_ingredients",
+#         "rating_mean",
+#     ]
+#     missing = [c for c in required_cols if c not in df.columns]
+#     if missing:
+#         # raise ValueError(f"Missing required columns: {missing}")
+#         # logger = get_logger(__name__)
+#         # logger.error(
+#         #     f"Missing required columns: {missing}"
+#         # )
+#         return None, f"Missing required columns: {missing}"
+#     df.to_csv(path, index=False)
+#     return df, f"Saved data to {path} successfully"
 
 
 @st.cache_data
 def load_recipes_data(
-    path: Path = Path("data/preprocessed/recipes_all_feature_data.csv"),
+    path: Path = Path("data/clustering/recipes_clustering_with_pca.csv"),
 ) -> pd.DataFrame:
     """Load and preprocess recipes data from compressed CSV files.
 
