@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from app.logging_config import configure_logging, get_logger
+from src.app.logging_config import configure_logging, get_logger
 
 
 def _initialise_logging() -> None:

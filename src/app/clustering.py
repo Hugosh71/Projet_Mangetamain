@@ -5,8 +5,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from app.logging_config import configure_logging, get_logger
-from mangetamain.preprocessing.streamlit import (
+from src.app.logging_config import configure_logging, get_logger
+from src.mangetamain.preprocessing.streamlit import (
     add_month_labels,
     get_cluster_names,
     get_cluster_summary,
@@ -16,7 +16,7 @@ from mangetamain.preprocessing.streamlit import (
     min_max_scale,
     remove_outliers_iqr,
     rgb_to_hex,
-    save_recipes_all_feature_data,
+    # save_recipes_all_feature_data,
 )
 
 configure_logging(log_directory="./logs", reset_existing=True)
@@ -26,6 +26,18 @@ logger = get_logger("clustering")
 st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
 
 st.markdown("# Clustering")
+
+reload_col = st.columns(1)[0]
+with reload_col:
+    if st.button(
+        "🔄 Rafraîchir les données", help="Recharger les données depuis S3/local"
+    ):
+        # Clear caches and rerun the page to reflect updated CSV
+        try:
+            st.cache_data.clear()
+        except Exception:
+            pass
+        st.rerun()
 st.sidebar.markdown(
     '<p style="color:#78a08a;font-size:0.9em;line-heitht:normal;">'
     "L'analyse de <strong>clustering</strong> appliquée aux "
@@ -34,14 +46,14 @@ st.sidebar.markdown(
     "entre les recettes, au sein de l'équipe Data Science de Mangetamain.</p>",
     unsafe_allow_html=True,
 )
-df_all_features, message = save_recipes_all_feature_data()
-if df_all_features is None:
-    logger.error(message)
-    # st.error(message)
-    # st.stop()
-else:
-    logger.debug(message)
-    st.success(message)
+# df_all_features, message = save_recipes_all_feature_data()
+# if df_all_features is None:
+#     logger.error(message)
+#     # st.error(message)
+#     # st.stop()
+# else:
+#     logger.debug(message)
+#     st.success(message)
 
 # Load data and cluster names
 df_recipes, message = load_recipes_data()
