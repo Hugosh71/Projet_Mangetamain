@@ -53,5 +53,3 @@ def run_downloading_datasets(logger: logging.Logger | None = None) -> dict[str, 
     shutil.copy2(src_interactions, dest_interactions)
     log.info("Copied RAW CSVs into %s", data_dir)
     return {"recipes": dest_recipes, "interactions": dest_interactions}
-
-

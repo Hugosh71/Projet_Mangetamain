@@ -5,16 +5,19 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.app.logging_config import configure_logging, get_logger
 from src.app.datasets import run_downloading_datasets
-from src.mangetamain.clustering import RecipeClusteringPipeline, ClusteringPaths
+from src.app.logging_config import configure_logging, get_logger
+from src.mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline
 from src.mangetamain.preprocessing.factories import ProcessorFactory
 from src.mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser
 from src.mangetamain.preprocessing.feature.nutrition import NutritionAnalyser
 from src.mangetamain.preprocessing.feature.rating import RatingAnalyser
 from src.mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer
 from src.mangetamain.preprocessing.feature.steps import StepsAnalyser
-from src.mangetamain.preprocessing.repositories import CSVDataRepository, RepositoryPaths
+from src.mangetamain.preprocessing.repositories import (
+    CSVDataRepository,
+    RepositoryPaths,
+)
 
 
 def ensure_dirs() -> None:
@@ -43,27 +46,19 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_rating = ProcessorFactory.create_rating(repo, logger=logger)
     pair_rating = proc_rating.run()
     rating_an = RatingAnalyser(logger=logger)
-    rating_result = rating_an.analyze(
-        pair_rating.recipes, pair_rating.interactions
-    )
-    rating_paths = rating_an.generate_report(
-        rating_result, Path("data/preprocessed")
-    )
+    rating_result = rating_an.analyze(pair_rating.recipes, pair_rating.interactions)
+    rating_paths = rating_an.generate_report(rating_result, Path("data/preprocessed"))
     if isinstance(rating_paths, dict):
         outputs["rating"] = Path(rating_paths["table_path"])
     else:
-        outputs["rating"] = Path(
-            "data/preprocessed/recipes_feature_rating_full.csv"
-        )
+        outputs["rating"] = Path("data/preprocessed/recipes_feature_rating_full.csv")
 
     # Seasonality
     _safe_log(logger, logging.INFO, "Preprocessing: seasonality …")
     proc_season = ProcessorFactory.create_seasonality(repo, logger=logger)
     pair_season = proc_season.run()
     season_an = SeasonalityAnalyzer(logger=logger)
-    season_result = season_an.analyze(
-        pair_season.recipes, pair_season.interactions
-    )
+    season_result = season_an.analyze(pair_season.recipes, pair_season.interactions)
     season_paths = season_an.generate_report(
         season_result,
         Path("data/preprocessed"),
@@ -80,12 +75,8 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_nutri = ProcessorFactory.create_nutrition(repo, logger=logger)
     pair_nutri = proc_nutri.run()
     nutri_an = NutritionAnalyser()
-    nutri_result = nutri_an.analyze(
-        pair_nutri.recipes, pair_nutri.interactions
-    )
-    nutri_paths = nutri_an.generate_report(
-        nutri_result, Path("data/preprocessed")
-    )
+    nutri_result = nutri_an.analyze(pair_nutri.recipes, pair_nutri.interactions)
+    nutri_paths = nutri_an.generate_report(nutri_result, Path("data/preprocessed"))
     if isinstance(nutri_paths, dict):
         outputs["nutrition"] = Path(nutri_paths["table_path"])
     else:
@@ -128,9 +119,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(ing_paths, dict):
         outputs["ingredients"] = Path(ing_paths["table_path"])
     else:
-        outputs["ingredients"] = Path(
-            "data/preprocessed/features_axes_ingredients.csv"
-        )
+        outputs["ingredients"] = Path("data/preprocessed/features_axes_ingredients.csv")
 
     _safe_log(logger, logging.INFO, "Preprocessing done")
     return outputs
@@ -155,7 +144,11 @@ def run_clustering(logger: logging.Logger) -> Path:
     return out_path
 
 
-def merge_all_tables(logger: logging.Logger, preprocessed_paths: dict[str, Path] | None = None, clustering_path: Path | None = None) -> pd.DataFrame:
+def merge_all_tables(
+    logger: logging.Logger,
+    preprocessed_paths: dict[str, Path] | None = None,
+    clustering_path: Path | None = None,
+) -> pd.DataFrame:
     _safe_log(
         logger,
         logging.INFO,
@@ -173,18 +166,28 @@ def merge_all_tables(logger: logging.Logger, preprocessed_paths: dict[str, Path]
 
     else:
         if preprocessed_paths["nutrition"] is None:
-            preprocessed_paths["nutrition"] = Path("data/preprocessed/features_nutrition.csv")
+            preprocessed_paths["nutrition"] = Path(
+                "data/preprocessed/features_nutrition.csv"
+            )
         if preprocessed_paths["seasonality"] is None:
-            preprocessed_paths["seasonality"] = Path("data/preprocessed/recipe_seasonality_features.csv")
+            preprocessed_paths["seasonality"] = Path(
+                "data/preprocessed/recipe_seasonality_features.csv"
+            )
         if preprocessed_paths["rating"] is None:
-            preprocessed_paths["rating"] = Path("data/preprocessed/recipes_feature_rating_full.csv")
+            preprocessed_paths["rating"] = Path(
+                "data/preprocessed/recipes_feature_rating_full.csv"
+            )
         if preprocessed_paths["complexity"] is None:
-            preprocessed_paths["complexity"] = Path("data/preprocessed/recipes_features_complexity.csv")
+            preprocessed_paths["complexity"] = Path(
+                "data/preprocessed/recipes_features_complexity.csv"
+            )
         if preprocessed_paths["ingredients"] is None:
-            preprocessed_paths["ingredients"] = Path("data/preprocessed/features_axes_ingredients.csv")
-    
+            preprocessed_paths["ingredients"] = Path(
+                "data/preprocessed/features_axes_ingredients.csv"
+            )
+
     if clustering_path is None:
-        clustering_path = Path("data/clustering/recipes_clustering_with_pca.csv")  
+        clustering_path = Path("data/clustering/recipes_clustering_with_pca.csv")
 
     # Read tables exactly as in notebook
     nutrition = pd.read_csv(preprocessed_paths["nutrition"], delimiter=";", index_col=0)
@@ -240,7 +243,11 @@ def run_pipeline() -> Path:
         # Run clustering
         clustering_path = run_clustering(logger)
         # Merge all tables
-        merged = merge_all_tables(logger, preprocessed_paths=preprocessed_paths, clustering_path=clustering_path)
+        merged = merge_all_tables(
+            logger,
+            preprocessed_paths=preprocessed_paths,
+            clustering_path=clustering_path,
+        )
         # Save merged table
         merged_path = save_merged_gzip(merged, logger)
         return merged_path

@@ -26,6 +26,18 @@ logger = get_logger("clustering")
 st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
 
 st.markdown("# Clustering")
+
+reload_col = st.columns(1)[0]
+with reload_col:
+    if st.button(
+        "🔄 Rafraîchir les données", help="Recharger les données depuis S3/local"
+    ):
+        # Clear caches and rerun the page to reflect updated CSV
+        try:
+            st.cache_data.clear()
+        except Exception:
+            pass
+        st.rerun()
 st.sidebar.markdown(
     '<p style="color:#78a08a;font-size:0.9em;line-heitht:normal;">'
     "L'analyse de <strong>clustering</strong> appliquée aux "

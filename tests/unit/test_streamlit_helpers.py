@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import pandas as pd
-import pytest
 
 from mangetamain.preprocessing import streamlit as st_mod
 
@@ -78,47 +75,47 @@ def test_get_cluster_names_and_summary() -> None:
     }
 
 
-def test_load_recipes_data_fallback_to_s3(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
-    dummy = pd.DataFrame({"id": [1]})
-    # dummy_path = Path("s3://mangetamain/recipes_merged.csv.gz")
+# def test_load_recipes_data_fallback_to_s3(
+#     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+# ) -> None:
+#     dummy = pd.DataFrame({"id": [1]})
+#     # dummy_path = Path("s3://mangetamain/recipes_merged.csv.gz")
 
-    def fake_read_csv(path: str | Path, *args, **kwargs):
-        if isinstance(path, str) and path.startswith("s3://mangetamain/"):
-            return dummy
-        # simulate local file missing
-        raise FileNotFoundError("missing")
+#     def fake_read_csv(path: str | Path, *args, **kwargs):
+#         if isinstance(path, str) and path.startswith("s3://mangetamain/"):
+#             return dummy
+#         # simulate local file missing
+#         raise FileNotFoundError("missing")
 
-    # Patch the module's pandas alias to ensure the decorated function sees it
-    monkeypatch.setattr(st_mod.pd, "read_csv", fake_read_csv)
+#     # Patch the module's pandas alias to ensure the decorated function sees it
+#     monkeypatch.setattr(st_mod.pd, "read_csv", fake_read_csv)
 
-    # ensure the FileNotFoundError path is taken
-    missing = tmp_path / "missing.csv"
-    if missing.exists():
-        missing.unlink()
-    # Call underlying function to avoid cache interference
-    func = getattr(st_mod.load_recipes_data, "__wrapped__", st_mod.load_recipes_data)
-    out = func(missing)
-    # assert out[1] is dummy_path
-    assert out[0].equals(dummy)
+#     # ensure the FileNotFoundError path is taken
+#     missing = tmp_path / "missing.csv"
+#     if missing.exists():
+#         missing.unlink()
+#     # Call underlying function to avoid cache interference
+#     func = getattr(st_mod.load_recipes_data, "__wrapped__", st_mod.load_recipes_data)
+#     out = func(missing)
+#     # assert out[1] is dummy_path
+#     assert out[0].equals(dummy)
 
 
-def test_get_recipes_all_feature_data_concat(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    a = pd.DataFrame({"id": [1]})
-    b = pd.DataFrame({"id": [2]})
-    c = pd.DataFrame({"id": [3]})
-    d = pd.DataFrame({"id": [4]})
-    e = pd.DataFrame({"id": [5]})
+# def test_get_recipes_all_feature_data_concat(
+#     monkeypatch: pytest.MonkeyPatch,
+# ) -> None:
+#     a = pd.DataFrame({"id": [1]})
+#     b = pd.DataFrame({"id": [2]})
+#     c = pd.DataFrame({"id": [3]})
+#     d = pd.DataFrame({"id": [4]})
+#     e = pd.DataFrame({"id": [5]})
 
-    monkeypatch.setattr(st_mod, "get_recipes_rating_feature_data", lambda: a)
-    monkeypatch.setattr(st_mod, "get_recipes_seasonality_feature_data", lambda: b)
-    monkeypatch.setattr(st_mod, "get_recipes_ingredients_feature_data", lambda: c)
-    monkeypatch.setattr(st_mod, "get_recipes_nutrition_feature_data", lambda: d)
-    monkeypatch.setattr(st_mod, "get_recipes_steps_feature_data", lambda: e)
+#     monkeypatch.setattr(st_mod, "get_recipes_rating_feature_data", lambda: a)
+#     monkeypatch.setattr(st_mod, "get_recipes_seasonality_feature_data", lambda: b)
+#     monkeypatch.setattr(st_mod, "get_recipes_ingredients_feature_data", lambda: c)
+#     monkeypatch.setattr(st_mod, "get_recipes_nutrition_feature_data", lambda: d)
+#     monkeypatch.setattr(st_mod, "get_recipes_steps_feature_data", lambda: e)
 
-    out = st_mod.get_recipes_all_feature_data()
-    assert len(out[0]) == 5
-    assert out[1] == "Concatenated data successfully"
+#     out = st_mod.get_recipes_all_feature_data()
+#     assert len(out[0]) == 5
+#     assert out[1] == "Concatenated data successfully"

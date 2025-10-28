@@ -6,9 +6,9 @@ This submodule mirrors the structure and conventions used in
 """
 
 from .pipeline import (
-    RecipeClusteringPipeline,
-    ClusteringPaths,
     REQUIRED_FEATURES,
+    ClusteringPaths,
+    RecipeClusteringPipeline,
 )
 
 __all__ = [
@@ -16,4 +16,3 @@ __all__ = [
     "ClusteringPaths",
     "REQUIRED_FEATURES",
 ]
-

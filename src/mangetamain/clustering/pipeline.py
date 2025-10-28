@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-
 
 # Variables to use, strictly matching the notebook selection order
 REQUIRED_FEATURES: list[str] = [
@@ -102,9 +101,7 @@ class RecipeClusteringPipeline:
         self._validate_features(df, REQUIRED_FEATURES)
 
         pca_df, pca_model = self._compute_pca(df[REQUIRED_FEATURES])
-        clusters = self._fit_predict_kmeans(
-            pca_df.iloc[:, : self.n_pcs_for_kmeans]
-        )
+        clusters = self._fit_predict_kmeans(pca_df.iloc[:, : self.n_pcs_for_kmeans])
 
         result = self._build_result(df, pca_df, clusters)
         self._save_output(result)
@@ -150,18 +147,12 @@ class RecipeClusteringPipeline:
         self.logger.info("Merged recipes shape: %s", recipes.shape)
         return recipes
 
-    def _validate_features(
-        self, df: pd.DataFrame, required: Iterable[str]
-    ) -> None:
+    def _validate_features(self, df: pd.DataFrame, required: Iterable[str]) -> None:
         missing = [c for c in required if c not in df.columns]
         if missing:
-            raise ValueError(
-                f"Missing required variables: {missing}"
-            )
+            raise ValueError(f"Missing required variables: {missing}")
 
-    def _compute_pca(
-        self, features_df: pd.DataFrame
-    ) -> tuple[pd.DataFrame, PCA]:
+    def _compute_pca(self, features_df: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
         scaler = StandardScaler()
         features_scaled = scaler.fit_transform(features_df)
         pca = PCA(n_components=features_df.shape[1])

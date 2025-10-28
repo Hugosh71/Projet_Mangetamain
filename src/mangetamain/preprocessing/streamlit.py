@@ -2,7 +2,6 @@
 
 import ast
 import re
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -163,6 +162,7 @@ def load_recipes_data() -> pd.DataFrame:
             raise ValueError(f"No data found at {target_path}")
 
     return df, f"Loaded data from {target_path}"
+
 
 @st.cache_data
 def get_cluster_names() -> dict:
