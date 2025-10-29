@@ -22,5 +22,3 @@ def test_ingredients_report_filenames_and_stub(tmp_path: Path) -> None:
     assert Path(out["summary_path"]).name == "ingredients_summary.csv"
     assert Path(out["table_path"]).exists()
     assert Path(out["summary_path"]).exists()
-
-

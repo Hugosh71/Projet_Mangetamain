@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from mangetamain.preprocessing.feature.seasonality.analyzers import SeasonalityAnalyzer
-from mangetamain.preprocessing.feature.steps.analysers import StepsAnalyser
 from mangetamain.preprocessing.feature.ingredients.analysers import IngredientsAnalyser
 from mangetamain.preprocessing.feature.nutrition.analysers import NutritionAnalyser
+from mangetamain.preprocessing.feature.seasonality.analyzers import SeasonalityAnalyzer
+from mangetamain.preprocessing.feature.steps.analysers import StepsAnalyser
 from mangetamain.preprocessing.interfaces import AnalysisResult
 
 
@@ -27,5 +27,3 @@ def test_generate_report_with_file_path_else_branch(tmp_path: Path) -> None:
 
     out_n = NutritionAnalyser().generate_report(result, dummy_file)
     assert Path(out_n["table_path"]).parent == tmp_path
-
-

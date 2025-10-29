@@ -9,16 +9,24 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import logging  # noqa: E402
+
 import pandas as pd  # noqa: E402
 
 from app.datasets import run_downloading_datasets  # noqa: E402
 from app.logging_config import configure_logging, get_logger  # noqa: E402
-from mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline  # noqa: E402
+from mangetamain.clustering import (
+    ClusteringPaths,
+    RecipeClusteringPipeline,
+)  # noqa: E402
 from mangetamain.preprocessing.factories import ProcessorFactory  # noqa: E402
-from mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser  # noqa: E402
+from mangetamain.preprocessing.feature.ingredients import (
+    IngredientsAnalyser,
+)  # noqa: E402
 from mangetamain.preprocessing.feature.nutrition import NutritionAnalyser  # noqa: E402
 from mangetamain.preprocessing.feature.rating import RatingAnalyser  # noqa: E402
-from mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer  # noqa: E402
+from mangetamain.preprocessing.feature.seasonality import (
+    SeasonalityAnalyzer,
+)  # noqa: E402
 from mangetamain.preprocessing.feature.steps import StepsAnalyser  # noqa: E402
 from mangetamain.preprocessing.repositories import (  # noqa: E402
     CSVDataRepository,
@@ -57,7 +65,9 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(rating_paths, dict):
         outputs["rating"] = Path(rating_paths["table_path"])
     else:
-        outputs["rating"] = Path("data/preprocessed/backup/recipes_feature_rating_full.csv")
+        outputs["rating"] = Path(
+            "data/preprocessed/backup/recipes_feature_rating_full.csv"
+        )
 
     # Seasonality
     _safe_log(logger, logging.INFO, "Preprocessing: seasonality …")
@@ -125,7 +135,9 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(ing_paths, dict):
         outputs["ingredients"] = Path(ing_paths["table_path"])
     else:
-        outputs["ingredients"] = Path("data/preprocessed/backup/features_axes_ingredients.csv")
+        outputs["ingredients"] = Path(
+            "data/preprocessed/backup/features_axes_ingredients.csv"
+        )
 
     _safe_log(logger, logging.INFO, "Preprocessing done")
     return outputs
@@ -164,10 +176,16 @@ def merge_all_tables(
     if preprocessed_paths is None:
         preprocessed_paths = {
             "nutrition": Path("data/preprocessed/backup/features_nutrition.csv"),
-            "seasonality": Path("data/preprocessed/backup/recipe_seasonality_features.csv"),
+            "seasonality": Path(
+                "data/preprocessed/backup/recipe_seasonality_features.csv"
+            ),
             "rating": Path("data/preprocessed/backup/recipes_feature_rating_full.csv"),
-            "complexity": Path("data/preprocessed/backup/recipes_features_complexity.csv"),
-            "ingredients": Path("data/preprocessed/backup/features_axes_ingredients.csv"),
+            "complexity": Path(
+                "data/preprocessed/backup/recipes_features_complexity.csv"
+            ),
+            "ingredients": Path(
+                "data/preprocessed/backup/features_axes_ingredients.csv"
+            ),
         }
 
     else:
@@ -196,7 +214,16 @@ def merge_all_tables(
         clustering_path = Path("data/clustering/recipes_clustering_with_pca.csv")
 
     # Read tables exactly as in notebook
-    nutrition = pd.read_csv(preprocessed_paths["nutrition"], delimiter=";" if preprocessed_paths["nutrition"] == Path("data/preprocessed/backup/features_nutrition.csv") else None, index_col=0)
+    nutrition = pd.read_csv(
+        preprocessed_paths["nutrition"],
+        delimiter=(
+            ";"
+            if preprocessed_paths["nutrition"]
+            == Path("data/preprocessed/backup/features_nutrition.csv")
+            else None
+        ),
+        index_col=0,
+    )
     seasonal = pd.read_csv(preprocessed_paths["seasonality"], index_col=0)
     rating = pd.read_csv(preprocessed_paths["rating"], index_col=0)
     complexity = pd.read_csv(preprocessed_paths["complexity"], index_col=0)

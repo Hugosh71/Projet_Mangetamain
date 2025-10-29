@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import types
+from pathlib import Path
 
 from src.app.download_from_s3 import download_from_s3, download_from_s3_stub
 
@@ -33,5 +33,3 @@ def test_download_from_s3_successful_path(monkeypatch, tmp_path: Path) -> None:
     out = download_from_s3(dest_dir=tmp_path, key="file.csv")
     assert out.exists()
     assert out.read_text() == "ok"
-
-

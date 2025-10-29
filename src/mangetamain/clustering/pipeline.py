@@ -128,7 +128,16 @@ class RecipeClusteringPipeline:
                 raise FileNotFoundError(f"Missing input file for {key}: {p}")
 
         # Respect notebook logic: read as CSV, merge by index
-        nutrition = pd.read_csv(paths["nutrition"], delimiter=";" if paths["nutrition"] == Path("data/preprocessed/backup/features_nutrition.csv") else None, index_col=0)
+        nutrition = pd.read_csv(
+            paths["nutrition"],
+            delimiter=(
+                ";"
+                if paths["nutrition"]
+                == Path("data/preprocessed/backup/features_nutrition.csv")
+                else None
+            ),
+            index_col=0,
+        )
         seasonal = pd.read_csv(paths["seasonality"], index_col=0)
         rating = pd.read_csv(paths["rating"], index_col=0)
         complexity = pd.read_csv(paths["complexity"], index_col=0)

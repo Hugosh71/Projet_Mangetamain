@@ -1,8 +1,11 @@
 """Nutrition analyser module."""
 
 from __future__ import annotations
+
 import ast
+
 import pandas as pd
+
 from ...interfaces import Analyser, AnalysisResult
 
 
@@ -25,7 +28,15 @@ class NutritionAnalyser(Analyser):
         nutrition_series = recipes["nutrition"].dropna()
         nutrition_df = pd.DataFrame(
             nutrition_series.apply(ast.literal_eval).tolist(),
-            columns=["calories", "fat", "sugar", "sodium", "protein", "sat_fat", "carbs"],
+            columns=[
+                "calories",
+                "fat",
+                "sugar",
+                "sodium",
+                "protein",
+                "sat_fat",
+                "carbs",
+            ],
             index=nutrition_series.index,
         )
 
@@ -33,12 +44,16 @@ class NutritionAnalyser(Analyser):
         if "id" in recipes.columns:
             id_series = recipes.loc[nutrition_df.index, "id"].rename("id")
         else:
-            id_series = pd.Series(range(len(nutrition_df)), index=nutrition_df.index, name="id")
+            id_series = pd.Series(
+                range(len(nutrition_df)), index=nutrition_df.index, name="id"
+            )
 
         if "name" in recipes.columns:
             name_series = recipes.loc[nutrition_df.index, "name"].rename("name")
         else:
-            name_series = pd.Series([None] * len(nutrition_df), index=nutrition_df.index, name="name")
+            name_series = pd.Series(
+                [None] * len(nutrition_df), index=nutrition_df.index, name="name"
+            )
 
         df_full = pd.concat([id_series, name_series, nutrition_df], axis=1)
 
@@ -55,18 +70,20 @@ class NutritionAnalyser(Analyser):
 
         # feature 4 : nutrient balance index
         df_full["nutrient_balance_index"] = (
-            (df_full["protein"] - (df_full["fat"] + df_full["sugar"] + df_full["sodium"]) / 3)
-            / (df_full["calories"] + 1)
-        )
+            df_full["protein"]
+            - (df_full["fat"] + df_full["sugar"] + df_full["sodium"]) / 3
+        ) / (df_full["calories"] + 1)
 
-        df_export = df_full[[
-            "id",
-            "name",
-            "energy_density",
-            "protein_ratio",
-            "fat_ratio",
-            "nutrient_balance_index",
-        ]]
+        df_export = df_full[
+            [
+                "id",
+                "name",
+                "energy_density",
+                "protein_ratio",
+                "fat_ratio",
+                "nutrient_balance_index",
+            ]
+        ]
         # summary
         summary = {
             "mean_energy_density": float(df_export["energy_density"].mean()),
@@ -81,6 +98,7 @@ class NutritionAnalyser(Analyser):
     def generate_report(self, result: AnalysisResult, path):
         """Write nutrition_table.csv and nutrition_summary.csv into the given path."""
         from pathlib import Path
+
         path = Path(path)
         if path.is_dir():
             out_table = path / "nutrition_table.csv"
@@ -103,7 +121,8 @@ class NutritionAnalyser(Analyser):
 
         return {"table_path": str(out_table), "summary_path": str(out_summary)}
 
-# Partie test 
+
+# Partie test
 # if __name__ == "__main__":
 #     import pandas as pd
 

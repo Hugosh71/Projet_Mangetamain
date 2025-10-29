@@ -20,5 +20,3 @@ def test_seasonality_invalid_dates_raises() -> None:
     analyser = SeasonalityAnalyzer()
     with pytest.raises(ValueError):
         analyser.analyze(recipes, interactions)
-
-
