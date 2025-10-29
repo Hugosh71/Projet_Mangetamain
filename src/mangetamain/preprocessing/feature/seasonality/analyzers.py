@@ -66,7 +66,9 @@ class SeasonalityAnalyzer(Analyser):
             ValueError: If required columns ('date', 'recipe_id') are missing
                 or if invalid date values are detected.
         """
-        self._logger.debug("Computing seasonality features for recipes based on user interaction data")
+        self._logger.debug(
+            "Computing seasonality features for recipes based on user interaction data"
+        )
 
         df_interactions = interactions.copy()
         date_col = "date"
@@ -74,11 +76,18 @@ class SeasonalityAnalyzer(Analyser):
         k = 5.0
 
         # Validate required columns
-        if date_col not in df_interactions.columns or group_col not in df_interactions.columns:
-            raise ValueError(f"interactions must contain '{date_col}' and '{group_col}'")
+        if (
+            date_col not in df_interactions.columns
+            or group_col not in df_interactions.columns
+        ):
+            raise ValueError(
+                f"interactions must contain '{date_col}' and '{group_col}'"
+            )
 
         # Convert date column to datetime and compute day-of-year
-        df_interactions[date_col] = pd.to_datetime(df_interactions[date_col], errors="coerce")
+        df_interactions[date_col] = pd.to_datetime(
+            df_interactions[date_col], errors="coerce"
+        )
         if df_interactions[date_col].isna().any():
             raise ValueError(f"Invalid dates found in '{date_col}'")
 
@@ -102,11 +111,17 @@ class SeasonalityAnalyzer(Analyser):
         )
 
         # Empirical Bayes smoothing
-        agg["inter_doy_sin_smooth"] = (agg["n"] * agg["sin_mean"] + k * sin_global_) / (agg["n"] + k)
-        agg["inter_doy_cos_smooth"] = (agg["n"] * agg["cos_mean"] + k * cos_global_) / (agg["n"] + k)
+        agg["inter_doy_sin_smooth"] = (agg["n"] * agg["sin_mean"] + k * sin_global_) / (
+            agg["n"] + k
+        )
+        agg["inter_doy_cos_smooth"] = (agg["n"] * agg["cos_mean"] + k * cos_global_) / (
+            agg["n"] + k
+        )
 
         # Compute seasonal strength (vector length)
-        agg["inter_strength"] = np.sqrt(agg["inter_doy_sin_smooth"] ** 2 + agg["inter_doy_cos_smooth"] ** 2)
+        agg["inter_strength"] = np.sqrt(
+            agg["inter_doy_sin_smooth"] ** 2 + agg["inter_doy_cos_smooth"] ** 2
+        )
 
         # Store only the aggregated features for merging later
         df_features = agg[
@@ -154,7 +169,9 @@ class SeasonalityAnalyzer(Analyser):
         result.table.to_csv(out_table, index=False)
 
         # Write summary as key,value rows
-        summary_df = pd.DataFrame([result.summary]).melt(var_name="metric", value_name="value")
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
+        )
         summary_df.to_csv(out_summary, index=False)
 
         return {

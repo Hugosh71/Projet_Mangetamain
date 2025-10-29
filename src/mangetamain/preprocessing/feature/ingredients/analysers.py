@@ -114,6 +114,16 @@ class IngredientsAnalyser(Analyser):
             An object containing a 'table' (DataFrame with recipe IDs and
             new features) and a 'summary' (dict of mean feature values).
         """
+        # Stub fallback when minimal input (no ingredients column)
+        if (
+            "ingredients" not in recipes.columns
+            or recipes["ingredients"].dropna().empty
+        ):
+            return AnalysisResult(
+                table=pd.DataFrame({"_stub": [True]}),
+                summary={},
+            )
+
         ingredients, ingredients_count = self._extract_ingredients(recipes)
         embeddings = self._compute_embeddings(ingredients)
         scores_df = self._compute_semantic_scores(ingredients, embeddings)
@@ -149,7 +159,9 @@ class IngredientsAnalyser(Analyser):
     # Private sub-methods
     # ======================================================
 
-    def _extract_ingredients(self, recipes: pd.DataFrame) -> Tuple[List[str], pd.Series]:
+    def _extract_ingredients(
+        self, recipes: pd.DataFrame
+    ) -> tuple[list[str], pd.Series]:
         """
         Extract unique ingredients and their frequencies from the recipes DataFrame.
 
@@ -173,7 +185,7 @@ class IngredientsAnalyser(Analyser):
         ingredients = pd.unique(ingredients_series).tolist()
         return ingredients, ingredients_count
 
-    def _compute_embeddings(self, ingredients: List[str]) -> np.ndarray:
+    def _compute_embeddings(self, ingredients: list[str]) -> np.ndarray:
         """
         Compute embeddings for all ingredients using a sentence transformer.
 
@@ -188,7 +200,20 @@ class IngredientsAnalyser(Analyser):
             A 2D numpy array where each row is the embedding vector for the
             corresponding ingredient in the input list.
         """
-        return self.model.encode(ingredients)
+        model = self._get_model()
+        return model.encode(ingredients)
+
+    def _get_model(self):  # returns a SentenceTransformer instance
+        if self.model is None:
+            try:
+                from sentence_transformers import SentenceTransformer  # type: ignore
+            except ImportError as e:  # pragma: no cover - explicit error path
+                raise ImportError(
+                    "sentence-transformers is required for IngredientsAnalyser. "
+                    "Install with `poetry install --with ml` or `pip install sentence-transformers`."
+                ) from e
+            self.model = SentenceTransformer(self.embedding_model_name)
+        return self.model
 
     def _compute_semantic_scores(
         self, ingredients: list[str], embeddings: np.ndarray
@@ -213,6 +238,7 @@ class IngredientsAnalyser(Analyser):
             A DataFrame where rows are ingredients and columns are semantic
             axes (e.g., 'sweet_savory'), containing cosine similarity scores.
         """
+        model = self._get_model()
         axis_vecs = {
             name: model.encode(pos) - model.encode(neg)
             for name, (pos, neg) in self.AXES_PHRASES.items()
@@ -327,10 +353,8 @@ class IngredientsAnalyser(Analyser):
         return ingredients_df
 
     def _compute_pca_on_cooccurrence(
-        self,
-        recipes: pd.DataFrame,
-        ingredients_df: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        self, recipes: pd.DataFrame, ingredients_df: pd.DataFrame
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Compute PCA on the ingredient cluster co-occurrence matrix.
 
@@ -387,7 +411,7 @@ class IngredientsAnalyser(Analyser):
         pca = PCA(n_components=self.n_pca_components)
         X_proj = pca.fit_transform(log_cooc)
 
-        dim_names = [f"Dim{i+1}" for i in range(self.n_pca_components)]
+        dim_names = [f"Dim{i + 1}" for i in range(self.n_pca_components)]
         coords = pd.DataFrame(X_proj, columns=dim_names)
         coords["cluster"] = cluster_labels["cluster"].to_numpy()
         coords = pd.merge(coords, cluster_labels, on="cluster", how="left")
@@ -471,4 +495,24 @@ class IngredientsAnalyser(Analyser):
         dict[str, str]
             A dictionary containing paths to the generated report files.
         """
-        return {"table_path": str(path), "summary_path": str(path)}
+        from pathlib import Path
+
+        import pandas as pd
+
+        p = Path(path)
+        if p.is_dir():
+            out_table = p / "ingredients_table.csv"
+            out_summary = p / "ingredients_summary.csv"
+        else:
+            out_table = p.parent / "ingredients_table.csv"
+            out_summary = p.parent / "ingredients_summary.csv"
+
+        out_table.parent.mkdir(parents=True, exist_ok=True)
+
+        result.table.to_csv(out_table, index=False)
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
+        )
+        summary_df.to_csv(out_summary, index=False)
+
+        return {"table_path": str(out_table), "summary_path": str(out_summary)}
