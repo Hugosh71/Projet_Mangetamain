@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-10-29
+
+### Added
+- End-to-end pipeline orchestrator `src/app/run_all.py` for dataset download, preprocessing, clustering, and S3 upload simulation (0ed2d93, 121b82f)
+- Clustering pipeline with PCA and KMeans using nutrition, seasonality, and complexity features; Streamlit integration and data reload button (5561907, 191f81b)
+- Rating module with analysers/strategies, report generation, top recipes caching, and comprehensive unit/integration tests (f4562f4, fdaa369, cfe50e8, 3ce60c2)
+- Centralized logging configuration with `LoggingSettings` and robust tests (cc5c91d, 5c7578d, dd17272)
+- CI workflow and Docker build; Poetry dependency groups and lock management (ba18f78, d719223, e760ad9)
+
+### Changed
+- Restructured preprocessing into `src/mangetamain/preprocessing/*` with analysers and strategies; renamed `datasets/` to `data/`; standardized imports and path handling (9f7fd03, cc37526, 3d52ae0, 5a79cc0)
+- Updated Streamlit pages for clustering and ratings, improved formatting and layout, and integrated pipeline features (82caece, 16fe8c2, 191f81b)
+
+### Fixed
+- Docker and CI configuration issues (PYTHONPATH, `.streamlit` dir, test images) (fdbccac, 0fd75ef, 79c4b40)
+- Missing datasets in container and assorted path typos (52fc738, 8a91c2b)
+
+### Documentation
+- Expanded Sphinx docs and README usage; improved changelog and documentation structure (4bdf6d5, 0e6b6e2, 091b130)
+
 ### Added
 - Comprehensive Sphinx documentation system with professional theme
 - API documentation with auto-generated docs from docstrings

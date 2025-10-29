@@ -9,6 +9,37 @@ This page contains a detailed history of all changes made to the Mangetamain pro
 Recent Changes
 ==============
 
+Version 1.0.0 - Production Release
+----------------------------------
+
+**Release Date**: October 2025
+
+Highlights
+~~~~~~~~~~
+
+* First production-ready release with a complete end-to-end data pipeline, clustering, ratings analysis, and improved developer experience.
+
+New Features
+~~~~~~~~~~~~
+
+* End-to-end pipeline orchestrator to download datasets, preprocess features, run clustering, and simulate S3 upload
+* Clustering pipeline with PCA and KMeans across nutrition, seasonality, and complexity features; Streamlit integration and data reload button
+* Ratings module with analysers/strategies, report generation, and top-recipes caching; extensive unit and integration tests
+* Centralized logging configuration with typed settings and comprehensive tests
+
+Improvements
+~~~~~~~~~~~~
+
+* Restructured preprocessing into analysers and strategies; standardized imports and path handling; renamed ``datasets/`` to ``data/``
+* Updated Streamlit pages for clustering and ratings with improved UX and formatting
+* CI workflow and Docker build improvements; Poetry dependency groups and lock management
+
+Fixes
+~~~~~
+
+* Docker and CI configuration issues (PYTHONPATH, ``.streamlit`` directory, test images)
+* Missing datasets in container and assorted path typos
+
 Version 0.1.0 - Documentation System
 ------------------------------------
 
