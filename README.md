@@ -41,8 +41,6 @@ poetry --version
 Until now, we are always based on the native Python environment **NOT** the desired virtual environment.
 Even Poetry is always run within this native Python environment.
 
-
-
 ### Install Git (for version control)
 
 Install [Git](https://git-scm.com/downloads) and [set up it](https://docs.github.com/fr/get-started/git-basics/set-up-git)
@@ -131,6 +129,20 @@ make docker-run
 ```
 
 The app will be available at `http://localhost:8501`.
+
+## Deployment
+
+1. Run the preprocessing and prediction pipeline:
+
+```commandline
+./scripts/run_pipeline.sh
+```
+
+2. This script executes all preprocessing steps, feature engineering, and clustering model training, and finally upload the prepared dataset to S3.
+
+3. When a new commit is pushed to the `main` branch, the CI/CD pipeline (GitHub Actions) automatically builds and pushes the Docker image to AWS ECR.
+
+4. Force a new deployment on Amazon Elastic Container Service.
 
 ## Collaborative Development
 

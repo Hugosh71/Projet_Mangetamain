@@ -23,7 +23,7 @@ configure_logging(log_directory="./logs", reset_existing=True)
 logger = get_logger("clustering")
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
+st.set_page_config(page_title="Clustering - Mangetamain", layout="wide")
 
 st.markdown("# Clustering")
 
