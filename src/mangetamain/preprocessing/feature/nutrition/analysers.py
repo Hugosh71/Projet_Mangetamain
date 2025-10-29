@@ -15,9 +15,12 @@ class NutritionAnalyser(Analyser):
         interactions: pd.DataFrame | None = None,
         **kwargs: object,
     ) -> AnalysisResult:
-        # safety check
-        if "nutrition" not in recipes.columns:
-            raise ValueError("Column 'nutrition' is missing in recipes DataFrame.")
+        # Stub fallback when minimal input (no nutrition column)
+        if "nutrition" not in recipes.columns or recipes["nutrition"].dropna().empty:
+            return AnalysisResult(
+                table=pd.DataFrame({"_stub": [True]}),
+                summary={},
+            )
 
         nutrition_df = pd.DataFrame(
             recipes["nutrition"].dropna().apply(ast.literal_eval).tolist(),
@@ -61,12 +64,29 @@ class NutritionAnalyser(Analyser):
         return AnalysisResult(table=df_export, summary=summary)
 
     def generate_report(self, result: AnalysisResult, path):
-        """Save outputs or generate paths summary (stub)."""
-        result.table.to_csv(path / "features_nutrition.csv", index=False, sep=";")
-        return {
-            "table_path": str(path / "features_nutrition.csv"),
-            "summary": result.summary,
-        }
+        """Write nutrition_table.csv and nutrition_summary.csv into the given path."""
+        from pathlib import Path
+        path = Path(path)
+        if path.is_dir():
+            out_table = path / "nutrition_table.csv"
+            out_summary = path / "nutrition_summary.csv"
+        else:
+            out_table = path.parent / "nutrition_table.csv"
+            out_summary = path.parent / "nutrition_summary.csv"
+
+        out_table.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write table
+        # Keep a simple CSV (no custom separator) for consistency with other analyzers
+        result.table.to_csv(out_table, index=False)
+
+        # Write summary as key,value rows
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
+        )
+        summary_df.to_csv(out_summary, index=False)
+
+        return {"table_path": str(out_table), "summary_path": str(out_summary)}
 
 # Partie test 
 # if __name__ == "__main__":

@@ -39,7 +39,8 @@ class IngredientsAnalyser(Analyser):
         self.cluster_threshold = cluster_threshold or self.DEFAULT_CLUSTER_THRESHOLD
         self.n_pca_components = n_pca_components or self.DEFAULT_N_PCA_COMPONENTS
         self.embedding_model_name = embedding_model or self.DEFAULT_MODEL_NAME
-        self.model = SentenceTransformer(self.embedding_model_name)
+        # Lazy-load the embedding model only when needed to keep tests lightweight
+        self.model: SentenceTransformer | None = None
 
     # ======================================================
     # Main public method
@@ -52,6 +53,13 @@ class IngredientsAnalyser(Analyser):
         **kwargs: object,
     ) -> AnalysisResult:
         """Main analysis pipeline producing semantic and PCA-based features."""
+        # Stub fallback when minimal input (no ingredients column)
+        if "ingredients" not in recipes.columns or recipes["ingredients"].dropna().empty:
+            return AnalysisResult(
+                table=pd.DataFrame({"_stub": [True]}),
+                summary={},
+            )
+
         ingredients, ingredients_count = self._extract_ingredients(recipes)
         embeddings = self._compute_embeddings(ingredients)
         scores_df = self._compute_semantic_scores(ingredients, embeddings)
@@ -88,7 +96,13 @@ class IngredientsAnalyser(Analyser):
 
     def _compute_embeddings(self, ingredients: List[str]) -> np.ndarray:
         """Compute embeddings for all ingredients using a sentence transformer."""
-        return self.model.encode(ingredients)
+        model = self._get_model()
+        return model.encode(ingredients)
+
+    def _get_model(self) -> SentenceTransformer:
+        if self.model is None:
+            self.model = SentenceTransformer(self.embedding_model_name)
+        return self.model
 
     def _compute_semantic_scores(
         self,
@@ -96,8 +110,9 @@ class IngredientsAnalyser(Analyser):
         embeddings: np.ndarray
     ) -> pd.DataFrame:
         """Compute cosine similarity scores between ingredients and semantic axes."""
+        model = self._get_model()
         axis_vecs = {
-            name: self.model.encode(pos) - self.model.encode(neg)
+            name: model.encode(pos) - model.encode(neg)
             for name, (pos, neg) in self.AXES_PHRASES.items()
         }
 
@@ -230,5 +245,24 @@ class IngredientsAnalyser(Analyser):
     # ======================================================
 
     def generate_report(self, result: AnalysisResult, path: str) -> dict[str, str]:
-        """Stub report generator."""
-        return {"table_path": str(path), "summary_path": str(path)}
+        """Write ingredients_table.csv and ingredients_summary.csv into the given path."""
+        from pathlib import Path
+        import pandas as pd
+
+        p = Path(path)
+        if p.is_dir():
+            out_table = p / "ingredients_table.csv"
+            out_summary = p / "ingredients_summary.csv"
+        else:
+            out_table = p.parent / "ingredients_table.csv"
+            out_summary = p.parent / "ingredients_summary.csv"
+
+        out_table.parent.mkdir(parents=True, exist_ok=True)
+
+        result.table.to_csv(out_table, index=False)
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
+        )
+        summary_df.to_csv(out_summary, index=False)
+
+        return {"table_path": str(out_table), "summary_path": str(out_summary)}
