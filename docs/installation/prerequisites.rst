@@ -17,7 +17,7 @@ For Windows
 2. Run the installer and make sure to check "Add Python to PATH"
 3. Verify the installation:
 
-.. code-block:: cmd
+.. code-block:: bash
 
    python --version
 

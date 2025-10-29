@@ -13,7 +13,8 @@ Mangetamain is a modern Streamlit-based web application designed for data analys
 
    installation/index
    development/index
-   modules
+   usage/index
+   api/index
    changelog
 
 Features

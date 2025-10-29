@@ -53,7 +53,7 @@ This will install:
 
    Windows:
 
-   .. code-block:: cmd
+   .. code-block:: bash
 
       .\.venv\Scripts\activate.ps1
 
@@ -183,6 +183,6 @@ Next Steps
 
 After successful installation, you can:
 
-1. Read the :doc:`usage` guide to learn how to use the application
-2. Explore the :doc:`api/index` for detailed API documentation
-3. Check the :doc:`development` guide for contributing to the project
+1. Read the :doc:`../usage/index` guide to learn how to use the application
+2. Explore the :doc:`../api/index` for detailed API documentation
+3. Check the :doc:`../development/index` guide for contributing to the project
