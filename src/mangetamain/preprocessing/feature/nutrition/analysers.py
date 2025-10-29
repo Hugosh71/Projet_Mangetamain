@@ -22,15 +22,25 @@ class NutritionAnalyser(Analyser):
                 summary={},
             )
 
+        nutrition_series = recipes["nutrition"].dropna()
         nutrition_df = pd.DataFrame(
-            recipes["nutrition"].dropna().apply(ast.literal_eval).tolist(),
+            nutrition_series.apply(ast.literal_eval).tolist(),
             columns=["calories", "fat", "sugar", "sodium", "protein", "sat_fat", "carbs"],
+            index=nutrition_series.index,
         )
 
-        nutrition_df.index = recipes["nutrition"].dropna().index
+        # Ensure id and name are present and aligned
+        if "id" in recipes.columns:
+            id_series = recipes.loc[nutrition_df.index, "id"].rename("id")
+        else:
+            id_series = pd.Series(range(len(nutrition_df)), index=nutrition_df.index, name="id")
 
-        base_cols = [c for c in ["id", "name"] if c in recipes.columns]
-        df_full = pd.concat([recipes.loc[nutrition_df.index, base_cols], nutrition_df], axis=1)
+        if "name" in recipes.columns:
+            name_series = recipes.loc[nutrition_df.index, "name"].rename("name")
+        else:
+            name_series = pd.Series([None] * len(nutrition_df), index=nutrition_df.index, name="name")
+
+        df_full = pd.concat([id_series, name_series, nutrition_df], axis=1)
 
         # feature 1 : energy density
         df_full["energy_density"] = df_full["calories"] / (
@@ -49,9 +59,14 @@ class NutritionAnalyser(Analyser):
             / (df_full["calories"] + 1)
         )
 
-        df_export = df_full[
-            base_cols + ["energy_density", "protein_ratio", "fat_ratio", "nutrient_balance_index"]
-        ]
+        df_export = df_full[[
+            "id",
+            "name",
+            "energy_density",
+            "protein_ratio",
+            "fat_ratio",
+            "nutrient_balance_index",
+        ]]
         # summary
         summary = {
             "mean_energy_density": float(df_export["energy_density"].mean()),

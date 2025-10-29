@@ -5,16 +5,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.app.datasets import run_downloading_datasets
-from src.app.logging_config import configure_logging, get_logger
-from src.mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline
-from src.mangetamain.preprocessing.factories import ProcessorFactory
-from src.mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser
-from src.mangetamain.preprocessing.feature.nutrition import NutritionAnalyser
-from src.mangetamain.preprocessing.feature.rating import RatingAnalyser
-from src.mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer
-from src.mangetamain.preprocessing.feature.steps import StepsAnalyser
-from src.mangetamain.preprocessing.repositories import (
+from app.datasets import run_downloading_datasets
+from app.logging_config import configure_logging, get_logger
+from mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline
+from mangetamain.preprocessing.factories import ProcessorFactory
+from mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser
+from mangetamain.preprocessing.feature.nutrition import NutritionAnalyser
+from mangetamain.preprocessing.feature.rating import RatingAnalyser
+from mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer
+from mangetamain.preprocessing.feature.steps import StepsAnalyser
+from mangetamain.preprocessing.repositories import (
     CSVDataRepository,
     RepositoryPaths,
 )
@@ -51,7 +51,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(rating_paths, dict):
         outputs["rating"] = Path(rating_paths["table_path"])
     else:
-        outputs["rating"] = Path("data/preprocessed/recipes_feature_rating_full.csv")
+        outputs["rating"] = Path("data/preprocessed/backup/recipes_feature_rating_full.csv")
 
     # Seasonality
     _safe_log(logger, logging.INFO, "Preprocessing: seasonality …")
@@ -67,7 +67,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
         outputs["seasonality"] = Path(season_paths["table_path"])
     else:
         outputs["seasonality"] = Path(
-            "data/preprocessed/recipe_seasonality_features.csv"
+            "data/preprocessed/backup/recipe_seasonality_features.csv"
         )
 
     # Nutrition
@@ -80,7 +80,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(nutri_paths, dict):
         outputs["nutrition"] = Path(nutri_paths["table_path"])
     else:
-        outputs["nutrition"] = Path("data/preprocessed/features_nutrition.csv")
+        outputs["nutrition"] = Path("data/preprocessed/backup/features_nutrition.csv")
 
     # Complexity (steps)
     _safe_log(logger, logging.INFO, "Preprocessing: complexity …")
@@ -99,7 +99,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
         outputs["complexity"] = Path(steps_paths["table_path"])
     else:
         outputs["complexity"] = Path(
-            "data/preprocessed/recipes_features_complexity.csv"
+            "data/preprocessed/backup/recipes_features_complexity.csv"
         )
 
     # Ingredients axes
@@ -119,7 +119,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(ing_paths, dict):
         outputs["ingredients"] = Path(ing_paths["table_path"])
     else:
-        outputs["ingredients"] = Path("data/preprocessed/features_axes_ingredients.csv")
+        outputs["ingredients"] = Path("data/preprocessed/backup/features_axes_ingredients.csv")
 
     _safe_log(logger, logging.INFO, "Preprocessing done")
     return outputs
@@ -157,40 +157,40 @@ def merge_all_tables(
 
     if preprocessed_paths is None:
         preprocessed_paths = {
-            "nutrition": Path("data/preprocessed/features_nutrition.csv"),
-            "seasonality": Path("data/preprocessed/recipe_seasonality_features.csv"),
-            "rating": Path("data/preprocessed/recipes_feature_rating_full.csv"),
-            "complexity": Path("data/preprocessed/recipes_features_complexity.csv"),
-            "ingredients": Path("data/preprocessed/features_axes_ingredients.csv"),
+            "nutrition": Path("data/preprocessed/backup/features_nutrition.csv"),
+            "seasonality": Path("data/preprocessed/backup/recipe_seasonality_features.csv"),
+            "rating": Path("data/preprocessed/backup/recipes_feature_rating_full.csv"),
+            "complexity": Path("data/preprocessed/backup/recipes_features_complexity.csv"),
+            "ingredients": Path("data/preprocessed/backup/features_axes_ingredients.csv"),
         }
 
     else:
         if preprocessed_paths["nutrition"] is None:
             preprocessed_paths["nutrition"] = Path(
-                "data/preprocessed/features_nutrition.csv"
+                "data/preprocessed/backup/features_nutrition.csv"
             )
         if preprocessed_paths["seasonality"] is None:
             preprocessed_paths["seasonality"] = Path(
-                "data/preprocessed/recipe_seasonality_features.csv"
+                "data/preprocessed/backup/recipe_seasonality_features.csv"
             )
         if preprocessed_paths["rating"] is None:
             preprocessed_paths["rating"] = Path(
-                "data/preprocessed/recipes_feature_rating_full.csv"
+                "data/preprocessed/backup/recipes_feature_rating_full.csv"
             )
         if preprocessed_paths["complexity"] is None:
             preprocessed_paths["complexity"] = Path(
-                "data/preprocessed/recipes_features_complexity.csv"
+                "data/preprocessed/backup/recipes_features_complexity.csv"
             )
         if preprocessed_paths["ingredients"] is None:
             preprocessed_paths["ingredients"] = Path(
-                "data/preprocessed/features_axes_ingredients.csv"
+                "data/preprocessed/backup/features_axes_ingredients.csv"
             )
 
     if clustering_path is None:
         clustering_path = Path("data/clustering/recipes_clustering_with_pca.csv")
 
     # Read tables exactly as in notebook
-    nutrition = pd.read_csv(preprocessed_paths["nutrition"], delimiter=";", index_col=0)
+    nutrition = pd.read_csv(preprocessed_paths["nutrition"], delimiter=";" if preprocessed_paths["nutrition"] == Path("data/preprocessed/backup/features_nutrition.csv") else None, index_col=0)
     seasonal = pd.read_csv(preprocessed_paths["seasonality"], index_col=0)
     rating = pd.read_csv(preprocessed_paths["rating"], index_col=0)
     complexity = pd.read_csv(preprocessed_paths["complexity"], index_col=0)
