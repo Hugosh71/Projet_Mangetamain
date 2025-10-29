@@ -14,19 +14,23 @@ import pandas as pd  # noqa: E402
 
 from app.datasets import run_downloading_datasets  # noqa: E402
 from app.logging_config import configure_logging, get_logger  # noqa: E402
-from mangetamain.clustering import (
+from mangetamain.clustering import (  # noqa: E402
     ClusteringPaths,
     RecipeClusteringPipeline,
-)  # noqa: E402
+)
 from mangetamain.preprocessing.factories import ProcessorFactory  # noqa: E402
-from mangetamain.preprocessing.feature.ingredients import (
+from mangetamain.preprocessing.feature.ingredients import (  # noqa: E402
     IngredientsAnalyser,
-)  # noqa: E402
-from mangetamain.preprocessing.feature.nutrition import NutritionAnalyser  # noqa: E402
-from mangetamain.preprocessing.feature.rating import RatingAnalyser  # noqa: E402
-from mangetamain.preprocessing.feature.seasonality import (
+)
+from mangetamain.preprocessing.feature.nutrition import (  # noqa: E402
+    NutritionAnalyser,
+)
+from mangetamain.preprocessing.feature.rating import (  # noqa: E402
+    RatingAnalyser,
+)
+from mangetamain.preprocessing.feature.seasonality import (  # noqa: E402
     SeasonalityAnalyzer,
-)  # noqa: E402
+)
 from mangetamain.preprocessing.feature.steps import StepsAnalyser  # noqa: E402
 from mangetamain.preprocessing.repositories import (  # noqa: E402
     CSVDataRepository,
@@ -60,8 +64,14 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_rating = ProcessorFactory.create_rating(repo, logger=logger)
     pair_rating = proc_rating.run()
     rating_an = RatingAnalyser(logger=logger)
-    rating_result = rating_an.analyze(pair_rating.recipes, pair_rating.interactions)
-    rating_paths = rating_an.generate_report(rating_result, Path("data/preprocessed"))
+    rating_result = rating_an.analyze(
+        pair_rating.recipes,
+        pair_rating.interactions,
+    )
+    rating_paths = rating_an.generate_report(
+        rating_result,
+        Path("data/preprocessed"),
+    )
     if isinstance(rating_paths, dict):
         outputs["rating"] = Path(rating_paths["table_path"])
     else:
@@ -74,7 +84,10 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_season = ProcessorFactory.create_seasonality(repo, logger=logger)
     pair_season = proc_season.run()
     season_an = SeasonalityAnalyzer(logger=logger)
-    season_result = season_an.analyze(pair_season.recipes, pair_season.interactions)
+    season_result = season_an.analyze(
+        pair_season.recipes,
+        pair_season.interactions,
+    )
     season_paths = season_an.generate_report(
         season_result,
         Path("data/preprocessed"),
@@ -91,8 +104,14 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_nutri = ProcessorFactory.create_nutrition(repo, logger=logger)
     pair_nutri = proc_nutri.run()
     nutri_an = NutritionAnalyser()
-    nutri_result = nutri_an.analyze(pair_nutri.recipes, pair_nutri.interactions)
-    nutri_paths = nutri_an.generate_report(nutri_result, Path("data/preprocessed"))
+    nutri_result = nutri_an.analyze(
+        pair_nutri.recipes,
+        pair_nutri.interactions,
+    )
+    nutri_paths = nutri_an.generate_report(
+        nutri_result,
+        Path("data/preprocessed"),
+    )
     if isinstance(nutri_paths, dict):
         outputs["nutrition"] = Path(nutri_paths["table_path"])
     else:
@@ -127,7 +146,10 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     proc_ing = ProcessorFactory.create_ingredients(repo, logger=logger)
     pair_ing = proc_ing.run()
     ing_an = IngredientsAnalyser()
-    ing_result = ing_an.analyze(pair_ing.recipes, pair_ing.interactions)
+    ing_result = ing_an.analyze(
+        pair_ing.recipes,
+        pair_ing.interactions,
+    )
     ing_paths = ing_an.generate_report(
         ing_result,
         Path("data/preprocessed"),

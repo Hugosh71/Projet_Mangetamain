@@ -152,7 +152,7 @@ class IngredientsAnalyser(Analyser):
         for axis in scores_df.columns:
             score_map = scores_df[axis].to_dict()
             recipes[f"score_{axis}"] = recipes["ingredients"].apply(
-                lambda ingr_list: np.mean(
+                lambda ingr_list, score_map=score_map: np.mean(
                     [
                         score_map[i]
                         for i in ast.literal_eval(ingr_list)

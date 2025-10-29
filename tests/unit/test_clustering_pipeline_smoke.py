@@ -40,7 +40,7 @@ def test_pipeline_runs_with_minimal_inputs(tmp_path: Path, n: int) -> None:
             "nutrient_balance_index",
         ],
     )
-    nutrition.to_csv(base / "features_nutrition.csv", sep=";")
+    nutrition.to_csv(base / "nutrition_table.csv")
 
     season = _frame(
         idx,
@@ -50,7 +50,7 @@ def test_pipeline_runs_with_minimal_inputs(tmp_path: Path, n: int) -> None:
             "inter_strength",
         ],
     )
-    season.to_csv(base / "recipe_seasonality_features.csv")
+    season.to_csv(base / "seasonality_table.csv")
 
     rating = _frame(
         idx,
@@ -63,7 +63,7 @@ def test_pipeline_runs_with_minimal_inputs(tmp_path: Path, n: int) -> None:
             "rating_std",
         ],
     ).assign(name="r")
-    rating.to_csv(base / "recipes_feature_rating_full.csv")
+    rating.to_csv(base / "rating_table.csv")
 
     complexity = _frame(
         idx,
@@ -73,7 +73,7 @@ def test_pipeline_runs_with_minimal_inputs(tmp_path: Path, n: int) -> None:
             "minutes_log",
         ],
     )
-    complexity.to_csv(base / "recipes_features_complexity.csv")
+    complexity.to_csv(base / "complexity_table.csv")
 
     ingredients = _frame(
         idx,
@@ -87,7 +87,7 @@ def test_pipeline_runs_with_minimal_inputs(tmp_path: Path, n: int) -> None:
             "score_western_exotic",
         ],
     )
-    ingredients.to_csv(base / "features_axes_ingredients.csv")
+    ingredients.to_csv(base / "ingredients_table.csv")
 
     paths = ClusteringPaths(base=base, out_dir=out_dir)
     pipe = RecipeClusteringPipeline(paths=paths)
