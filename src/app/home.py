@@ -1,27 +1,26 @@
 """Page d'accueil de l'application"""
 
-from pathlib import Path
-
 import streamlit as st
 
-from app.download_from_s3 import download_from_s3_stub
-from app.run_all import run_pipeline
-from app.upload_to_s3 import upload_to_s3_stub
-
-st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Accueil - Mangetamain", layout="wide")
 
 st.markdown(
     """
 <div style="background-color:#f8f9fa; padding:20px; border-radius:15px;">
+<div style="text-align:center;">
+<img width="150" src="https://raw.githubusercontent.com/Hugosh71/Projet_Mangetamain/main/docs/images/logo.jpeg">
+</div>
 <h2 style="text-align:center;">Bienvenue sur Mangetamain !</h2>
-<p style="text-align:center;">Explorez nos clusters de recettes bio et traditionnelles 
-et découvrez des patterns nutritionnels et sensoriels uniques.</p>
+<p style="text-align:center;">
+Explorez nos clusters de recettes bio et traditionnelles 
+et découvrez des patterns nutritionnels et sensoriels uniques.
+<br>
+<small style="color: gray;">Il est conseillé d’ouvrir l’application web depuis un ordinateur.</small>
+</p>
 </div>
 """,
     unsafe_allow_html=True,
 )
-
-st.sidebar.header("🏠 Accueil")
 
 st.write("\n")
 st.write("\n")
@@ -70,7 +69,8 @@ st.markdown(
     """
 <div style="background-color:#f8f9fa;padding:15px;border-radius:10px;
 text-align:center;">
-🚀 Cliquez sur la page 📊 Clustering pour commencer votre exploration des données !
+🚀 Cliquez sur la page <b><a style="text-decoration:none;color:#158237;" href="/clustering" target="_self">Clustering</a></b>
+pour commencer votre exploration des données !
 </div>
 </div>
 """,
@@ -92,29 +92,29 @@ with col3:
 st.write("\n")
 st.write("\n")
 
-st.markdown("### ⚙️ Pipeline")
-btn_run, btn_upload, btn_download = st.columns(3)
-with btn_run:
-    if st.button("Lancer pipeline", type="primary"):
-        try:
-            out = run_pipeline()
-            st.success(f"Pipeline terminé → {out}")
-        except Exception as exc:
-            st.error(f"Erreur pipeline: {exc}")
-with btn_upload:
-    up = st.file_uploader("Uploader CSV local", type=["csv", "gz"])
-    if up is not None:
-        dest = Path("data/clustering")
-        dest.mkdir(parents=True, exist_ok=True)
-        target = dest / "recipes_merged.csv.gz"
-        with open(target, "wb") as f:
-            f.write(up.getbuffer())
-        upload_to_s3_stub(target)
-        st.success(f"Fichier uploadé vers S3 (stub): {target}")
-with btn_download:
-    if st.button("Télécharger CSV"):
-        local = download_from_s3_stub("recipes_merged.csv.gz")
-        st.success(f"Fichier téléchargé (stub): {local}")
+# st.markdown("### ⚙️ Pipeline")
+# btn_run, btn_upload, btn_download = st.columns(3)
+# with btn_run:
+#     if st.button("Lancer pipeline", type="primary"):
+#         try:
+#             out = run_pipeline()
+#             st.success(f"Pipeline terminé → {out}")
+#         except Exception as exc:
+#             st.error(f"Erreur pipeline: {exc}")
+# with btn_upload:
+#     up = st.file_uploader("Uploader CSV local", type=["csv", "gz"])
+#     if up is not None:
+#         dest = Path("data/clustering")
+#         dest.mkdir(parents=True, exist_ok=True)
+#         target = dest / "recipes_merged.csv.gz"
+#         with open(target, "wb") as f:
+#             f.write(up.getbuffer())
+#         upload_to_s3_stub(target)
+#         st.success(f"Fichier uploadé vers S3 (stub): {target}")
+# with btn_download:
+#     if st.button("Télécharger CSV"):
+#         local = download_from_s3_stub("recipes_merged.csv.gz")
+#         st.success(f"Fichier téléchargé (stub): {local}")
 
 st.markdown(
     """
@@ -124,7 +124,8 @@ caractéristiques des recettes, telles que la composition nutritionnelle, les sc
 sensoriels, le nombre d’ingrédients et d’étapes, ainsi que les interactions et 
 évaluations des utilisateurs.  
 
-💡 Cliquez sur la page **“Méthodologie”** pour comprendre comment nous avons segmenté 
+💡 Cliquez sur la page <b><a style="text-decoration:none;color:#158237;" href="/methodology" target="_self">Méthodologie</a></b> pour comprendre comment nous avons segmenté 
 les recettes et construit nos visualisations.
-"""
+""",
+    unsafe_allow_html=True,
 )

@@ -45,6 +45,7 @@ COPY --from=builder /usr/local /usr/local
 
 # Copy all sources
 COPY src/ ./src/
+COPY .streamlit/ /app/.streamlit/
 COPY .streamlit/ ./src/.streamlit/
 COPY data/ ./data/
 
