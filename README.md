@@ -2,6 +2,8 @@
 
 # Mangetamain
 
+https://mangetamain.immock.com/
+
 ## Prerequisites
 
 - Python>=3.12,<3.13
