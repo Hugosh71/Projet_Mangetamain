@@ -5,7 +5,6 @@ import ast
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple
-from sentence_transformers import SentenceTransformer
 from sklearn.decomposition import PCA
 from sklearn.cluster import AgglomerativeClustering
 
@@ -40,7 +39,7 @@ class IngredientsAnalyser(Analyser):
         self.n_pca_components = n_pca_components or self.DEFAULT_N_PCA_COMPONENTS
         self.embedding_model_name = embedding_model or self.DEFAULT_MODEL_NAME
         # Lazy-load the embedding model only when needed to keep tests lightweight
-        self.model: SentenceTransformer | None = None
+        self.model: object | None = None
 
     # ======================================================
     # Main public method
@@ -99,8 +98,15 @@ class IngredientsAnalyser(Analyser):
         model = self._get_model()
         return model.encode(ingredients)
 
-    def _get_model(self) -> SentenceTransformer:
+    def _get_model(self):  # returns a SentenceTransformer instance
         if self.model is None:
+            try:
+                from sentence_transformers import SentenceTransformer  # type: ignore
+            except ImportError as e:  # pragma: no cover - explicit error path
+                raise ImportError(
+                    "sentence-transformers is required for IngredientsAnalyser. "
+                    "Install with `poetry install --with ml` or `pip install sentence-transformers`."
+                ) from e
             self.model = SentenceTransformer(self.embedding_model_name)
         return self.model
 

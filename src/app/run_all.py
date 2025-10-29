@@ -1,20 +1,26 @@
 from __future__ import annotations
 
-import logging
+import sys
 from pathlib import Path
 
-import pandas as pd
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    # Ensure `src` is on sys.path when running as `python src/app/run_all.py`
+    sys.path.insert(0, str(ROOT))
 
-from app.datasets import run_downloading_datasets
-from app.logging_config import configure_logging, get_logger
-from mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline
-from mangetamain.preprocessing.factories import ProcessorFactory
-from mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser
-from mangetamain.preprocessing.feature.nutrition import NutritionAnalyser
-from mangetamain.preprocessing.feature.rating import RatingAnalyser
-from mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer
-from mangetamain.preprocessing.feature.steps import StepsAnalyser
-from mangetamain.preprocessing.repositories import (
+import logging  # noqa: E402
+import pandas as pd  # noqa: E402
+
+from app.datasets import run_downloading_datasets  # noqa: E402
+from app.logging_config import configure_logging, get_logger  # noqa: E402
+from mangetamain.clustering import ClusteringPaths, RecipeClusteringPipeline  # noqa: E402
+from mangetamain.preprocessing.factories import ProcessorFactory  # noqa: E402
+from mangetamain.preprocessing.feature.ingredients import IngredientsAnalyser  # noqa: E402
+from mangetamain.preprocessing.feature.nutrition import NutritionAnalyser  # noqa: E402
+from mangetamain.preprocessing.feature.rating import RatingAnalyser  # noqa: E402
+from mangetamain.preprocessing.feature.seasonality import SeasonalityAnalyzer  # noqa: E402
+from mangetamain.preprocessing.feature.steps import StepsAnalyser  # noqa: E402
+from mangetamain.preprocessing.repositories import (  # noqa: E402
     CSVDataRepository,
     RepositoryPaths,
 )
