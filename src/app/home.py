@@ -4,9 +4,9 @@ from pathlib import Path
 
 import streamlit as st
 
-from src.app.download_from_s3 import download_from_s3_stub
-from src.app.run_all import run_pipeline
-from src.app.upload_to_s3 import upload_to_s3_stub
+from app.download_from_s3 import download_from_s3_stub
+from app.run_all import run_pipeline
+from app.upload_to_s3 import upload_to_s3_stub
 
 st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
 

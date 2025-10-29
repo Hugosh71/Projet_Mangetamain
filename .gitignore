@@ -203,3 +203,7 @@ docs/_build/
 
 # Temporary files
 tmp/
+
+# VSCode
+.vscode/
+

@@ -2,9 +2,8 @@
 
 __all__ = [
     "__version__",
-    "preprocessing",
 ]
 
 __version__ = "0.1.0"
 
-from . import preprocessing as preprocessing
+# Avoid importing heavy subpackages at top-level to keep imports lightweight.

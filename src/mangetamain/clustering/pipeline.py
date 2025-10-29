@@ -41,13 +41,26 @@ class ClusteringPaths:
     base: Path = Path("data/preprocessed")
     out_dir: Path = Path("data/clustering")
 
-    nutrition: str = "features_nutrition.csv"
-    seasonality: str = "recipe_seasonality_features.csv"
-    rating: str = "recipes_feature_rating_full.csv"
-    complexity: str = "recipes_features_complexity.csv"
-    ingredients: str = "features_axes_ingredients.csv"
+    nutrition: str = "nutrition_table.csv"
+    seasonality: str = "seasonality_table.csv"
+    rating: str = "rating_table.csv"
+    complexity: str = "complexity_table.csv"
+    ingredients: str = "ingredients_table.csv"
 
     def input_paths(self) -> dict[str, Path]:
+        if not self.base.exists():
+            raise FileNotFoundError(f"Base directory not found: {self.base}")
+
+        if not (self.base / self.nutrition).exists():
+            self.nutrition = "backup/features_nutrition.csv"
+        if not (self.base / self.seasonality).exists():
+            self.seasonality = "backup/recipe_seasonality_features.csv"
+        if not (self.base / self.rating).exists():
+            self.rating = "backup/recipes_feature_rating_full.csv"
+        if not (self.base / self.complexity).exists():
+            self.complexity = "backup/recipes_features_complexity.csv"
+        if not (self.base / self.ingredients).exists():
+            self.ingredients = "backup/features_axes_ingredients.csv"
         return {
             "nutrition": self.base / self.nutrition,
             "seasonality": self.base / self.seasonality,
@@ -115,7 +128,16 @@ class RecipeClusteringPipeline:
                 raise FileNotFoundError(f"Missing input file for {key}: {p}")
 
         # Respect notebook logic: read as CSV, merge by index
-        nutrition = pd.read_csv(paths["nutrition"], delimiter=";", index_col=0)
+        nutrition = pd.read_csv(
+            paths["nutrition"],
+            delimiter=(
+                ";"
+                if paths["nutrition"]
+                == Path("data/preprocessed/backup/features_nutrition.csv")
+                else None
+            ),
+            index_col=0,
+        )
         seasonal = pd.read_csv(paths["seasonality"], index_col=0)
         rating = pd.read_csv(paths["rating"], index_col=0)
         complexity = pd.read_csv(paths["complexity"], index_col=0)

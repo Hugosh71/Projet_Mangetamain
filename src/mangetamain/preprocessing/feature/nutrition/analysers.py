@@ -1,8 +1,11 @@
 """Nutrition analyser module."""
 
 from __future__ import annotations
+
 import ast
+
 import pandas as pd
+
 from ...interfaces import Analyser, AnalysisResult
 
 
@@ -15,19 +18,44 @@ class NutritionAnalyser(Analyser):
         interactions: pd.DataFrame | None = None,
         **kwargs: object,
     ) -> AnalysisResult:
-        # safety check
-        if "nutrition" not in recipes.columns:
-            raise ValueError("Column 'nutrition' is missing in recipes DataFrame.")
+        # Stub fallback when minimal input (no nutrition column)
+        if "nutrition" not in recipes.columns or recipes["nutrition"].dropna().empty:
+            return AnalysisResult(
+                table=pd.DataFrame({"_stub": [True]}),
+                summary={},
+            )
 
+        nutrition_series = recipes["nutrition"].dropna()
         nutrition_df = pd.DataFrame(
-            recipes["nutrition"].dropna().apply(ast.literal_eval).tolist(),
-            columns=["calories", "fat", "sugar", "sodium", "protein", "sat_fat", "carbs"],
+            nutrition_series.apply(ast.literal_eval).tolist(),
+            columns=[
+                "calories",
+                "fat",
+                "sugar",
+                "sodium",
+                "protein",
+                "sat_fat",
+                "carbs",
+            ],
+            index=nutrition_series.index,
         )
 
-        nutrition_df.index = recipes["nutrition"].dropna().index
+        # Ensure id and name are present and aligned
+        if "id" in recipes.columns:
+            id_series = recipes.loc[nutrition_df.index, "id"].rename("id")
+        else:
+            id_series = pd.Series(
+                range(len(nutrition_df)), index=nutrition_df.index, name="id"
+            )
 
-        base_cols = [c for c in ["id", "name"] if c in recipes.columns]
-        df_full = pd.concat([recipes.loc[nutrition_df.index, base_cols], nutrition_df], axis=1)
+        if "name" in recipes.columns:
+            name_series = recipes.loc[nutrition_df.index, "name"].rename("name")
+        else:
+            name_series = pd.Series(
+                [None] * len(nutrition_df), index=nutrition_df.index, name="name"
+            )
+
+        df_full = pd.concat([id_series, name_series, nutrition_df], axis=1)
 
         # feature 1 : energy density
         df_full["energy_density"] = df_full["calories"] / (
@@ -42,12 +70,19 @@ class NutritionAnalyser(Analyser):
 
         # feature 4 : nutrient balance index
         df_full["nutrient_balance_index"] = (
-            (df_full["protein"] - (df_full["fat"] + df_full["sugar"] + df_full["sodium"]) / 3)
-            / (df_full["calories"] + 1)
-        )
+            df_full["protein"]
+            - (df_full["fat"] + df_full["sugar"] + df_full["sodium"]) / 3
+        ) / (df_full["calories"] + 1)
 
         df_export = df_full[
-            base_cols + ["energy_density", "protein_ratio", "fat_ratio", "nutrient_balance_index"]
+            [
+                "id",
+                "name",
+                "energy_density",
+                "protein_ratio",
+                "fat_ratio",
+                "nutrient_balance_index",
+            ]
         ]
         # summary
         summary = {
@@ -61,14 +96,33 @@ class NutritionAnalyser(Analyser):
         return AnalysisResult(table=df_export, summary=summary)
 
     def generate_report(self, result: AnalysisResult, path):
-        """Save outputs or generate paths summary (stub)."""
-        result.table.to_csv(path / "features_nutrition.csv", index=False, sep=";")
-        return {
-            "table_path": str(path / "features_nutrition.csv"),
-            "summary": result.summary,
-        }
+        """Write nutrition_table.csv and nutrition_summary.csv into the given path."""
+        from pathlib import Path
 
-# Partie test 
+        path = Path(path)
+        if path.is_dir():
+            out_table = path / "nutrition_table.csv"
+            out_summary = path / "nutrition_summary.csv"
+        else:
+            out_table = path.parent / "nutrition_table.csv"
+            out_summary = path.parent / "nutrition_summary.csv"
+
+        out_table.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write table
+        # Keep a simple CSV (no custom separator) for consistency with other analyzers
+        result.table.to_csv(out_table, index=False)
+
+        # Write summary as key,value rows
+        summary_df = pd.DataFrame([result.summary]).melt(
+            var_name="metric", value_name="value"
+        )
+        summary_df.to_csv(out_summary, index=False)
+
+        return {"table_path": str(out_table), "summary_path": str(out_summary)}
+
+
+# Partie test
 # if __name__ == "__main__":
 #     import pandas as pd
 

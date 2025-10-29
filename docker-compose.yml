@@ -14,7 +14,7 @@ services:
       - "8501:8501"
     environment:
       <<: *default-env
-      PYTHONPATH: /app
+      PYTHONPATH: /app/src
     volumes:
       - ./src:/app/src
       - ./docs:/app/docs
