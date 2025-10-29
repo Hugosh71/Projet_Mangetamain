@@ -7,7 +7,38 @@ This page contains a detailed history of all changes made to the Mangetamain pro
    :maxdepth: 2
 
 Recent Changes
-==============
+--------------
+
+Version 1.0.0 - Production Release
+----------------------------------
+
+**Release Date**: October 2025
+
+Highlights
+~~~~~~~~~~
+
+* First production-ready release with a complete end-to-end data pipeline, clustering, ratings analysis, and improved developer experience.
+
+New Features
+~~~~~~~~~~~~
+
+* End-to-end pipeline orchestrator to download datasets, preprocess features, run clustering, and simulate S3 upload
+* Clustering pipeline with PCA and KMeans across nutrition, seasonality, and complexity features; Streamlit integration and data reload button
+* Ratings module with analysers/strategies, report generation, and top-recipes caching; extensive unit and integration tests
+* Centralized logging configuration with typed settings and comprehensive tests
+
+Improvements
+~~~~~~~~~~~~
+
+* Restructured preprocessing into analysers and strategies; standardized imports and path handling; renamed ``datasets/`` to ``data/``
+* Updated Streamlit pages for clustering and ratings with improved UX and formatting
+* CI workflow and Docker build improvements; Poetry dependency groups and lock management
+
+Fixes
+~~~~~
+
+* Docker and CI configuration issues (PYTHONPATH, ``.streamlit`` directory, test images)
+* Missing datasets in container and assorted path typos
 
 Version 1.0.0 - Production Release
 ----------------------------------
@@ -102,18 +133,18 @@ Migration Guide
 No migration required for this release.
 
 Full Changelog
-==============
+--------------
 
 For a complete history of all changes, see the `CHANGELOG.md <../CHANGELOG.md>`_ file in the project root.
 
 Key Milestones
-==============
+--------------
 
 * **v0.1.0**: Complete documentation system and enhanced code quality
 * **v0.0.1**: Initial project setup and basic structure
 
 Future Releases
-==============
+---------------
 
 Planned features for upcoming releases:
 
@@ -122,7 +153,7 @@ Planned features for upcoming releases:
 * **v1.0.0**: Production-ready release with full feature set
 
 Contributing to Changelog
-=========================
+-------------------------
 
 When contributing to the project, please update the changelog following these guidelines:
 
@@ -131,5 +162,3 @@ When contributing to the project, please update the changelog following these gu
 3. **Include relevant issue numbers when applicable**
 4. **Follow the established format and categories**
 5. **Update version information when releasing**
-
-For more details, see the :doc:`contributing` guide.

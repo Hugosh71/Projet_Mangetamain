@@ -2,6 +2,8 @@
 
 # Mangetamain
 
+https://mangetamain.immock.com/
+
 ## Prerequisites
 
 - Python>=3.12,<3.13
@@ -40,8 +42,6 @@ poetry --version
 
 Until now, we are always based on the native Python environment **NOT** the desired virtual environment.
 Even Poetry is always run within this native Python environment.
-
-
 
 ### Install Git (for version control)
 
@@ -131,6 +131,20 @@ make docker-run
 ```
 
 The app will be available at `http://localhost:8501`.
+
+## Deployment
+
+1. Run the preprocessing and prediction pipeline:
+
+```commandline
+./scripts/run_pipeline.sh
+```
+
+This script executes all preprocessing steps, feature engineering, and clustering model training, and finally upload the prepared dataset to S3.
+
+2. When a new commit is pushed to the `main` branch, the CI/CD pipeline (GitHub Actions) automatically builds and pushes the Docker image to AWS ECR.
+
+3. Force a new deployment on Amazon Elastic Container Service.
 
 ## Collaborative Development
 

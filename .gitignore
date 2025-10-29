@@ -199,11 +199,10 @@ cython_debug/
 .temp/
 
 # Documentation
-docs/_build/
+# docs/_build/
 
 # Temporary files
 tmp/
 
 # VSCode
 .vscode/
-

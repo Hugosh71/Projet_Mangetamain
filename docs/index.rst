@@ -8,18 +8,17 @@ Welcome to Mangetamain's documentation!
 Mangetamain is a modern Streamlit-based web application designed for data analysis and visualization. This documentation provides comprehensive information about the application's architecture, installation, usage, and API reference.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-   installation
-   usage
+   installation/index
+   development/index
+   usage/index
    api/index
-   development
-   contributing
    changelog
 
 Features
-========
+--------
 
 * **Modern Web Interface**: Built with Streamlit for an intuitive user experience
 * **Data Analysis**: Comprehensive tools for data exploration and visualization
@@ -28,7 +27,7 @@ Features
 * **Code Quality**: Automated linting, formatting, and pre-commit hooks
 
 Quick Start
-===========
+-----------
 
 If you're eager to get started quickly:
 
@@ -50,7 +49,7 @@ If you're eager to get started quickly:
 The application will be available at `http://localhost:8501`.
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

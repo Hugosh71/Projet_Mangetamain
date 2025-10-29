@@ -49,7 +49,6 @@ docs/
 ├── conf.py              # Sphinx configuration
 ├── index.rst            # Main documentation page
 ├── installation.rst     # Installation guide
-├── usage.rst           # Usage guide
 ├── development.rst      # Development guide
 ├── contributing.rst    # Contributing guide
 ├── api/                # API documentation

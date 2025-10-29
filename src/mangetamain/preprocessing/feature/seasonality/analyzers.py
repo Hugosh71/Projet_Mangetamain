@@ -1,4 +1,10 @@
-"""Seasonality analysers (stubs)."""
+"""Seasonality analysers.
+
+This module provides tools to compute and report seasonality features
+for recipe interaction data. It extracts cyclic (seasonal) patterns
+based on user interactions and represents them as smoothed sine/cosine
+features along with a seasonality strength metric.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +18,21 @@ from ...interfaces import Analyser, AnalysisResult
 
 
 class SeasonalityAnalyzer(Analyser):
+    """Analyzes seasonality patterns in user-recipe interactions.
+
+    This analyzer computes seasonality-related features (e.g., sine and cosine
+    of day-of-year) for each recipe based on user interaction timestamps.
+    It applies empirical Bayes smoothing to stabilize estimates for recipes
+    with limited data.
+    """
+
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
+        """Initializes the SeasonalityAnalyzer.
+
+        Args:
+            logger (logging.Logger | None): Optional custom logger instance.
+                If not provided, a module-level logger will be used.
+        """
         self._logger = logger or logging.getLogger(__name__)
 
     def analyze(
@@ -21,6 +41,31 @@ class SeasonalityAnalyzer(Analyser):
         interactions: pd.DataFrame,
         **kwargs: object,
     ) -> AnalysisResult:
+        """Computes seasonality features for recipes based on interaction data.
+
+        The method estimates each recipe's position in the yearly cycle using
+        the day of year (DOY) of its interactions. It encodes DOY as sine and
+        cosine features to capture cyclical seasonality and applies empirical
+        Bayes smoothing to reduce noise in low-sample cases.
+
+        Args:
+            recipes (pd.DataFrame): DataFrame of recipe metadata (unused here but
+                required by interface).
+            interactions (pd.DataFrame): DataFrame of user interactions containing:
+                - 'recipe_id': Identifier of the recipe.
+                - 'date': Date of interaction.
+            **kwargs (object): Additional keyword arguments (unused).
+
+        Returns:
+            AnalysisResult: Object containing:
+                - `table` (pd.DataFrame): Per-recipe seasonality features:
+                    ['recipe_id', 'inter_doy_sin_smooth', 'inter_doy_cos_smooth', 'inter_strength']
+                - `summary` (dict): Empty summary (for compatibility with reporting).
+
+        Raises:
+            ValueError: If required columns ('date', 'recipe_id') are missing
+                or if invalid date values are detected.
+        """
         self._logger.debug(
             "Computing seasonality features for recipes based on user interaction data"
         )
@@ -69,7 +114,6 @@ class SeasonalityAnalyzer(Analyser):
         agg["inter_doy_sin_smooth"] = (agg["n"] * agg["sin_mean"] + k * sin_global_) / (
             agg["n"] + k
         )
-
         agg["inter_doy_cos_smooth"] = (agg["n"] * agg["cos_mean"] + k * cos_global_) / (
             agg["n"] + k
         )
@@ -92,6 +136,22 @@ class SeasonalityAnalyzer(Analyser):
         return AnalysisResult(table=df_features, summary={})
 
     def generate_report(self, result: AnalysisResult, path):
+        """Generates and saves CSV reports for seasonality results.
+
+        This function saves both a detailed per-recipe feature table and
+        a summary CSV file in the given directory.
+
+        Args:
+            result (AnalysisResult): Result object returned by `analyze()`.
+            path (str or Path): Path to the output directory or file.
+                If a directory is provided, files are saved inside it.
+                If a file path is given, its parent directory is used.
+
+        Returns:
+            dict: A dictionary containing:
+                - 'table_path' (str): Path to the saved per-recipe CSV file.
+                - 'summary_path' (str): Path to the saved summary CSV file.
+        """
         self._logger.debug("Writing seasonality_table.csv and seasonality_summary.csv")
 
         path = Path(path)

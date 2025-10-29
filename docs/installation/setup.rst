@@ -1,76 +1,6 @@
-Installation Guide
-==================
 
-This guide will walk you through the installation process for Mangetamain on different operating systems.
-
-Prerequisites
-============
-
-Before installing Mangetamain, ensure you have the following prerequisites:
-
-* Python >= 3.12, < 3.13
-* Poetry (for dependency management)
-* Git (for version control)
-
-Installing Python 3.12
-======================
-
-Windows
--------
-
-1. Download Python 3.12 from the official website: https://www.python.org/downloads/release/python-31210/
-2. Run the installer and make sure to check "Add Python to PATH"
-3. Verify the installation:
-
-.. code-block:: cmd
-
-   python --version
-
-macOS
------
-
-Using Homebrew:
-
-.. code-block:: bash
-
-   brew install python@3.12
-
-Verify the installation:
-
-.. code-block:: bash
-
-   python3.12 --version
-
-Linux (Ubuntu/Debian)
----------------------
-
-.. code-block:: bash
-
-   sudo apt update
-   sudo apt install python3.12 python3.12-venv python3.12-dev
-
-Installing Poetry
+Environment Setup
 =================
-
-Poetry is used for dependency management and virtual environment handling.
-
-.. code-block:: bash
-
-   pip3.12 install poetry
-
-Verify the installation:
-
-.. code-block:: bash
-
-   poetry --version
-
-Installing Git
-==============
-
-Download and install Git from https://git-scm.com/downloads and follow the setup instructions.
-
-Installation Methods
-====================
 
 Method 1: Using Poetry (Recommended)
 ------------------------------------
@@ -97,6 +27,20 @@ This is the recommended method for development and local usage.
 
    poetry install
 
+Install additional development dependencies:
+
+.. code-block:: bash
+
+   poetry install --with dev
+   poetry run pre-commit install
+
+This will install:
+
+* Testing tools (pytest, pytest-cov)
+* Code formatting (black, ruff)
+* Linting (flake8, ruff)
+* Pre-commit hooks
+
 4. **Activate the virtual environment:**
 
    **Option A: Using VS Code**
@@ -109,7 +53,7 @@ This is the recommended method for development and local usage.
 
    Windows:
 
-   .. code-block:: cmd
+   .. code-block:: bash
 
       .\.venv\Scripts\activate.ps1
 
@@ -168,7 +112,7 @@ For development with all services:
    docker compose up app
 
 Verification
-============
+------------
 
 After installation, verify that everything is working correctly:
 
@@ -201,10 +145,9 @@ After installation, verify that everything is working correctly:
    Open your browser and navigate to `http://localhost:8501`
 
 Troubleshooting
-===============
+---------------
 
 Common Issues
--------------
 
 **Issue: Python version mismatch**
 
@@ -235,28 +178,11 @@ Common Issues
    # Solution: Use a different port
    poetry run streamlit run src/app/main.py --server.port=8502
 
-Development Setup
-=================
-
-For development, install additional development dependencies:
-
-.. code-block:: bash
-
-   poetry install --with dev
-   poetry run pre-commit install
-
-This will install:
-
-* Testing tools (pytest, pytest-cov)
-* Code formatting (black, ruff)
-* Linting (flake8, ruff)
-* Pre-commit hooks
-
 Next Steps
-==========
+----------
 
 After successful installation, you can:
 
-1. Read the :doc:`usage` guide to learn how to use the application
-2. Explore the :doc:`api/index` for detailed API documentation
-3. Check the :doc:`development` guide for contributing to the project
+1. Read the :doc:`../usage/index` guide to learn how to use the application
+2. Explore the :doc:`../api/index` for detailed API documentation
+3. Check the :doc:`../development/index` guide for contributing to the project

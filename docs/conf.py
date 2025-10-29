@@ -42,6 +42,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
+    "sphinx_markdown_builder",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

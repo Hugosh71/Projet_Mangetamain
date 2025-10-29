@@ -18,6 +18,10 @@ if __name__ == "__main__":
     clustering_page = st.Page(
         "clustering.py", title="Clustering", icon=":material/graph_6:"
     )
+    method_page = st.Page(
+        "methodology.py", title="Méthodologie", icon=":material/book:"
+    )
 
-    pg = st.navigation([home_page, clustering_page])
+    # Create nav in side bar
+    pg = st.navigation([home_page, clustering_page, method_page])
     pg.run()

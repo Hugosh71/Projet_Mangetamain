@@ -1,38 +1,5 @@
-Usage Guide
-===========
-
-This guide explains how to use the Mangetamain application effectively.
-
-Getting Started
-===============
-
-Starting the Application
-------------------------
-
-After installation, start the application using one of these methods:
-
-**Using Poetry (Recommended for development):**
-
-.. code-block:: bash
-
-   make run
-
-**Using Docker:**
-
-.. code-block:: bash
-
-   docker compose up app
-
-**Using Docker directly:**
-
-.. code-block:: bash
-
-   make docker-run
-
-The application will be available at `http://localhost:8501`.
-
 Application Interface
-=====================
+---------------------
 
 The Mangetamain application provides a modern, intuitive web interface built with Streamlit. The interface includes:
 
@@ -42,10 +9,9 @@ The Mangetamain application provides a modern, intuitive web interface built wit
 * **Export Features**: Download results in various formats
 
 Key Features
-============
+------------
 
-Data Analysis
--------------
+**Data Analysis**
 
 Mangetamain provides powerful data analysis capabilities:
 
@@ -54,8 +20,7 @@ Mangetamain provides powerful data analysis capabilities:
 * **Visualization**: Interactive charts and graphs
 * **Filtering**: Advanced filtering and search capabilities
 
-Visualization Tools
--------------------
+**Visualization Tools**
 
 The application includes comprehensive visualization tools:
 
@@ -64,8 +29,7 @@ The application includes comprehensive visualization tools:
 * **Customization**: Color schemes, themes, and styling options
 * **Export**: Save visualizations as images or PDFs
 
-Data Management
----------------
+**Data Management**
 
 * **Data Import**: Load data from various sources
 * **Data Cleaning**: Tools for data preprocessing
@@ -73,10 +37,9 @@ Data Management
 * **Data Export**: Save processed data in multiple formats
 
 Advanced Usage
-==============
+--------------
 
-Configuration
--------------
+**Configuration**
 
 The application can be configured through environment variables or configuration files:
 
@@ -102,8 +65,7 @@ Create a `.streamlit/config.toml` file:
    backgroundColor = "#FFFFFF"
    secondaryBackgroundColor = "#F0F2F6"
 
-Customization
--------------
+**Customization**
 
 The application can be customized for different use cases:
 
@@ -113,7 +75,7 @@ The application can be customized for different use cases:
 * **Data Sources**: Configure different data sources
 
 Performance Optimization
-========================
+------------------------
 
 For large datasets, consider these optimization strategies:
 
@@ -123,26 +85,23 @@ For large datasets, consider these optimization strategies:
 * **Parallel Processing**: Use multiprocessing for intensive computations
 
 Best Practices
-==============
+--------------
 
-Data Handling
--------------
+**Data Handling**
 
 * **Data Validation**: Always validate data before processing
 * **Error Handling**: Implement proper error handling for data operations
 * **Data Backup**: Keep backups of important datasets
 * **Version Control**: Use version control for data processing scripts
 
-User Experience
----------------
+**User Experience**
 
 * **Loading Indicators**: Use loading indicators for long operations
 * **Error Messages**: Provide clear, actionable error messages
 * **Help Text**: Include helpful descriptions and tooltips
 * **Responsive Design**: Ensure the interface works on different screen sizes
 
-Security Considerations
-======================
+**Security Considerations**
 
 * **Data Privacy**: Ensure sensitive data is handled securely
 * **Access Control**: Implement appropriate access controls
@@ -150,10 +109,9 @@ Security Considerations
 * **Audit Logging**: Log important operations for security auditing
 
 Troubleshooting
-===============
+---------------
 
-Common Issues
--------------
+**Common Issues**
 
 **Application won't start:**
 
@@ -189,7 +147,7 @@ Common Issues
 * Clear browser cache if needed
 
 Getting Help
-============
+------------
 
 If you encounter issues:
 
@@ -199,10 +157,10 @@ If you encounter issues:
 4. **Report bugs**: Create an issue on the project repository
 
 Next Steps
-==========
+----------
 
 After mastering the basic usage:
 
-1. Explore the :doc:`api/index` for detailed API documentation
-2. Check the :doc:`development` guide for contributing to the project
+1. Explore the :doc:`../api/index` for detailed API documentation
+2. Check the :doc:`../development/index` guide for contributing to the project
 3. Learn about advanced features and customization options
