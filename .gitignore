@@ -200,10 +200,10 @@ cython_debug/
 
 # Documentation
 docs/_build/
+!docs/build
 
 # Temporary files
 tmp/
 
 # VSCode
 .vscode/
-
