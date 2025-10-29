@@ -15,7 +15,7 @@ from .factories import ProcessorFactory
 from .feature.ingredients import IngredientsAnalyser
 from .feature.nutrition import NutritionAnalyser
 from .feature.rating import RatingAnalyser
-from .feature.seasonality import SeasonalityAnalyzer
+from .feature.seasonality import SeasonalityAnalyser
 from .feature.steps import StepsAnalyser
 from .repositories import CSVDataRepository, RepositoryPaths
 
@@ -40,7 +40,7 @@ def get_recipes_seasonality_feature_data() -> pd.DataFrame:
     repo = CSVDataRepository(paths=RepositoryPaths())
     processor = ProcessorFactory.create_seasonality(repo)
     processed = processor.run()
-    analyser = SeasonalityAnalyzer()
+    analyser = SeasonalityAnalyser()
     result = analyser.analyze(processed.recipes, processed.interactions)
     return result.table
 

@@ -1,7 +1,7 @@
 import pandas as pd
 
-from mangetamain.preprocessing.feature.seasonality.analyzers import (
-    SeasonalityAnalyzer,
+from mangetamain.preprocessing.feature.seasonality.analysers import (
+    SeasonalityAnalyser,
 )
 from mangetamain.preprocessing.feature.seasonality.strategies import (
     SeasonalityCleaning,
@@ -9,19 +9,19 @@ from mangetamain.preprocessing.feature.seasonality.strategies import (
 )
 
 
-def test_seasonality_analyser_stub() -> None:
+def test_seasonality_analyser() -> None:
     recipes = pd.DataFrame([{"id": 1, "name": "A"}])
     interactions = pd.DataFrame(
         [{"recipe_id": 1, "date": "2025-01-01"}, {"recipe_id": 2, "date": "2025-07-01"}]
     )
-    analyser = SeasonalityAnalyzer()
+    analyser = SeasonalityAnalyser()
     result = analyser.analyze(recipes, interactions)
     assert "inter_doy_sin_smooth" in result.table.columns
     assert "inter_doy_cos_smooth" in result.table.columns
     assert "inter_strength" in result.table.columns
 
 
-def test_seasonality_strategies_stub() -> None:
+def test_seasonality_strategies() -> None:
     recipes = pd.DataFrame([{"id": 1}])
     interactions = pd.DataFrame([{"recipe_id": 1}])
     cleaner = SeasonalityCleaning()

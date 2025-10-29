@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from .analyzers import SeasonalityAnalyzer
+from .analysers import SeasonalityAnalyser
 from .strategies import SeasonalityCleaning, SeasonalityPreprocessing
 
 __all__ = [
     "SeasonalityCleaning",
     "SeasonalityPreprocessing",
-    "SeasonalityAnalyzer",
+    "SeasonalityAnalyser",
 ]
