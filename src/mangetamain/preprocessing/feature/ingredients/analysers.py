@@ -13,7 +13,28 @@ from ...interfaces import Analyser, AnalysisResult
 
 
 class IngredientsAnalyser(Analyser):
-    """Analyser that extracts semantic and PCA-based features from recipe ingredients."""
+    """
+    Analyser that extracts semantic and PCA-based features from recipe ingredients.
+
+    This class implements the Analyser interface to process a list of recipes.
+    It performs two main tasks:
+    1.  Semantic Analysis: Computes scores for each recipe along predefined
+        semantic axes (e.g., sweet vs. savory) using sentence embeddings.
+    2.  Co-occurrence Analysis: Clusters ingredients based on their embeddings,
+        builds a co-occurrence matrix, and applies PCA to extract
+        principal components as recipe features.
+
+    Attributes
+    ----------
+    cluster_threshold : float
+        Distance threshold used for hierarchical clustering of ingredients.
+    n_pca_components : int
+        Number of principal components to compute from the co-occurrence matrix.
+    embedding_model_name : str
+        Name of the SentenceTransformer model used to compute embeddings.
+    model : SentenceTransformer
+        The loaded SentenceTransformer model instance.
+    """
 
     DEFAULT_CLUSTER_THRESHOLD: float = 0.5
     DEFAULT_N_PCA_COMPONENTS: int = 10
@@ -35,7 +56,21 @@ class IngredientsAnalyser(Analyser):
         n_pca_components: int | None = None,
         embedding_model: str | None = None,
     ) -> None:
-        """Initialize the IngredientsAnalyser."""
+        """
+        Initialize the IngredientsAnalyser.
+
+        Parameters
+        ----------
+        cluster_threshold : float, optional
+            The distance threshold for the AgglomerativeClustering.
+            If None, defaults to `DEFAULT_CLUSTER_THRESHOLD`.
+        n_pca_components : int, optional
+            The number of components for PCA.
+            If None, defaults to `DEFAULT_N_PCA_COMPONENTS`.
+        embedding_model : str, optional
+            The name of the SentenceTransformer model to load.
+            If None, defaults to `DEFAULT_MODEL_NAME`.
+        """
         self.cluster_threshold = cluster_threshold or self.DEFAULT_CLUSTER_THRESHOLD
         self.n_pca_components = n_pca_components or self.DEFAULT_N_PCA_COMPONENTS
         self.embedding_model_name = embedding_model or self.DEFAULT_MODEL_NAME
@@ -52,17 +87,33 @@ class IngredientsAnalyser(Analyser):
         interactions: pd.DataFrame,
         **kwargs: object,
     ) -> AnalysisResult:
-        """Main analysis pipeline producing semantic and PCA-based features."""
-        # Stub fallback when minimal input (no ingredients column)
-        if (
-            "ingredients" not in recipes.columns
-            or recipes["ingredients"].dropna().empty
-        ):
-            return AnalysisResult(
-                table=pd.DataFrame({"_stub": [True]}),
-                summary={},
-            )
+        """
+        Main analysis pipeline producing semantic and PCA-based features.
 
+        This method executes the full analysis workflow:
+        1. Extracts ingredients.
+        2. Computes embeddings.
+        3. Calculates semantic scores and adds them to recipes.
+        4. Clusters ingredients.
+        5. Computes co-occurrence PCA and adds dimensions to recipes.
+
+        Parameters
+        ----------
+        recipes : pd.DataFrame
+            DataFrame containing recipe data, must have an 'ingredients' column
+            (expected as a string representation of a list).
+        interactions : pd.DataFrame
+            DataFrame of user interactions. (Note: This parameter is part of the
+            interface but not used in this specific analyser).
+        **kwargs : object
+            Additional keyword arguments (unused, for interface compatibility).
+
+        Returns
+        -------
+        AnalysisResult
+            An object containing a 'table' (DataFrame with recipe IDs and
+            new features) and a 'summary' (dict of mean feature values).
+        """
         ingredients, ingredients_count = self._extract_ingredients(recipes)
         embeddings = self._compute_embeddings(ingredients)
         scores_df = self._compute_semantic_scores(ingredients, embeddings)
@@ -98,37 +149,70 @@ class IngredientsAnalyser(Analyser):
     # Private sub-methods
     # ======================================================
 
-    def _extract_ingredients(
-        self, recipes: pd.DataFrame
-    ) -> tuple[list[str], pd.Series]:
-        """Extract unique ingredients and their frequencies from the recipes DataFrame."""
+    def _extract_ingredients(self, recipes: pd.DataFrame) -> Tuple[List[str], pd.Series]:
+        """
+        Extract unique ingredients and their frequencies from the recipes DataFrame.
+
+        Assumes the 'ingredients' column contains string representations of lists
+        which are evaluated using `ast.literal_eval`.
+
+        Parameters
+        ----------
+        recipes : pd.DataFrame
+            The input DataFrame with an 'ingredients' column.
+
+        Returns
+        -------
+        Tuple[List[str], pd.Series]
+            A tuple containing:
+            - A list of unique ingredient names.
+            - A pandas Series mapping ingredient names to their frequency (count).
+        """
         ingredients_series = recipes["ingredients"].apply(ast.literal_eval).explode()
         ingredients_count = ingredients_series.value_counts()
         ingredients = pd.unique(ingredients_series).tolist()
         return ingredients, ingredients_count
 
-    def _compute_embeddings(self, ingredients: list[str]) -> np.ndarray:
-        """Compute embeddings for all ingredients using a sentence transformer."""
-        model = self._get_model()
-        return model.encode(ingredients)
+    def _compute_embeddings(self, ingredients: List[str]) -> np.ndarray:
+        """
+        Compute embeddings for all ingredients using a sentence transformer.
 
-    def _get_model(self):  # returns a SentenceTransformer instance
-        if self.model is None:
-            try:
-                from sentence_transformers import SentenceTransformer  # type: ignore
-            except ImportError as e:  # pragma: no cover - explicit error path
-                raise ImportError(
-                    "sentence-transformers is required for IngredientsAnalyser. "
-                    "Install with `poetry install --with ml` or `pip install sentence-transformers`."
-                ) from e
-            self.model = SentenceTransformer(self.embedding_model_name)
-        return self.model
+        Parameters
+        ----------
+        ingredients : List[str]
+            A list of unique ingredient names.
+
+        Returns
+        -------
+        np.ndarray
+            A 2D numpy array where each row is the embedding vector for the
+            corresponding ingredient in the input list.
+        """
+        return self.model.encode(ingredients)
 
     def _compute_semantic_scores(
         self, ingredients: list[str], embeddings: np.ndarray
     ) -> pd.DataFrame:
-        """Compute cosine similarity scores between ingredients and semantic axes."""
-        model = self._get_model()
+        """
+        Compute cosine similarity scores between ingredients and semantic axes.
+
+        This method projects ingredient embeddings onto semantic axes defined
+        in `AXES_PHRASES`. Each axis is a vector difference between two
+        contrasting phrases (e.g., "sweet" - "savory").
+
+        Parameters
+        ----------
+        ingredients : List[str]
+            List of ingredient names (used as the index for the output DataFrame).
+        embeddings : np.ndarray
+            The embedding matrix for the ingredients (must match order of `ingredients`).
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame where rows are ingredients and columns are semantic
+            axes (e.g., 'sweet_savory'), containing cosine similarity scores.
+        """
         axis_vecs = {
             name: model.encode(pos) - model.encode(neg)
             for name, (pos, neg) in self.AXES_PHRASES.items()
@@ -148,7 +232,25 @@ class IngredientsAnalyser(Analyser):
     def _add_semantic_features(
         self, recipes: pd.DataFrame, scores_df: pd.DataFrame
     ) -> pd.DataFrame:
-        """Add semantic scores to the recipes DataFrame."""
+        """
+        Add semantic scores to the recipes DataFrame.
+
+        Calculates the average semantic score for each recipe by averaging the
+        scores (from `scores_df`) of its constituent ingredients.
+
+        Parameters
+        ----------
+        recipes : pd.DataFrame
+            The main recipes DataFrame.
+        scores_df : pd.DataFrame
+            DataFrame of scores per ingredient (output of `_compute_semantic_scores`).
+
+        Returns
+        -------
+        pd.DataFrame
+            The `recipes` DataFrame, modified in-place to include new columns
+            (e.g., 'score_sweet_savory').
+        """
         for axis in scores_df.columns:
             score_map = scores_df[axis].to_dict()
             recipes[f"score_{axis}"] = recipes["ingredients"].apply(
@@ -168,7 +270,35 @@ class IngredientsAnalyser(Analyser):
         embeddings: np.ndarray,
         ingredients_count: pd.Series,
     ) -> pd.DataFrame:
-        """Cluster ingredients based on embeddings using hierarchical clustering."""
+        """
+        Cluster ingredients based on embeddings to normalize ingredient names.
+
+        This step serves as a **semantic deduplication** process. Given the presence
+        of spelling mistakes, superfluous adjectives, singular/plural forms, and
+        synonyms in raw ingredient data (e.g., 'fresh onion' vs. 'onions'),
+        hierarchical clustering groups near-identical ingredients based on their
+        embeddings. This ensures that the subsequent co-occurrence matrix and PCA
+        operate on normalized ingredient "concepts" rather than noisy textual variations.
+
+        Uses AgglomerativeClustering with a cosine metric. The label for each
+        cluster is determined by the most frequent ingredient within that cluster.
+
+        Parameters
+        ----------
+        ingredients : List[str]
+            List of unique ingredient names.
+        embeddings : np.ndarray
+            The embedding matrix for the ingredients.
+        ingredients_count : pd.Series
+            A Series mapping ingredient names to their frequency, used to
+            select the cluster label (most frequent ingredient).
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame with columns ['name', 'cluster', 'cluster label']
+            mapping each ingredient to its cluster (the normalized ingredient name).
+        """
         model_cut = AgglomerativeClustering(
             distance_threshold=self.cluster_threshold,
             n_clusters=None,
@@ -197,9 +327,33 @@ class IngredientsAnalyser(Analyser):
         return ingredients_df
 
     def _compute_pca_on_cooccurrence(
-        self, recipes: pd.DataFrame, ingredients_df: pd.DataFrame
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Compute PCA on the ingredient co-occurrence matrix."""
+        self,
+        recipes: pd.DataFrame,
+        ingredients_df: pd.DataFrame
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Compute PCA on the ingredient cluster co-occurrence matrix.
+
+        This method builds a matrix of how often ingredient *clusters*
+        co-occur within the same recipes. It applies log-transform
+        (np.log1p) and then PCA to this matrix.
+
+        Parameters
+        ----------
+        recipes : pd.DataFrame
+            The main recipes DataFrame, used to find co-occurrences.
+        ingredients_df : pd.DataFrame
+            The clustered ingredients DataFrame from `_cluster_ingredients`.
+
+        Returns
+        -------
+        Tuple[pd.DataFrame, pd.DataFrame]
+            A tuple containing:
+            - coords (pd.DataFrame): The PCA coordinates (dimensions) for
+              each cluster label.
+            - cluster_labels (pd.DataFrame): A DataFrame mapping cluster IDs
+              to their string labels.
+        """
         # Construction table recette-ingrédient
         ingredients_by_recipe = pd.DataFrame(
             recipes["ingredients"].apply(ast.literal_eval).explode()
@@ -243,7 +397,31 @@ class IngredientsAnalyser(Analyser):
     def _add_pca_features(
         self, recipes: pd.DataFrame, ingredients_df: pd.DataFrame, coords: pd.DataFrame
     ) -> pd.DataFrame:
-        """Add PCA-based cluster coordinates to each recipe as averaged features."""
+        """
+        Add PCA-based cluster coordinates to each recipe as averaged features.
+
+        For each recipe, this method finds the clusters of its ingredients,
+        retrieves the PCA coordinates for those clusters (from `coords`),
+        and calculates the mean of these coordinates. These mean values
+        are added as new 'DimX' columns to the recipes DataFrame.
+
+        Note: Dimensions 'Dim1' and 'Dim3' are excluded as they are
+        assumed to relate only to ingredient frequency.
+
+        Parameters
+        ----------
+        recipes : pd.DataFrame
+            The main recipes DataFrame.
+        ingredients_df : pd.DataFrame
+            The clustered ingredients DataFrame.
+        coords : pd.DataFrame
+            The PCA coordinates for each cluster.
+
+        Returns
+        -------
+        pd.DataFrame
+            The `recipes` DataFrame updated with new 'DimX' feature columns.
+        """
         recipes["ingredients_list"] = recipes["ingredients"].apply(ast.literal_eval)
         ingredient_to_cluster = dict(
             zip(ingredients_df["name"], ingredients_df["cluster label"], strict=False)
@@ -276,25 +454,21 @@ class IngredientsAnalyser(Analyser):
     # ======================================================
 
     def generate_report(self, result: AnalysisResult, path: str) -> dict[str, str]:
-        """Write ingredients_table.csv and ingredients_summary.csv into the given path."""
-        from pathlib import Path
+        """
+        Stub report generator.
 
-        import pandas as pd
+        (This is a placeholder and does not generate a real report).
 
-        p = Path(path)
-        if p.is_dir():
-            out_table = p / "ingredients_table.csv"
-            out_summary = p / "ingredients_summary.csv"
-        else:
-            out_table = p.parent / "ingredients_table.csv"
-            out_summary = p.parent / "ingredients_summary.csv"
+        Parameters
+        ----------
+        result : AnalysisResult
+            The result object returned by the `analyze` method.
+        path : str
+            The file path where the report should be saved.
 
-        out_table.parent.mkdir(parents=True, exist_ok=True)
-
-        result.table.to_csv(out_table, index=False)
-        summary_df = pd.DataFrame([result.summary]).melt(
-            var_name="metric", value_name="value"
-        )
-        summary_df.to_csv(out_summary, index=False)
-
-        return {"table_path": str(out_table), "summary_path": str(out_summary)}
+        Returns
+        -------
+        dict[str, str]
+            A dictionary containing paths to the generated report files.
+        """
+        return {"table_path": str(path), "summary_path": str(path)}

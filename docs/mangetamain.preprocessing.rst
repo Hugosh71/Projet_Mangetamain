@@ -1,6 +1,14 @@
 mangetamain.preprocessing package
 =================================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   mangetamain.preprocessing.feature
+
 Submodules
 ----------
 
