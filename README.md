@@ -140,11 +140,11 @@ The app will be available at `http://localhost:8501`.
 ./scripts/run_pipeline.sh
 ```
 
-2. This script executes all preprocessing steps, feature engineering, and clustering model training, and finally upload the prepared dataset to S3.
+This script executes all preprocessing steps, feature engineering, and clustering model training, and finally upload the prepared dataset to S3.
 
-3. When a new commit is pushed to the `main` branch, the CI/CD pipeline (GitHub Actions) automatically builds and pushes the Docker image to AWS ECR.
+2. When a new commit is pushed to the `main` branch, the CI/CD pipeline (GitHub Actions) automatically builds and pushes the Docker image to AWS ECR.
 
-4. Force a new deployment on Amazon Elastic Container Service.
+3. Force a new deployment on Amazon Elastic Container Service.
 
 ## Collaborative Development
 
