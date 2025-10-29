@@ -22,5 +22,6 @@ if __name__ == "__main__":
         "methodology.py", title="Méthodologie", icon=":material/book:"
     )
 
+    # Create nav in side bar
     pg = st.navigation([home_page, clustering_page, method_page])
     pg.run()

@@ -1,6 +1,12 @@
+# ruff: noqa
 import streamlit as st
 
-st.markdown("""# 🧠 Clustering de Recettes : Méthodologie et Perspectives
+st.set_page_config(
+    page_title="Méthodologie et Perspectives - Mangetamain", layout="wide"
+)
+
+st.markdown(
+    """# 🧠 Clustering de Recettes : Méthodologie et Perspectives
 
 Ce document présente la méthodologie utilisée pour construire une **typologie de recettes culinaires** à partir de variables nutritionnelles, sémantiques et comportementales.  
 L’objectif est de regrouper les recettes selon leurs similarités globales afin de révéler des familles cohérentes (par exemple : recettes légères et estivales, plats riches et réconfortants, etc.).
@@ -56,10 +62,14 @@ La **note moyenne** des utilisateurs a été ajustée par **lissage bayésien**,
 > 🧩 **Encart méthodologique – Le lissage bayésien**
 >
 > Le lissage bayésien consiste à **pondérer la moyenne empirique** d’un échantillon par une **moyenne globale** :
-""")
-st.latex(r"""\text{Note corrigée} = \frac{n \times \text{note moyenne recette} 
-         + k \times \text{note moyenne globale}}{n + k}""")
-st.markdown("""
+"""
+)
+st.latex(
+    r"""\text{Note corrigée} = \frac{n \times \text{note moyenne recette} 
+         + k \times \text{note moyenne globale}}{n + k}"""
+)
+st.markdown(
+    """
 > où :
 > - `n` = nombre de notes de la recette  
 > - `k` = poids de la moyenne globale (hyperparamètre)  
@@ -129,5 +139,5 @@ Le **nombre de classes** a été choisi en fonction de la **stabilité des group
   → Cela suggère que les dimensions explorées sont **quasi orthogonales** mais que le signal utile est **dilué**.
 - Une **Analyse Factorielle Multiple (AFM)** pourrait permettre de mieux **pondérer les groupes de variables** hétérogènes.
 - Une autre voie serait de **clustériser un sous-groupe homogène de variables** (par exemple les ingrédients) puis d’utiliser les autres variables comme **variables descriptives**.
-
----""")
+"""
+)

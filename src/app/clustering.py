@@ -18,7 +18,7 @@ from src.mangetamain.preprocessing.streamlit import (
 )
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Clustering - Mangetamain", page_icon="🍽️", layout="wide")
+st.set_page_config(page_title="Clustering - Mangetamain", layout="wide")
 
 st.markdown("# Clustering")
 st.sidebar.markdown(

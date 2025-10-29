@@ -2,20 +2,25 @@
 
 import streamlit as st
 
-st.set_page_config(page_title="Accueil - Mangetamain", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Accueil - Mangetamain", layout="wide")
 
 st.markdown(
     """
 <div style="background-color:#f8f9fa; padding:20px; border-radius:15px;">
+<div style="text-align:center;">
+<img width="150" src="https://raw.githubusercontent.com/Hugosh71/Projet_Mangetamain/main/docs/images/logo.jpeg">
+</div>
 <h2 style="text-align:center;">Bienvenue sur Mangetamain !</h2>
-<p style="text-align:center;">Explorez nos clusters de recettes bio et traditionnelles 
-et découvrez des patterns nutritionnels et sensoriels uniques.</p>
+<p style="text-align:center;">
+Explorez nos clusters de recettes bio et traditionnelles 
+et découvrez des patterns nutritionnels et sensoriels uniques.
+<br>
+<small style="color: gray;">Il est conseillé d’ouvrir l’application web depuis un ordinateur.</small>
+</p>
 </div>
 """,
     unsafe_allow_html=True,
 )
-
-st.sidebar.header("🏠 Accueil")
 
 st.write("\n")
 st.write("\n")
@@ -64,7 +69,8 @@ st.markdown(
     """
 <div style="background-color:#f8f9fa;padding:15px;border-radius:10px;
 text-align:center;">
-🚀 Cliquez sur la page 📊 Clustering pour commencer votre exploration des données !
+🚀 Cliquez sur la page <b><a style="text-decoration:none;color:#158237;" href="/clustering" target="_self">Clustering</a></b>
+pour commencer votre exploration des données !
 </div>
 </div>
 """,
@@ -94,7 +100,8 @@ caractéristiques des recettes, telles que la composition nutritionnelle, les sc
 sensoriels, le nombre d’ingrédients et d’étapes, ainsi que les interactions et 
 évaluations des utilisateurs.  
 
-💡 Cliquez sur la page **“Méthodologie”** pour comprendre comment nous avons segmenté 
+💡 Cliquez sur la page <b><a style="text-decoration:none;color:#158237;" href="/methodology" target="_self">Méthodologie</a></b> pour comprendre comment nous avons segmenté 
 les recettes et construit nos visualisations.
-"""
+""",
+    unsafe_allow_html=True,
 )
