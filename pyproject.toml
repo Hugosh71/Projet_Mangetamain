@@ -20,7 +20,8 @@ dependencies = [
     "tqdm (>=4.67.1,<5.0.0)",
     "plotly (>=6.3.1,<7.0.0)",
     "matplotlib (>=3.10.7,<4.0.0)",
-    "kagglehub (>=0.3.13,<0.4.0)"
+    "kagglehub (>=0.3.13,<0.4.0)",
+    "sphinx-markdown-builder (>=0.6.8,<0.7.0)"
 ]
 
 [tool.poetry.group.ui.dependencies]
