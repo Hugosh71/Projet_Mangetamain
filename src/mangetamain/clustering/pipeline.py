@@ -1,3 +1,19 @@
+"""Clustering pipeline (PCA + KMeans) for recipe feature tables.
+
+This module loads precomputed feature tables produced by the preprocessing
+analysers (nutrition, seasonality, rating, steps/complexity, ingredients),
+validates the presence of required columns, and runs a dimensionality
+reduction and clustering workflow that mirrors the team notebooks:
+
+- merges inputs on recipe index,
+- standardizes selected variables,
+- computes PCA with as many components as features,
+- applies KMeans to the first N principal components,
+- exports a compact CSV with ``cluster``, ``pc_1`` and ``pc_2`` per recipe.
+
+See :class:`RecipeClusteringPipeline` for the public API.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -114,7 +130,8 @@ class RecipeClusteringPipeline:
         self._validate_features(df, REQUIRED_FEATURES)
 
         pca_df, pca_model = self._compute_pca(df[REQUIRED_FEATURES])
-        clusters = self._fit_predict_kmeans(pca_df.iloc[:, : self.n_pcs_for_kmeans])
+        pcs_subset = pca_df.iloc[:, : self.n_pcs_for_kmeans]
+        clusters = self._fit_predict_kmeans(pcs_subset)
 
         result = self._build_result(df, pca_df, clusters)
         self._save_output(result)

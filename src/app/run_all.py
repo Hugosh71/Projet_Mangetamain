@@ -1,3 +1,27 @@
+"""End-to-end pipeline runner for Mangetamain.
+
+This module orchestrates the full data workflow used in the project:
+
+- ensures raw datasets are present (downloads them if missing),
+- runs all preprocessing analysers (rating, seasonality, nutrition, steps,
+  ingredients) and writes their feature tables to ``data/preprocessed/``,
+- executes the clustering pipeline (PCA + KMeans) writing to
+  ``data/clustering/recipes_clustering_with_pca.csv``,
+- merges all produced feature tables with clustering results into a single
+  gzip-compressed CSV used by notebooks and downstream exploration.
+
+Typical usage
+-------------
+The module is designed to be executed as a script, e.g.::
+
+    python src/app/run_all.py
+
+It sets up logging via :func:`app.logging_config.configure_logging`, writes
+structured logs to the ``logs/`` directory, and emits progress information
+throughout the run. Public functions are individually testable and can be
+reused in a larger orchestration tool if needed.
+"""
+
 from __future__ import annotations
 
 import sys
@@ -294,16 +318,20 @@ def run_pipeline() -> Path:
         if not (raw_recipes.exists() and raw_interactions.exists()):
             run_downloading_datasets(logger)
         # Run preprocessing
+        _safe_log(logger, logging.INFO, "Running preprocessing …")
         preprocessed_paths = run_preprocessing(logger)
         # Run clustering
+        _safe_log(logger, logging.INFO, "Running clustering …")
         clustering_path = run_clustering(logger)
         # Merge all tables
+        _safe_log(logger, logging.INFO, "Merging all tables …")
         merged = merge_all_tables(
             logger,
             preprocessed_paths=preprocessed_paths,
             clustering_path=clustering_path,
         )
         # Save merged table
+        _safe_log(logger, logging.INFO, "Saving merged table …")
         merged_path = save_merged_gzip(merged, logger)
         return merged_path
     except Exception as exc:  # pragma: no cover - top-level guard
