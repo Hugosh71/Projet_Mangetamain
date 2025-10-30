@@ -11,7 +11,7 @@ import pandas as pd
 from ...interfaces import Analyser, AnalysisResult
 
 
-class SeasonalityAnalyzer(Analyser):
+class SeasonalityAnalyser(Analyser):
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
         self._logger = logger or logging.getLogger(__name__)
 
