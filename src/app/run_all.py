@@ -65,7 +65,7 @@ from mangetamain.preprocessing.repositories import (  # noqa: E402
 def ensure_dirs() -> None:
     Path("data/preprocessed").mkdir(parents=True, exist_ok=True)
     Path("data/clustering").mkdir(parents=True, exist_ok=True)
-    Path("logs").mkdir(parents=True, exist_ok=True)
+    Path(ROOT / "logs").mkdir(parents=True, exist_ok=True)
 
 
 def _safe_log(logger: logging.Logger, level: int, msg: str, *args) -> None:
@@ -309,7 +309,7 @@ def save_merged_gzip(df: pd.DataFrame, logger: logging.Logger) -> Path:
 
 def run_pipeline() -> Path:
     ensure_dirs()
-    configure_logging(log_directory="./logs", reset_existing=True)
+    configure_logging(log_directory=ROOT / "logs", reset_existing=True)
     logger = get_logger("runner")
     try:
         # Ensure RAW datasets are present

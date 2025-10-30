@@ -1,0 +1,1 @@
+2025-10-28T10:28:32.395+00:00 | ERROR | /app/src/app/clustering.py:39 | run=0ee65a5947554ad587c18f30e890a8b1 | user=anonymous | session=f319c836a29d4646accc202086a18e8e | Error concatenating data: data/RAW_recipes.csv
