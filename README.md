@@ -11,11 +11,12 @@
   <img alt="Streamlit" src="https://img.shields.io/badge/app-Streamlit-FF4B4B">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED">
   <img alt="pre-commit" src="https://img.shields.io/badge/pre--commit-enabled-brightgreen">
+  <img alt="Docs" src="https://img.shields.io/badge/docs-Sphinx-blueviolet">
+  <img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg">
 </p>
-
 ---
 
-## Objectives
+## 🎯 Objectives
 
 - **Exploratory Data Analysis (EDA)** on recipe and rating datasets: distributions, seasonality, popularity.
 - **Feature engineering** (scores, aggregations, confidence intervals).
@@ -25,7 +26,7 @@
 
 ---
 
-## Table of Contents
+## 📖 Table of Contents
 - [Prerequisites](#prerequisites)
 - [Quick Installation](#installation)
 - [Run the Application](#run-locally)
@@ -38,7 +39,7 @@
 ---
 
 
-## Prerequisites
+## ⚙️ Prerequisites
 
 - Python>=3.12,<3.13
 - Poetry
@@ -85,7 +86,7 @@ Install [Git](https://git-scm.com/downloads) and [set up it](https://docs.github
 
 ---
 
-## Installation
+## 💾 Installation
 
 The following guidelines show how to install the project and set up a virtual environment isolated within the project folder.
 ### Clone the repo to your local
@@ -156,7 +157,7 @@ Then you may use `pip freeze` to check whether `streamlit` is installed. If `str
 
 ---
 
-## Run locally
+## 🚀 Run locally
 
 ```commandline
 make requirements
@@ -174,7 +175,7 @@ The app will be available at `http://localhost:8501`.
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 ```
 Projet_Mangetamain/
 ├─ .github/workflows/           # CI (lint, tests, Docker build)
@@ -195,7 +196,7 @@ Projet_Mangetamain/
 
 ---
 
-# Branch Log (work summary before merging)
+## 🪵 Branch Log (work summary before merging)
 
 ### feature/eda
 - Exploratory Data Analysis: data cleaning, visualization, clustering, and enriched CSV exports.
@@ -234,7 +235,7 @@ Projet_Mangetamain/
 
 ---
 
-## Collaborative Development
+## 🤝 Collaborative Development
 
 **Fetch changes from the remote repo on GitHub:**
 
@@ -338,7 +339,7 @@ git push origin --delete <merged-branch-name>
 
 ---
 
-## Quality & CI Workflow
+## 🧪 Quality & CI Workflow
 
 - Launch the Streamlit app locally with Docker Compose:
 
@@ -374,7 +375,7 @@ poetry run pre-commit run --all-files
 ```
 ---
 
-## How to Use the Documentation
+## 📚 How to Use the Documentation
 
 ### Build Documentation:
 
