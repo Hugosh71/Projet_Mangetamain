@@ -96,10 +96,10 @@ class StepsAnalyser(Analyser):
             missing = [c for c in required_cols if c not in df.columns]
             raise ValueError(f"Missing required column: {missing[0]}")
 
-         # Logarithmic transformation (reduces skewness of time variable)
+        # Logarithmic transformation (reduces skewness of time variable)
         df["minutes_log"] = np.log1p(df["minutes"])  # log(1 + x)
 
-         # Standardization: mean = 0, std = 1
+        # Standardization: mean = 0, std = 1
         cols_to_scale = ["minutes", "n_steps", "n_ingredients"]
         scaler = StandardScaler()
         scaled_values = scaler.fit_transform(df[cols_to_scale])

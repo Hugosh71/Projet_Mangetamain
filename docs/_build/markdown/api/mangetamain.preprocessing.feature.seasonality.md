@@ -80,17 +80,48 @@ a summary CSV file in the given directory.
 
 Seasonality strategies (stubs).
 
+Defines the cleaning and preprocessing strategies used by the seasonality
+feature processing pipeline. Strategies follow simple interfaces that return
+possibly transformed copies of the input `recipes` and `interactions`
+dataframes while preserving schema invariants.
+
 ### *class* mangetamain.preprocessing.feature.seasonality.strategies.SeasonalityCleaning(\*args, \*\*kwargs)
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning step for seasonality inputs.
+
+This placeholder keeps the pipeline structure uniform. Implementations may
+drop invalid or out-of-range dates, or filter interactions by source.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.seasonality.strategies.SeasonalityPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing step for seasonality inputs.
+
+Real implementations could compute additional intermediate fields such as
+normalized timestamps or pre-aggregations used by the analyzer.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ## Module contents
 
@@ -100,13 +131,39 @@ Seasonnality module stubs.
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning step for seasonality inputs.
+
+This placeholder keeps the pipeline structure uniform. Implementations may
+drop invalid or out-of-range dates, or filter interactions by source.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.seasonality.SeasonalityPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing step for seasonality inputs.
+
+Real implementations could compute additional intermediate fields such as
+normalized timestamps or pre-aggregations used by the analyzer.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.seasonality.SeasonalityAnalyzer(\*, logger: Logger | None = None)
 
