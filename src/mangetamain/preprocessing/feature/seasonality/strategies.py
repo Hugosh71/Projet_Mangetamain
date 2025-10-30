@@ -19,6 +19,7 @@ class SeasonalityCleaning(ICleaningStrategy):
     This placeholder keeps the pipeline structure uniform. Implementations may
     drop invalid or out-of-range dates, or filter interactions by source.
     """
+
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -40,6 +41,7 @@ class SeasonalityPreprocessing(IPreprocessingStrategy):
     Real implementations could compute additional intermediate fields such as
     normalized timestamps or pre-aggregations used by the analyzer.
     """
+
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:

@@ -18,6 +18,7 @@ class NutritionCleaning(ICleaningStrategy):
     Potential responsibilities include dropping rows with malformed
     ``nutrition`` fields or coercing numeric types.
     """
+
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -39,6 +40,7 @@ class NutritionPreprocessing(IPreprocessingStrategy):
     Could expand list-like nutrition fields to structured columns or compute
     derived fields required by downstream analysers.
     """
+
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:

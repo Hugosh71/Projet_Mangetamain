@@ -119,7 +119,7 @@ def configure_logging(
 
     if getattr(logger, "__mangetamain_configured__", False):
         # Return the existing configuration captured on the first setup.
-        existing = getattr(logger, "__mangetamain_logging_config__")
+        existing = logger.__mangetamain_logging_config__
         return existing  # type: ignore[attr-defined]
 
     derived = LoggingSettings.from_env()
@@ -192,7 +192,7 @@ def configure_logging(
     )
 
     logger.__mangetamain_configured__ = True  # type: ignore[attr-defined]
-    setattr(logger, "__mangetamain_logging_config__", logging_config)
+    logger.__mangetamain_logging_config__ = logging_config
 
     return logging_config
 

@@ -17,6 +17,7 @@ class StepsCleaning(ICleaningStrategy):
 
     Useful extensions include clipping outliers or imputing missing values.
     """
+
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -37,6 +38,7 @@ class StepsPreprocessing(IPreprocessingStrategy):
 
     Might compute helper columns used by the analyser.
     """
+
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:

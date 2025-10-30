@@ -139,9 +139,7 @@ def run_preprocessing(logger: logging.Logger) -> dict[str, Path]:
     if isinstance(nutri_paths, dict):
         outputs["nutrition"] = Path(nutri_paths["table_path"])
     else:
-        outputs["nutrition"] = Path(
-            "data/preprocessed/backup/features_nutrition.csv"
-        )
+        outputs["nutrition"] = Path("data/preprocessed/backup/features_nutrition.csv")
 
     # Complexity (steps)
     _safe_log(logger, logging.INFO, "Preprocessing: complexity …")
@@ -223,15 +221,11 @@ def merge_all_tables(
 
     if preprocessed_paths is None:
         preprocessed_paths = {
-            "nutrition": Path(
-                "data/preprocessed/backup/features_nutrition.csv"
-            ),
+            "nutrition": Path("data/preprocessed/backup/features_nutrition.csv"),
             "seasonality": Path(
                 "data/preprocessed/backup/recipe_seasonality_features.csv"
             ),
-            "rating": Path(
-                "data/preprocessed/backup/recipes_feature_rating_full.csv"
-            ),
+            "rating": Path("data/preprocessed/backup/recipes_feature_rating_full.csv"),
             "complexity": Path(
                 "data/preprocessed/backup/recipes_features_complexity.csv"
             ),
@@ -263,9 +257,7 @@ def merge_all_tables(
             )
 
     if clustering_path is None:
-        clustering_path = Path(
-            "data/clustering/recipes_clustering_with_pca.csv"
-        )
+        clustering_path = Path("data/clustering/recipes_clustering_with_pca.csv")
 
     # Read tables exactly as in notebook
     nutrition = pd.read_csv(

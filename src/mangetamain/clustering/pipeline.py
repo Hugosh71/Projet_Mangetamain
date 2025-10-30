@@ -186,18 +186,12 @@ class RecipeClusteringPipeline:
         self.logger.info("Merged recipes shape: %s", recipes.shape)
         return recipes
 
-    def _validate_features(
-        self, df: pd.DataFrame, required: Iterable[str]
-    ) -> None:
+    def _validate_features(self, df: pd.DataFrame, required: Iterable[str]) -> None:
         missing = [c for c in required if c not in df.columns]
         if missing:
-            raise ValueError(
-                f"Missing required variables: {missing}"
-            )
+            raise ValueError(f"Missing required variables: {missing}")
 
-    def _compute_pca(
-        self, features_df: pd.DataFrame
-    ) -> tuple[pd.DataFrame, PCA]:
+    def _compute_pca(self, features_df: pd.DataFrame) -> tuple[pd.DataFrame, PCA]:
         scaler = StandardScaler()
         features_scaled = scaler.fit_transform(features_df)
         pca = PCA(n_components=features_df.shape[1])

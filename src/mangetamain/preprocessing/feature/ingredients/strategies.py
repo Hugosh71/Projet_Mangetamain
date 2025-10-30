@@ -17,6 +17,7 @@ class IngredientsCleaning(ICleaningStrategy):
 
     May remove empty or malformed ingredient lists and standardize casing.
     """
+
     def clean(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -37,6 +38,7 @@ class IngredientsPreprocessing(IPreprocessingStrategy):
 
     Could expand stringified lists to proper arrays or tokenize ingredients.
     """
+
     def preprocess(
         self, recipes: pd.DataFrame, interactions: pd.DataFrame
     ) -> tuple[pd.DataFrame, pd.DataFrame]:

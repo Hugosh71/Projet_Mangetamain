@@ -131,14 +131,13 @@ class RatingAnalyser(Analyser):
         # )
 
         # Merge aggregates
-        per_recipe = (
-            n_interactions.merge(n_rated, on="recipe_id", how="left")
-            .merge(rated_agg, on="recipe_id", how="left")
+        per_recipe = n_interactions.merge(n_rated, on="recipe_id", how="left").merge(
+            rated_agg, on="recipe_id", how="left"
         )
         per_recipe["n_rated"] = per_recipe["n_rated"].fillna(0).astype(int)
-        per_recipe["share_rated"] = per_recipe["n_rated"].divide(
-            per_recipe["n_interactions"]
-        ).fillna(0)
+        per_recipe["share_rated"] = (
+            per_recipe["n_rated"].divide(per_recipe["n_interactions"]).fillna(0)
+        )
 
         # Bayesian smoothing (simple):
         # bayes_mean = (mu * c + sum_ratings) / (c + n_rated)
@@ -150,9 +149,7 @@ class RatingAnalyser(Analyser):
             else 0.0
         )
         c_value = (
-            c
-            if c is not None
-            else max(5, int(per_recipe["n_rated"].median() or 5))
+            c if c is not None else max(5, int(per_recipe["n_rated"].median() or 5))
         )
         # compute sum_ratings per recipe
         if rated_only.empty:
@@ -166,12 +163,12 @@ class RatingAnalyser(Analyser):
                 .rename("sum_ratings")
                 .reset_index()
             )
-        per_recipe = per_recipe.merge(
-            sum_ratings, on="recipe_id", how="left"
-        ).fillna({"sum_ratings": 0.0})
-        per_recipe["bayes_mean"] = (
-            mu * c_value + per_recipe["sum_ratings"]
-        ) / (c_value + per_recipe["n_rated"].clip(lower=0))
+        per_recipe = per_recipe.merge(sum_ratings, on="recipe_id", how="left").fillna(
+            {"sum_ratings": 0.0}
+        )
+        per_recipe["bayes_mean"] = (mu * c_value + per_recipe["sum_ratings"]) / (
+            c_value + per_recipe["n_rated"].clip(lower=0)
+        )
 
         # Additional dispersion metrics
         # if not rated_only.empty:
@@ -247,9 +244,7 @@ class RatingAnalyser(Analyser):
             summary=summary,
         )
 
-    def generate_report(
-        self, result: AnalysisResult, path: Path
-    ) -> dict[str, object]:
+    def generate_report(self, result: AnalysisResult, path: Path) -> dict[str, object]:
         """Write CSV outputs for per-recipe metrics and global summary.
 
         The function exports two CSV files in the given directory:
