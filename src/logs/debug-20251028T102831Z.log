@@ -1,0 +1,4 @@
+2025-10-28T10:28:31.567+00:00 | DEBUG | /app/src/mangetamain/preprocessing/interfaces.py:121 | run=ff8373e77c504f6794cc6ec3742fb71f | user=anonymous | session=db0b0f43a4c34d8bad9096bb812140c2 | Loading raw dataframes from repository
+2025-10-28T10:28:31.568+00:00 | ERROR | /app/src/mangetamain/preprocessing/repositories.py:47 | run=ff8373e77c504f6794cc6ec3742fb71f | user=anonymous | session=db0b0f43a4c34d8bad9096bb812140c2 | Data file not found: data/RAW_recipes.csv
+2025-10-28T10:28:31.570+00:00 | ERROR | /app/src/app/clustering.py:39 | run=ff8373e77c504f6794cc6ec3742fb71f | user=anonymous | session=db0b0f43a4c34d8bad9096bb812140c2 | Error concatenating data: data/RAW_recipes.csv
+2025-10-28T10:28:32.121+00:00 | DEBUG | /app/src/app/main.py:15 | run=6d8dac53a484488093f7927d414488eb | user=anonymous | session=f6f7b68b70c14fd9824e07a70baad626 | Starting the application

@@ -2,309 +2,189 @@
 
 # Mangetamain
 
-https://mangetamain.immock.com/
+Live demo: `https://mangetamain.immock.com/`
 
-## Prerequisites
+Discover recipes, analyze ingredients and nutrition, and explore clusters with an interactive Streamlit app backed by a reproducible data pipeline.
 
-- Python>=3.12,<3.13
+## Table of Contents
+- Quick Start
+- Requirements
+- Optional: Install Docker and Docker Compose
+- Installation (Poetry)
+- Running the App
+- Testing
+- Linting & Formatting
+- Data Pipeline (prepare datasets)
+- Documentation
+- Best Practices
+- FAQ / Troubleshooting
+
+## Quick Start
+
+Option A — with Poetry:
+```commandline
+poetry install
+make run
+```
+
+Option B — with Docker Compose:
+```commandline
+docker compose up --build app
+```
+
+App URL: `http://localhost:8501`
+
+## Requirements
+- Python >= 3.12, < 3.13
 - Poetry
 - Git
 
-### Install Python 3.12
+## Optional: Install Docker and Docker Compose
+Docker is recommended for a consistent, no-local-setup experience.
 
-**For Windows**:
+- Install Docker Desktop: `https://www.docker.com/products/docker-desktop/`
+- Verify installation:
+  ```commandline
+  docker --version
+  docker compose version
+  ```
 
-Download and install Python on your system: https://www.python.org/downloads/release/python-31210/
+Notes:
+- Docker Compose is included as `docker compose` (v2) in modern Docker Desktop.
+- Allocate at least 2 CPUs and 4GB RAM for smoother model steps.
 
-**For Mac**:
+## Installation (Poetry)
 
+1) Clone the repository:
 ```commandline
-brew install python@3.12
-```
-Test Python installed
-
-```commandline
-python3.12 --version
-```
-
-### Install Poetry (for packaging and dependency management)
-
-Install the latest version of [Poetry](https://python-poetry.org/)
-
-```commandline
-pip3.12 install poetry
-```
-
-Test Poetry installed:
-```commandline
-poetry --version
-```
-
-Until now, we are always based on the native Python environment **NOT** the desired virtual environment.
-Even Poetry is always run within this native Python environment.
-
-### Install Git (for version control)
-
-Install [Git](https://git-scm.com/downloads) and [set up it](https://docs.github.com/fr/get-started/git-basics/set-up-git)
-
-## Installation
-
-The following guidelines show how to install the project and set up a virtual environment isolated within the project folder.
-### Clone the repo to your local
-
-Clone the repository from GitHub (remote repo) to your local machine. This creates a copy of the code that you can modify locally. Your changes will take effect once you `commit` them and `push` to the remote repository (`add` files when necessary):
-
-```commandline
-cd /your/folder
 git clone https://github.com/Hugosh71/Projet_Mangetamain.git
+cd Projet_Mangetamain
 ```
 
-This clones the repo to `/your/folder/Projet_Mangetamain` with a hidden `.git` folder inside, which keeps track of everything about the code.
-
-We don't need to redo `git init`, because the repo is already initialized (with a `.git`) when created from GitHub. Once cloned to your local machine, it's ready!
-
-Now, you may open the repo from your code editor (VSCode).
-
-### Set up the virtual environment
-
-From now on, we recommend executing commands from the terminal in VS Code.  You can open a new terminal with `Terminal > New Terminal`. As a reminder, currently we are still using the native Python environment.
-
-The pyproject.toml file contains all Poetry configurations. Inside, you can find the following lines:
-
-```toml
-requires-python = ">=3.12,<3.13"
-dependencies = [
-    "streamlit (>=1.49.1,<2.0.0)"
-]
-```
-
-These lines specify the Python version and the dependencies used for the virtual environment.
-
-**Create a virtual environment with specified dependencies:**
-
+2) Create a project-local virtual environment and install dependencies:
 ```commandline
 poetry config virtualenvs.in-project true
 poetry env use python3.12
 poetry install
 ```
 
-This creates `.venv` under your working folder. The `.venv` is an isolated environment containing own Python interpreter and its own set of dependencies (packages).
+3) Activate the environment:
+- Windows PowerShell:
+  ```commandline
+  .\.venv\Scripts\activate.ps1
+  ```
+- macOS/Linux:
+  ```commandline
+  source .venv/bin/activate
+  ```
 
-### Activate the virtual environment
+## Running the App
 
-**Option 1**
-
-In VSCode, open the Command Palette (Ctrl + Shift + P or Command + Shift + P). Enter "Python" and click "Python: Select Interpreter". Then select the environment you've just created (for example, `mangetamain-py3.12`).
-
-Reopen the terminal. If you see the (mangetamain-py3.12) prefix, the environment is **activated** from the VSCode terminal for this project.
-
-**Option 2**
-
-For Windows:
-
-```commandline
-.\.venv\Scripts\activate.ps1
-```
-
-For Mac:
-
-```commandline
-source .venv/bin/activate
-```
-
-If you see the (mangetamain-py3.12) prefix, the environment is **activated** from the VSCode terminal for this project.
-
-Then you may use `pip freeze` to check whether `streamlit` is installed. If `streamlit` exist in the list of dependencies, the virtual environment is ready and we can start a local backend and web app servers later!
-
-## Run locally
-
+With Poetry (recommended for local development):
 ```commandline
 make requirements
 make run
 ```
 
-or run via Docker Compose
-
+With Docker Compose (no local Python needed):
 ```commandline
-make requirements
 make docker-run
+# or directly
+docker compose up --build app
 ```
 
-The app will be available at `http://localhost:8501`.
+App URL: `http://localhost:8501`
 
-## Deployment
+## Testing
 
-1. Run the preprocessing and prediction pipeline:
+Run tests in Docker:
+```commandline
+docker compose run --rm tests
+```
 
+Run tests with Poetry:
+```commandline
+poetry run pytest
+```
+
+Coverage alternative:
+```commandline
+poetry run pytest --cov=src --cov-report=term-missing --cov-report=xml
+```
+
+Make targets:
+```commandline
+make test       # pytest
+make test-cov   # pytest + coverage
+```
+
+## Linting & Formatting
+
+With Docker:
+```commandline
+docker compose run --rm lint
+```
+
+With Poetry:
+```commandline
+poetry run black --check src tests
+poetry run ruff check src tests
+```
+
+Auto-fix formatting:
+```commandline
+poetry run ruff check --fix src tests
+poetry run ruff format src tests
+```
+
+## Data Pipeline (prepare datasets)
+
+Run the end-to-end preprocessing and clustering pipeline, then upload prepared artifacts to S3:
 ```commandline
 ./scripts/run_pipeline.sh
 ```
 
-This script executes all preprocessing steps, feature engineering, and clustering model training, and finally upload the prepared dataset to S3.
+Tips (Windows): run from Git Bash or WSL if your shell doesn’t support `bash` scripts.
 
-2. When a new commit is pushed to the `main` branch, the CI/CD pipeline (GitHub Actions) automatically builds and pushes the Docker image to AWS ECR.
+## Documentation
 
-3. Force a new deployment on Amazon Elastic Container Service.
-
-## Collaborative Development
-
-**Fetch changes from the remote repo on GitHub:**
-
-```commandline
-git fetch
-```
-
-or fetch & merge changes from the remote repo:
-
-```commandline
-git pull
-```
-
-**Commit and push changes to the remote repo:**
-
-```commandline
-# When necessary, add all modified files and prepare for next commit
-git add .
-
-# Save changes with a message
-git commit -m "..."
-
-# Push changes to the remote repo
-git push
-```
-
-**Create a new branch:**
-
-```commandline
-# Create a new branch
-git branch <branch-name>
-
-# Switch to the new branch
-git checkout <branch-name>
-```
-
-**Merge a branch to main:**
-
-```commandline
-git checkout main
-git merge new-feature
-```
-
-If there are conflicts, Git will ask you to resolve them manually. After resolving:
-
-```commandline
-git add <file-with-conflict>
-git commit -m "..."
-```
-
-After your Pull Request has been validated and merged to the main/develop branch, follow these steps to keep your local repository up to date:
-
-**1. Switch to the main/develop branch:**
-```commandline
-git checkout main
-```
-or
-
-```commandline
-git checkout develop
-```
-
-**2. Fetch the latest changes from remote:**
-```commandline
-git fetch origin # or git fetch --all
-```
-
-**3. Pull the merged changes:**
-```commandline
-git pull origin main
-```
-or
-
-```commandline
-git pull origin develop
-```
-
-**4. If working on a feature branch, rebase it on the updated main/develop branch:**
-```commandline
-git checkout <your-feature-branch>
-```
-
-```commandline
-git rebase main
-```
-
-**5. You can push your branch:**
-
-```commandline
-git push --force-with-lease origin <branch-name>
-```
-
-**6. Clean up merged branches (optional):**
-```commandline
-# Delete local branch that was merged
-git branch -d <merged-branch-name>
-
-# Delete remote tracking branch
-git push origin --delete <merged-branch-name>
-```
-
-## Quality & CI Workflow
-
-- Launch the Streamlit app locally with Docker Compose:
-
-  ```commandline
-  docker compose up app
-  ```
-
-- Run the test suite inside the dedicated container:
-
-  ```commandline
-  docker compose run --rm tests
-  ```
-
-- Execute linting & formatting checks via Docker Compose:
-
-  ```commandline
-  docker compose run --rm lint
-  ```
-
-### Pre-commit hooks
-
-Install the hooks once dependencies are installed:
-
+Build once:
 ```commandline
 poetry install --with dev
-poetry run pre-commit install
-```
-
-Trigger all hooks manually before committing:
-
-```commandline
-poetry run pre-commit run --all-files
-```
-
-## How to Use the Documentation
-
-### Build Documentation:
-
-```commandline
-# Install dependencies
-poetry install --with dev
-
-# Build documentation
 cd docs
 poetry run sphinx-build -b html . _build/html
-
-# Or use the build script
-python docs/build_docs.py build
 ```
 
-### View Documentation:
-
+Open locally:
 ```commandline
-# Open the built HTML files
-open docs/_build/html/index.html # or start docs/_build/html/index.html
-
-# Or serve locally
 python serve_docs.py
+# then open the printed local URL
 ```
+
+## Best Practices
+- Keep a clean environment: prefer Poetry or Docker; avoid mixing systems Python and project venvs.
+- Re-run tests before opening a PR or sharing results.
+- Use Docker when you want zero local Python setup or reproducibility across machines.
+- Large data stays under `data/` locally; avoid committing private data or credentials.
+
+## FAQ / Troubleshooting
+
+- The app does not start / port already in use
+  - Another process might be using port 8501. Stop it or run Streamlit on a different port, e.g.: `poetry run streamlit run src/app/main.py --server.port=8502`.
+
+- Poetry cannot find Python 3.12
+  - Ensure Python 3.12 is installed and on PATH. Then run: `poetry env use python3.12` (macOS/Linux) or pass the full path to the Python executable on Windows.
+
+- Docker command not found
+  - Install Docker Desktop and restart your shell. Verify with `docker --version` and `docker compose version`.
+
+- Tests fail with coverage threshold
+  - The project enforces coverage (`fail_under = 90`). Use `poetry run pytest --maxfail=1 -q` to iterate quickly, then run coverage once fixes are in.
+
+—
+
+If you just want to try the app, the quickest route is Docker:
+```commandline
+docker compose up --build app
+```
+Then open `http://localhost:8501`.

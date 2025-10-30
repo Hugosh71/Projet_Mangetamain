@@ -1,12 +1,16 @@
 """Main entry point of the app."""
 
+from pathlib import Path
+
 import streamlit as st
 
 from app.logging_config import configure_logging, get_logger
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 def _initialise_logging() -> None:
-    configure_logging(log_directory="./logs", reset_existing=True)
+    configure_logging(log_directory=ROOT / "logs", reset_existing=True)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ set -e
 
 # Step 1: Run the pipeline to generate recipes_merged.csv.gz
 echo "Running the ETL pipeline..."
-# python src/app/run_all.py
+python src/app/run_all.py
 
 # Check if file is produced
 if [ ! -f data/clustering/recipes_merged.csv.gz ]; then
