@@ -4,6 +4,21 @@
 
 ## mangetamain.clustering.pipeline module
 
+Clustering pipeline (PCA + KMeans) for recipe feature tables.
+
+This module loads precomputed feature tables produced by the preprocessing
+analysers (nutrition, seasonality, rating, steps/complexity, ingredients),
+validates the presence of required columns, and runs a dimensionality
+reduction and clustering workflow that mirrors the team notebooks:
+
+- merges inputs on recipe index,
+- standardizes selected variables,
+- computes PCA with as many components as features,
+- applies KMeans to the first N principal components,
+- exports a compact CSV with `cluster`, `pc_1` and `pc_2` per recipe.
+
+See [`RecipeClusteringPipeline`](#mangetamain.clustering.pipeline.RecipeClusteringPipeline) for the public API.
+
 ### *class* mangetamain.clustering.pipeline.ClusteringPaths(base: Path = PosixPath('data/preprocessed'), out_dir: Path = PosixPath('data/clustering'), nutrition: str = 'nutrition_table.csv', seasonality: str = 'seasonality_table.csv', rating: str = 'rating_table.csv', complexity: str = 'complexity_table.csv', ingredients: str = 'ingredients_table.csv')
 
 Bases: `object`
