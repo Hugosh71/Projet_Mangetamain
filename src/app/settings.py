@@ -10,7 +10,7 @@ from typing import Final
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 DEFAULT_LOG_DIR_NAME: Final[str] = "logs"
 DEFAULT_LOG_DIR: Final[Path] = PROJECT_ROOT / DEFAULT_LOG_DIR_NAME
-DEFAULT_MAX_LOG_FILES: Final[int] = 10
+DEFAULT_MAX_LOG_FILES: Final[int] = 20
 
 ENV_LOG_DIR: Final[str] = "MANG_LOG_DIR"
 ENV_LOG_MAX_FILES: Final[str] = "MANG_LOG_MAX_FILES"

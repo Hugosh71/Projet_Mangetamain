@@ -77,12 +77,18 @@ class _ContextFormatter(logging.Formatter):
 
     def __init__(self) -> None:
         fmt = (
-            "%(timestamp)s | %(levelname)s | %(pathname)s:%(lineno)d | "
-            "run=%(run_id)s | user=%(user_id)s | session=%(session_id)s | %(message)s"
+            "%(timestamp)s | %(levelname)s | "
+            "%(pathname)s:%(lineno)d | run=%(run_id)s | "
+            "user=%(user_id)s | session=%(session_id)s | "
+            "%(message)s"
         )
         super().__init__(fmt=fmt, style="%")
 
-    def formatTime(self, record: logging.LogRecord, datefmt: str | None = None) -> str:
+    def formatTime(
+        self,
+        record: logging.LogRecord,
+        datefmt: str | None = None,
+    ) -> str:
         dt = datetime.fromtimestamp(record.created, tz=UTC)
         return dt.isoformat(timespec="milliseconds")
 
@@ -113,7 +119,8 @@ def configure_logging(
 
     if getattr(logger, "__mangetamain_configured__", False):
         # Return the existing configuration captured on the first setup.
-        return logger.__mangetamain_logging_config__  # type: ignore[attr-defined]
+        existing = logger.__mangetamain_logging_config__
+        return existing  # type: ignore[attr-defined]
 
     derived = LoggingSettings.from_env()
 
@@ -143,10 +150,13 @@ def configure_logging(
 
     debug_handler = _build_file_handler(debug_log_path, level=logging.DEBUG)
     error_handler = _build_file_handler(error_log_path, level=logging.ERROR)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
 
     formatter = _ContextFormatter()
     debug_handler.setFormatter(formatter)
     error_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
 
     context_filter = _ContextFilter(
         user_id=user_id,
@@ -159,11 +169,13 @@ def configure_logging(
     # avant le formatage
     debug_handler.addFilter(context_filter)
     error_handler.addFilter(context_filter)
+    console_handler.addFilter(context_filter)
 
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
     logger.addHandler(debug_handler)
     logger.addHandler(error_handler)
+    logger.addHandler(console_handler)
 
     _prune_retained_logs(
         directory=resolved_log_dir,
@@ -180,7 +192,7 @@ def configure_logging(
     )
 
     logger.__mangetamain_configured__ = True  # type: ignore[attr-defined]
-    logger.__mangetamain_logging_config__ = logging_config  # type: ignore[attr-defined]
+    logger.__mangetamain_logging_config__ = logging_config
 
     return logging_config
 
@@ -234,7 +246,9 @@ def _prune_retained_logs(
         return
 
     ordered = sorted(
-        seen.values(), key=lambda candidate: candidate.stat().st_mtime, reverse=True
+        seen.values(),
+        key=lambda candidate: candidate.stat().st_mtime,
+        reverse=True,
     )
     for obsolete in ordered[keep:]:
         try:

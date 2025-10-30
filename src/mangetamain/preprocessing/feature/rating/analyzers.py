@@ -11,7 +11,23 @@ from ...interfaces import Analyser, AnalysisResult
 
 
 class RatingAnalyser(Analyser):
-    """Produce high-level insights for ratings (top-K by mean, etc.)."""
+    """Compute per-recipe rating statistics with Bayesian smoothing.
+
+    This analyser aggregates interaction ratings by recipe to derive robust
+    summary statistics. It supports recipes without ratings and uses a simple
+    empirical Bayes shrinkage toward a global prior to stabilize the mean
+    rating for recipes with few observations.
+
+    Metrics produced include:
+    - ``n_interactions``: total interactions per recipe (rated or not),
+    - ``n_rated`` and ``share_rated``: count and share of rated interactions,
+    - ``mean_rating``, ``median_rating``, ``rating_std`` over rated-only rows,
+    - ``bayes_mean``: smoothed mean rating with prior strength ``c`` and
+      prior mean ``mu`` (percentile of the rated distribution).
+
+    Optional bounds using the Wilson interval can also be computed for the
+    proportion of rated interactions per recipe.
+    """
 
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
         self._logger = logger or logging.getLogger(__name__)
@@ -26,6 +42,34 @@ class RatingAnalyser(Analyser):
         include_zero_ratings: bool = True,
         with_wilson_per_recipe: bool = False,
     ) -> AnalysisResult:
+        """Aggregate ratings and compute robust per-recipe statistics.
+
+        Args:
+            recipes (pd.DataFrame): Recipe metadata. Only ``id`` and ``name``
+                are used (if available) to attach readable labels.
+            interactions (pd.DataFrame): Interaction events expected to
+                contain:
+                - ``recipe_id`` (int): foreign key to a recipe,
+                - ``rating`` (float or int, optional): rating in [1, 5].
+            c (int | None): Prior strength used in Bayesian mean
+                ``(mu * c + sum_ratings) / (c + n_rated)``. Defaults to the
+                median of ``n_rated`` or 5, whichever is larger.
+            mu_percentile (float): Percentile of the rated-only distribution
+                to use as the prior mean ``mu``. Default is 0.5 (median).
+            include_zero_ratings (bool): Deprecated parameter kept for backward
+                compatibility (no effect). Ratings <= 0 are ignored.
+            with_wilson_per_recipe (bool): If ``True``, compute Wilson bounds
+                for ``share_rated`` per recipe.
+
+        Returns:
+            AnalysisResult: Object with
+                - ``table``: a DataFrame of per-recipe aggregates and metrics,
+                - ``summary``: global summary including Wilson bounds over the
+                  average rated share across recipes.
+
+        Raises:
+            ValueError: If ``interactions`` is missing required columns.
+        """
         self._logger.debug(
             "Computing per-recipe rating statistics with extended metrics"
         )
@@ -152,7 +196,8 @@ class RatingAnalyser(Analyser):
             .rename(columns={"name": "recipe_name"})
         )
 
-        # Optional Wilson bounds per recipe on the proportion of rated interactions
+        # Optional Wilson bounds per recipe on the proportion of rated
+        # interactions
         if with_wilson_per_recipe:
             z = 1.96
             p = per_recipe["share_rated"].fillna(0).astype(float)
@@ -163,7 +208,8 @@ class RatingAnalyser(Analyser):
             per_recipe["wilson_low_rec"] = (center - rad) / denom
             per_recipe["wilson_high_rec"] = (center + rad) / denom
 
-        # Global summary only (distribution can be derived downstream if needed)
+        # Global summary only (distribution can be derived downstream if
+        # needed)
 
         # Example global stats (can be extended):
         num_recipes = int(per_recipe["recipe_id"].nunique())
@@ -199,6 +245,21 @@ class RatingAnalyser(Analyser):
         )
 
     def generate_report(self, result: AnalysisResult, path: Path) -> dict[str, object]:
+        """Write CSV outputs for per-recipe metrics and global summary.
+
+        The function exports two CSV files in the given directory:
+        - ``rating_table.csv``: per-recipe metrics from :meth:`analyze`.
+        - ``rating_summary.csv``: one-row summary table for easy reading.
+
+        Args:
+            result (AnalysisResult): Output of :meth:`analyze`.
+            path (Path | str): Target directory (or a file whose parent
+                directory will be used) where CSVs are written.
+
+        Returns:
+            dict[str, object]: Paths of the created files under keys
+                ``table_path`` and ``summary_path``.
+        """
         self._logger.debug("Writing rating_table.csv and rating_summary.csv")
 
         path = Path(path)

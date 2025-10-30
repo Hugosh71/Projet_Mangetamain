@@ -76,17 +76,47 @@ and returns the file paths and summary information.
 
 Nutrition strategies (stubs).
 
+Lightweight strategy placeholders for the nutrition feature pipeline. These
+classes implement the minimal cleaning and preprocessing interfaces and can be
+extended to handle missing values, standardize units, or normalize schemas.
+
 ### *class* mangetamain.preprocessing.feature.nutrition.strategies.NutritionCleaning(\*args, \*\*kwargs)
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning for nutrition inputs.
+
+Potential responsibilities include dropping rows with malformed
+`nutrition` fields or coercing numeric types.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe (unused here).
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.nutrition.strategies.NutritionPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing for nutrition inputs.
+
+Could expand list-like nutrition fields to structured columns or compute
+derived fields required by downstream analysers.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe (unused here).
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ## Module contents
 
@@ -96,13 +126,39 @@ Nutrition module stubs.
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning for nutrition inputs.
+
+Potential responsibilities include dropping rows with malformed
+`nutrition` fields or coercing numeric types.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe (unused here).
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.nutrition.NutritionPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing for nutrition inputs.
+
+Could expand list-like nutrition fields to structured columns or compute
+derived fields required by downstream analysers.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe (unused here).
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.nutrition.NutritionAnalyser
 

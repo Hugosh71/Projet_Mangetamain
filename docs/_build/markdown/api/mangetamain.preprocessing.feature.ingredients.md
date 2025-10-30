@@ -110,17 +110,45 @@ Stub report generator.
 
 Ingredients strategies (stubs).
 
+Hooks for cleaning and preprocessing recipe ingredients. These strategies can
+normalize textual ingredients, fix encoding issues, or apply vocabulary
+mapping to improve downstream analysis.
+
 ### *class* mangetamain.preprocessing.feature.ingredients.strategies.IngredientsCleaning(\*args, \*\*kwargs)
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning for ingredients.
+
+May remove empty or malformed ingredient lists and standardize casing.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.ingredients.strategies.IngredientsPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing for ingredients.
+
+Could expand stringified lists to proper arrays or tokenize ingredients.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ## Module contents
 
@@ -130,13 +158,37 @@ Ingredients module stubs.
 
 Bases: [`ICleaningStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.ICleaningStrategy)
 
+No-op cleaning for ingredients.
+
+May remove empty or malformed ingredient lists and standardize casing.
+
 #### clean(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return cleaned copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.ingredients.IngredientsPreprocessing(\*args, \*\*kwargs)
 
 Bases: [`IPreprocessingStrategy`](mangetamain.preprocessing.md#mangetamain.preprocessing.interfaces.IPreprocessingStrategy)
 
+No-op preprocessing for ingredients.
+
+Could expand stringified lists to proper arrays or tokenize ingredients.
+
 #### preprocess(recipes: DataFrame, interactions: DataFrame) → tuple[DataFrame, DataFrame]
+
+Return preprocessed copies of the inputs.
+
+* **Parameters:**
+  * **recipes** – Recipes dataframe.
+  * **interactions** – Interactions dataframe.
+* **Returns:**
+  Tuple of possibly transformed `(recipes, interactions)`.
 
 ### *class* mangetamain.preprocessing.feature.ingredients.IngredientsAnalyser(cluster_threshold: float | None = None, n_pca_components: int | None = None, embedding_model: str | None = None)
 
