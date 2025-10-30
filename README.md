@@ -6,9 +6,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Hugosh71/Projet_Mangetamain/actions">
-    <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/Hugosh71/Projet_Mangetamain/<workflow>.yml?branch=<branch_ref>">
-  </a>
   <img alt="Python" src="https://img.shields.io/badge/python-3.12-blue">
   <img alt="Poetry" src="https://img.shields.io/badge/packaging-Poetry-60A5FA">
   <img alt="Streamlit" src="https://img.shields.io/badge/app-Streamlit-FF4B4B">
