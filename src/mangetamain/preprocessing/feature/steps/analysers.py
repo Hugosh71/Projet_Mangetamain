@@ -1,4 +1,13 @@
-"""Steps analysers (stubs)."""
+"""Steps analysers.
+
+This module provides tools to compute and report recipe complexity
+features based on preparation steps, ingredients, and cooking time.
+It standardizes recipe attributes, derives categorical complexity
+clusters, and produces summary statistics for reporting.
+
+The goal is to quantify recipe complexity in a consistent, scalable way,
+useful for recommendation models or descriptive analytics.
+"""
 
 from __future__ import annotations
 
@@ -14,8 +23,26 @@ from ...interfaces import Analyser, AnalysisResult
 
 
 class StepsAnalyser(Analyser):
+    """Analyzes recipe complexity based on steps, ingredients, and cooking time.
+
+    This analyzer computes standardized and categorical representations
+    of recipe complexity. It standardizes key numeric attributes (e.g.,
+    number of steps, number of ingredients, preparation time), applies
+    logarithmic transformation to duration, and groups recipes into
+    interpretable complexity clusters.
+
+    It produces both a per-recipe feature table and a summary report of
+    global statistics such as mean steps, mean ingredients, and the
+    correlation between them.
+    """
     def __init__(self, *, logger: logging.Logger | None = None) -> None:
         self._logger = logger or logging.getLogger(__name__)
+    """Initializes the StepsAnalyser.
+
+        Args:
+            logger (logging.Logger | None): Optional custom logger instance.
+                If not provided, a module-level logger will be used.
+        """
 
     def analyze(
         self,
@@ -23,6 +50,39 @@ class StepsAnalyser(Analyser):
         interactions: pd.DataFrame,
         **kwargs: object,
     ) -> AnalysisResult:
+        """Computes recipe complexity features based on step and ingredient counts.
+
+        The method standardizes numeric columns (`minutes`, `n_steps`,
+        `n_ingredients`) using z-scores, applies a logarithmic
+        transformation to `minutes`, and derives complexity clusters
+        combining step and ingredient categories. It also computes global
+        descriptive statistics for reporting.
+
+        Args:
+            recipes (pd.DataFrame): DataFrame containing recipe metadata with
+                required columns:
+                - ``minutes`` (float): Total preparation time.
+                - ``n_steps`` (int): Number of procedural steps.
+                - ``n_ingredients`` (int): Number of unique ingredients.
+            interactions (pd.DataFrame): Unused placeholder for interface
+                compatibility.
+            **kwargs (object): Additional keyword arguments (unused).
+
+        Returns:
+            AnalysisResult: Object containing:
+                - ``table`` (pd.DataFrame): Per-recipe complexity features:
+                  ['id', 'minutes', 'n_steps', 'n_ingredients', 'minutes_z',
+                   'n_steps_z', 'n_ingredients_z', 'minutes_log',
+                   'cluster_ing_steps', 'cluster_label_ing_steps']
+                - ``summary`` (dict): Aggregated metrics including:
+                  - 'moyenne_etapes'
+                  - 'moyenne_ingredients'
+                  - 'correlation_steps_ingredients'
+                  - 'nb_clusters'
+
+        Raises:
+            ValueError: If any of the required columns is missing.
+        """
         self._logger.debug("Analyzing recipe complexity by steps and ingredients")
         df = recipes.copy()
 
