@@ -34,7 +34,8 @@
 
 
 ## 🎮 Live Demo
-[Streamlit App](`https://mangetamain.immock.com/`)
+[Streamlit App](https://mangetamain.immock.com/)
+
 
 
 
