@@ -33,7 +33,7 @@
 - [Quick Installation](#installation)
 - [Run the Application](#run-locally)
 - [Project Structure](#project-structure)
-- [Branch Log (Work Summary)](#branch-log-work-summary)
+- [Branch Log (Work Summary)](#branch-log-work-summary-before-merging)
 - [Collaborative Development](#collaborative-development)
 - [Quality, Tests & CI](#quality--ci-workflow)
 - [Sphinx Documentation](#how-to-use-the-documentation)
